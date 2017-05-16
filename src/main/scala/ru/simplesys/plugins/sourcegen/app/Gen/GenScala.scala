@@ -1,13 +1,16 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
-import sbt.{Logger, File}
-import scalax.file.Path
+import java.net.URI
+
 import com.simplesys.common.Strings._
 import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.isc.system.typesDyn.OperatorId
+import com.simplesys.scalaGen.{ScalaClassJSONProperties, ScalaClassJSONProperty, ScalaClassJSONPropertyClassJSON, ScalaClassesJSON, _}
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
-import com.simplesys.scalaGen._
-import ru.simplesys.plugins.sourcegen.app.{SeqScalaClassJSON, JsonListScalaClassJSON, ArrayScalaClassJSON}
-import java.net.URI
+import ru.simplesys.plugins.sourcegen.app.{ArrayScalaClassJSON, JsonListScalaClassJSON, SeqScalaClassJSON}
+import sbt.{File, Logger}
+
+import scalax.file.Path
 
 abstract class GenScala {
     val appFilePath: Path
@@ -22,6 +25,19 @@ abstract class GenScala {
             case ScalaClassJSONProperty(_, value) => value match {
                 case ScalaClassJSONPropertyClassJSON(value) =>
                     ScalaBody(value addProperties makeCode(root, includingGroupName))
+                case propertyElement =>
+                    throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+            }
+            case propertyElement =>
+                throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+        }
+    }
+
+    protected def makeScalaCodeJS(root: IscElem, includingGroupName: Seq[String] = Seq.empty): ScalaBody = {
+        root.getScalaClassJSONPropertyJS match {
+            case ScalaClassJSONProperty(_, value) => value match {
+                case ScalaClassJSONPropertyClassJSON(value) =>
+                    ScalaBody(value addProperties makeCodeJS(root, includingGroupName))
                 case propertyElement =>
                     throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
             }
@@ -83,50 +99,51 @@ abstract class GenScala {
     }
 
     protected def makeCodeJS(elements: IscElem, includingGroupName: Seq[String] = Seq.empty[String]): ScalaClassJSONProperties = {
-            var res = ScalaClassJSONProperties()
-            //elements.log
+        var res = ScalaClassJSONProperties()
+        //elements.log
 
-            val group = elements getElements "Group"
-            //group.log
+        val group = elements getElements "Group"
+        //group.log
 
-            val a = includingGroupName.isEmpty
-            val b = group.text === strEmpty
-            val c = includingGroupName.exists(_ == group.text)
+        val a = includingGroupName.isEmpty
+        val b = group.text === strEmpty
+        val c = includingGroupName.exists(_ == group.text)
 
-            if (a || b || c)
-                for (element <- elements.child.filter(_.label !== "#PCDATA")) {
+        if (a || b || c)
+            for (element <- elements.child.filter(_.label !== "#PCDATA")) {
 
-                    val _element: IscElem = element
-                    //_element.log
+                val _element: IscElem = element
+                //_element.log
 
-                    val propertyElement: ScalaClassJSONProperty = _element.getScalaClassJSONPropertyJS
+                val propertyElement: ScalaClassJSONProperty = _element.getScalaClassJSONPropertyJS
 
-                    propertyElement match {
-                        case null =>
-                        case ScalaClassJSONProperty(label, scalaPropertElement) =>
-                            scalaPropertElement match {
-                                case array: SeqScalaClassJSON =>
-                                    val _arr = makeCodeJS(_element, includingGroupName)
+                propertyElement match {
+                    case null =>
+                    case ScalaClassJSONProperty(label, scalaPropertElement) =>
+                        scalaPropertElement match {
+                            case ScalaClassJSONPropertyClassJSON(value) =>
+                                val _arr = makeCodeJS(_element, includingGroupName)
 
-                                    if (!_arr.isEmpty)
-                                        res += (label.unCapitalize -> (array ++= _arr)).property
+                                if (!_arr.isEmpty) {
+                                    value addProperties _arr
+                                    res += (label.unCapitalize -> value).property
+                                }
 
-                                case ScalaClassJSONPropertyClassJSON(value) =>
-                                    val _arr = makeCodeJS(_element, includingGroupName)
+                            case array: SeqScalaClassJSON =>
+                                val _arr = makeCodeJS(_element, includingGroupName)
 
-                                    if (!_arr.isEmpty) {
-                                        value addProperties _arr
-                                        res += (label.unCapitalize -> value).property
-                                    }
-                                case value: ScalaPropertyElement =>
-                                    res += propertyElement
-                                case _ =>
-                                    throw new RuntimeException(s"Unknown implemantation label:${label} type : ${scalaPropertElement.toString.dblQuoted}")
-                            }
-                    }
+                                if (!_arr.isEmpty)
+                                    res += (label.unCapitalize -> (array ++= _arr)).property
+
+                            case value: ScalaPropertyElement =>
+                                res += propertyElement
+                            case _ =>
+                                throw new RuntimeException(s"Unknown implemantation label:${label} type : ${scalaPropertElement.toString.dblQuoted}")
+                        }
                 }
-            res
-        }
+            }
+        res
+    }
 }
 
 abstract class GenScala1 extends GenScala {

@@ -1,12 +1,13 @@
 package ru.simplesys.plugins.sourcegen.app.xml
 
-import com.simplesys.xml.Elem
-import scala.xml.{NodeSeq, Node}
-import ru.simplesys.plugins.sourcegen.app._
+import com.simplesys.common.Strings._
+import com.simplesys.common.equality.SimpleEquality._
 import com.simplesys.log.Logging
 import com.simplesys.scalaGen._
-import com.simplesys.common.equality.SimpleEquality._
-import com.simplesys.common.Strings._
+import com.simplesys.xml.Elem
+import ru.simplesys.plugins.sourcegen.app._
+
+import scala.xml.{Node, NodeSeq}
 
 object IscElem {
     implicit def apply(elem: Elem): IscElem = new IscElem(elem)
@@ -31,6 +32,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
         if (res.isEmpty) false else res.toBoolean
     }
 
+    def isEmpty (path: String): Boolean =  (proxy \ path).isEmpty
+    def isDefigned (path: String): Boolean =  !isEmpty(path)
 
     def getArttributeValue(path: String): String = {
         (proxy \ s"@${path}").text
@@ -101,6 +104,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             case "string" =>
                                 res = (label -> _value).property
                             case "clob" =>
+                                res = (label -> _value).property
+                            case "blob" =>
                                 res = (label -> _value).property
                             case "double" =>
                                 res = (label -> _value.toDouble).property
@@ -215,6 +220,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
                                 res = (label.unCapitalize -> _value).property
                             case "clob" =>
                                 res = (label.unCapitalize -> _value).property
+                            case "blob" =>
+                                res = (label.unCapitalize -> _value).property
                             case "double" =>
                                 res = (label.unCapitalize -> _value.toDouble).property
                             case "integer" =>
@@ -243,7 +250,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             val className = _type.substring(0, _type.lastIndexOf("Type")) + _type.substring(_type.lastIndexOf("Type") + 4)
 
                             val `class` = new ScalaClassJSON {
-                                scalaClassGen = className.replace("Dyn", "Props") cls
+                                scalaClassGen = className.replace("Dyn", "Props").cls
+                                wrappadOperator = if (className.contains("SimpleType")) "SimpleType.create" else ""
                             }
 
                             res = (label.unCapitalize -> ScalaClassJSONPropertyClassJSON(`class`)).property

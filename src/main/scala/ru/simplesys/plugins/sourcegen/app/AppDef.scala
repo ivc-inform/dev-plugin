@@ -25,7 +25,7 @@ object AppDef {
 
         val boFiles: PathSet[Path] = sourceBoDir * "*.xml"
         val appFiles: PathSet[Path] = sourceAppDir / "macroBo" * "*.xml"
-        var sourceBOFiles: PathSet[Path] = sourceBoDir * "*.xml"
+        val sourceBOFiles: PathSet[Path] = sourceBoDir * "*.xml"
 
         val jsDir: Path = sourceMain / "webapp" / "managed" / "javascript" / "common-webapp" / "developed"
 
@@ -52,15 +52,15 @@ object AppDef {
         else
             logger info (s"Done #932#2.")
 
-//        logger info (s"Begin #932#3.")
-//        res += new GenSimpleTypes(
-//            appFilePath = tmp / "SimpleTypes.xml",
-//            schemaPath = "schemaISC.xsd".xsdURI,
-//            outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
-//            packageName = pkgAppName + ".scala",
-//            stage = "#932#3",
-//            logger = logger).create
-//        logger info (s"Done #932#3.")
+        logger info (s"Begin #932#3.")
+        res += new GenSimpleTypes1(
+            appFilePath = tmp / "SimpleTypes.xml",
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
+            packageName = pkgAppName + ".scala",
+            stage = "#932#3",
+            logger = logger).create
+        logger info (s"Done #932#3.")
 
         logger info (s"Done #756.")
         //</editor-fold>
@@ -83,7 +83,7 @@ object AppDef {
         //</editor-fold>
 
         //<editor-fold desc="#758">
-        logger info (s"Begin #758.")
+        /*logger info (s"Begin #758.")
         if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
             params =>
                 params("ContextPath") = contextPath
@@ -96,15 +96,15 @@ object AppDef {
         } > 0)
             throw new RuntimeException("Execution terminated, due to an error(s) in #758 !!!")
         else
-            logger info (s"Done #758.")
+            logger info (s"Done #758.")*/
         //</editor-fold>
 
         //<editor-fold desc="#760">
         //<editor-fold desc="#761">
 
         logger info (s"Begin #761.")
-        res ++= new GenScalaApp(
-            appFilePath = xmlPath,
+        res ++= new GenDataSources(
+            appFilePath = tmp,
             schemaPath = "schemaISC.xsd".xsdURI,
             outFilePath = scalaOut,
             packageName = pkgAppName + ".gen.scala",
@@ -112,6 +112,16 @@ object AppDef {
             logger = logger).createSeq
 
         logger info (s"Done #761.")
+        logger info (s"Begin #761.1.")
+        res ++= new GenListGridFields(
+            appFilePath = tmp,
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = scalaOut,
+            packageName = pkgAppName + ".gen.scala",
+            stage = "#761.1",
+            logger = logger).createSeq
+
+        logger info (s"Done #761.1.")
         //</editor-fold>
         //</editor-fold>
 
@@ -119,9 +129,10 @@ object AppDef {
         logger info (s"Begin #765.")
 
         res ++= new GenBOContainer(
-            appFilePath = xmlPath,
+            appFilePath = tmp,
             boFilePath = sourceBoDir,
             schemaPath = "schemaApp.xsd".xsdURI,
+            sourceMain = sourceMain,
             outFilePath = outScalaAppDir,
             packageName = pkgAppName + ".scala.container",
             pkgBOName,

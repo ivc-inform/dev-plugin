@@ -14,6 +14,7 @@ scalacOptions := Seq(
     "-feature",
     "-language:higherKinds",
     "-language:implicitConversions",
+    "-language:existentials",
     "-language:reflectiveCalls",
     "-language:postfixOps",
     "-deprecation",
@@ -35,7 +36,7 @@ publishMavenStyle := true
 libraryDependencies ++= {
 	val ssysCoreVersion = "1.2.86"
 	//val ssysCoreVersion = "1.2-SNAPSHOT"
-	val scalazVersion = "7.1.3"
+	val scalazVersion = "7.2.4"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
         "com.simplesys.core" %% "core-utils" % ssysCoreVersion,
@@ -44,7 +45,8 @@ libraryDependencies ++= {
         "com.simplesys.core" %% "saxon-wrapper" % ssysCoreVersion,
         "com.simplesys.core" %% "scala-gen" % ssysCoreVersion,
         "org.scalaz" %% "scalaz-core" % scalazVersion,
-        /*"org.liquibase" % "liquibase-maven-plugin" % "3.4.2",*/
+        //"org.liquibase" % "liquibase-maven-plugin" % "3.5.1",
+        "com.h2database" % "h2" % "1.4.192",
         "org.postgresql" % "postgresql" % "9.2-1003-jdbc4" % "test",
         "org.specs2" %% "specs2" % "2.4.2" % "test",
         "org.mockito" % "mockito-all" % "1.9.5" % "test",
@@ -54,7 +56,7 @@ libraryDependencies ++= {
 
 logLevel := Level.Info
 
-git.baseVersion := "1.0.10"
+git.baseVersion := "1.0.11"
 
 
 

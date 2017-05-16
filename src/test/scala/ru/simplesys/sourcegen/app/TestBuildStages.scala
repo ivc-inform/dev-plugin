@@ -169,13 +169,6 @@ class TestBuildStages extends FunSuite with Logging {
     test("#761") {
         logger info (s"Begin #761.")
 
-        new GenScalaApp(
-            appFilePath = xmlPath,
-            schemaPath = "schemaISC.xsd".xsdURI,
-            outFilePath = scalaOut,
-            packageName = pkgAppName + ".scala",
-            logger = _logger).createSeq
-
         logger info (s"Done #761.")
     }
 

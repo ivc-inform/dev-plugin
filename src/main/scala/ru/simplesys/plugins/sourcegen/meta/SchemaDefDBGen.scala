@@ -11,7 +11,8 @@ trait SchemaDefDBGen {
     val baseChangeSetID = org.joda.time.DateTime.now().toString("YYYY.MM.dd")
     <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                       xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+                       xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
       {for (table <- tables.sortBy(t => t.group + t.tableName)) yield table.genCreateScript(baseChangeSetID)(this)}{for (table <- tables.filterNot(_.fks.isEmpty)) yield table.genFKScript(baseChangeSetID)(this)}
     </databaseChangeLog>
   }
