@@ -3,14 +3,13 @@ package ru.simplesys.plugins.sourcegen.app.Gen
 import java.net.URI
 
 import com.simplesys.common.Strings.{newLine, _}
+import com.simplesys.file.Path
 import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
 import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
-
-import scalax.file.Path
 
 class GenSimpleTypes1(val appFilePath: Path,
                       val schemaPath: URI,
@@ -26,7 +25,8 @@ class GenSimpleTypes1(val appFilePath: Path,
             scalaClassGen = "SimpleTypes".cls
             //typeScalaClass = TypeScalaObject
             extensibleClass = "StaticJSCode".ext
-            annotation = ScalaAnnotation("JSExport")
+            typeScalaClass = TypeScalaObject
+            //annotation = ScalaAnnotation("JSExport")
         }
 
         simpleTypes addMember ScalaMethod(
@@ -115,7 +115,7 @@ class GenSimpleTypes1(val appFilePath: Path,
             body = bodyCreateJS,
             `type` = ScalaUnit,
             parametrs = ScalaClassParametrs(emptyparentheses = true),
-            annotation = ScalaAnnotation("JSExport")
+            annotation = ScalaAnnotation("JSExportTopLevel(\"CreateSimpleTypes\")")
         )
 
         simpleTypes addMember newLine
@@ -129,7 +129,8 @@ class GenSimpleTypes1(val appFilePath: Path,
             "com.simplesys.option.{ScOption, ScSome}".imp,
             "com.simplesys.option.ScOption._".imp,
             "com.simplesys.SmartClient.App.StaticJSCode".imp,
-            "scala.scalajs.js.annotation.JSExport".imp,
+            //"scala.scalajs.js.annotation.JSExport".imp,
+            "scala.scalajs.js.annotation.JSExportTopLevel".imp,
             newLine,
             simpleTypes
         )

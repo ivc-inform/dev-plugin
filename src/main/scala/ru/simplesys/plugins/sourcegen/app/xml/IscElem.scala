@@ -32,8 +32,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
         if (res.isEmpty) false else res.toBoolean
     }
 
-    def isEmpty (path: String): Boolean =  (proxy \ path).isEmpty
-    def isDefigned (path: String): Boolean =  !isEmpty(path)
+    def isEmpty(path: String): Boolean = (proxy \ path).isEmpty
+    def isDefigned(path: String): Boolean = !isEmpty(path)
 
     def getArttributeValue(path: String): String = {
         (proxy \ s"@${path}").text
@@ -104,6 +104,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             case "string" =>
                                 res = (label -> _value).property
                             case "clob" =>
+                                res = (label -> _value).property
+                            case "json" =>
                                 res = (label -> _value).property
                             case "blob" =>
                                 res = (label -> _value).property
@@ -219,6 +221,8 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             case "string" =>
                                 res = (label.unCapitalize -> _value).property
                             case "clob" =>
+                                res = (label.unCapitalize -> _value).property
+                            case "json" =>
                                 res = (label.unCapitalize -> _value).property
                             case "blob" =>
                                 res = (label.unCapitalize -> _value).property

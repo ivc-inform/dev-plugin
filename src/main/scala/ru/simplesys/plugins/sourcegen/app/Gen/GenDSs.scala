@@ -14,7 +14,7 @@ import sbt.Logger
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import com.simplesys.file.{Path, PathSet}
 
 class GenDSs(val appFilePath: Path,
              val outFilePath: Path,
@@ -172,7 +172,7 @@ class GenDSs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "success",
+                                    defaultValue = ScalaApplyObject(name = "Success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(
@@ -199,7 +199,7 @@ class GenDSs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             )
         )
@@ -240,7 +240,7 @@ class GenDSs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "success",
+                                    defaultValue = ScalaApplyObject(name = "Success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(s"${productName}(${allColumnsP})"),
@@ -253,7 +253,7 @@ class GenDSs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -560,6 +560,7 @@ class GenDSs(val appFilePath: Path,
           newLine,
           ScalaAliasType(name = "ColumnTypes", body = ScalaBody(columnTypes)),
           ScalaMethod(name = "allColumns", serrializeToOneString = true, body = ScalaBody(allColumns.mkString(space + "~".space))),
+          ScalaMethod(name = "allColumns1", serrializeToOneString = true, body = ScalaBody(s"Seq(${allColumns.mkString(space + ",".space)})")),
           newLine,
           ScalaComment("Fetch Product"),
           selectPMethod(name = "selectPList", ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics(productName)))), sb = selectPBody(name = "selectListRoot", suffix = strEmpty)),

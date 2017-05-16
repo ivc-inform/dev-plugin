@@ -3,11 +3,10 @@ package sourcegen
 
 //import sbt.{`package` => _, _}
 
-import sbt.{`package` => _, _}
-
+import com.simplesys.file.{Path, PathSet}
+import sbt.{`package` ⇒ _, _}
 import sbt.Keys._
 import sbt.classpath.ClasspathUtilities
-
 import liquibase.Liquibase
 import liquibase.database.Database
 import liquibase.integration.commandline.CommandLineUtils
@@ -206,7 +205,8 @@ object DevPlugin extends AutoPlugin {
                 }
         },*/
         generateScalaCode := {
-            val tmp= tmpResourcesDir.value
+            val tmp = tmpResourcesDir.value
+            val baseDir = baseDirectory.value
             val out = streams.value
             val srcBoDir = sourceBoDir.value
             val pkgBOName = startPackageBOName.value
@@ -219,7 +219,7 @@ object DevPlugin extends AutoPlugin {
             val arr = maxArity.value
 
             import meta.SchemaDef
-            import scalax.file.ImplicitConversions._
+            import com.simplesys.file.ImplicitConversions._
 
             implicit val logger = out.log
             implicit val schema = SchemaDef(pkgBOName, sourceBOFiles)
@@ -233,6 +233,7 @@ object DevPlugin extends AutoPlugin {
                 Thread.currentThread setContextClassLoader cl2Set
 //                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
                   AppDef.generateScalaCode(
+                      baseDirectory = baseDir,
                       tmp = tmp,
                       sourceBoDir = srcBoDir,
                       sourceAppDir = srcAppDir,
@@ -255,8 +256,7 @@ object DevPlugin extends AutoPlugin {
 
                 import meta.SchemaDef
                 import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
-                import scalax.file.ImplicitConversions._
-                import scalax.file.Path
+                import com.simplesys.file.ImplicitConversions._
 
                 implicit val logger = out.log
                 implicit val schema = SchemaDef(pkgBoName, sourceBOFiles)
@@ -310,10 +310,9 @@ object DevPlugin extends AutoPlugin {
         N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName) map {
             (tmp, out, sourceBoDir, sourceAppDir, pkgBoName) => {
 
-                import scalax.file.ImplicitConversions._
+                import com.simplesys.file.ImplicitConversions._
                 import com.simplesys.saxon._
                 import com.simplesys.saxon.XsltTransformer._
-                import scalax.file.{Path, PathSet}
                 import com.simplesys.io._
 
                 val logger = out.log

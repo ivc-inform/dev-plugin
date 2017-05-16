@@ -5,18 +5,18 @@ import java.net.URI
 import com.simplesys.common.Strings._
 import com.simplesys.common._
 import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
 import com.simplesys.xhtml.XHTML._
-import ru.simplesys.plugins.sourcegen.app.{ForeignKeyConstraintDefOrd, AttrDefOrd}
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
+import ru.simplesys.plugins.sourcegen.app.{AttrDefOrd, ForeignKeyConstraintDefOrd}
 import ru.simplesys.plugins.sourcegen.meta._
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
 
 class GenBOServlet(val appFilePath: Path,
                    val boFilePath: Path,
@@ -260,6 +260,8 @@ class GenBOServlet(val appFilePath: Path,
                                                             getterType match {
                                                                 case "Long" =>
                                                                     parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                case "Double" =>
+                                                                    parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextDouble1(dataSet.fromBO.fromTable.databaseTablename)")
                                                                 case "BigDecimal" =>
                                                                     parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextBigDecimal1(dataSet.fromBO.fromTable.databaseTablename)")
                                                                 case "String" =>
@@ -412,7 +414,7 @@ class GenBOServlet(val appFilePath: Path,
                                                                       "Status = RPCResponseDyn.statusSuccess",
                                                                       "Data = _data",
                                                                       s"TotalRows = operation.StartRow.toInt + (if (qty == list.length) qty + (4 * (operation.EndRow.toInt - operation.StartRow.toInt)) else list.length)"
-                                                                      )
+                                                                    )
 
                                                                     res
                                                                 })
@@ -633,7 +635,7 @@ class GenBOServlet(val appFilePath: Path,
                         val module = ScalaModule(
                             packageName.pkg,
                             newLine,
-                            "com.simplesys.jdbc.control.clob.Clob".imp,
+                            "com.simplesys.jdbc.control.clob._".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
                             "com.simplesys.isc.dataBinging.{DSResponseFailureExDyn, DSResponseFailureDyn, DSRequestDyn, DSResponseDyn}".imp,
                             "com.simplesys.isc.dataBinging.RPC.RPCResponseDyn".imp,

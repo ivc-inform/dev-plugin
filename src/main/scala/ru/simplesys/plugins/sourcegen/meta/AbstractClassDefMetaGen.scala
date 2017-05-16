@@ -5,7 +5,7 @@ package meta
 //import ru.simplesys.meta.types.StringAddons
 import com.simplesys.common.Strings._
 import com.simplesys.common.equality.SimpleEquality._
-import ru.simplesys.meta.types.{DomainBlob, DomainClob}
+import ru.simplesys.meta.types.{DomainBlob, DomainClob, DomainJson}
 
 trait AbstractClassDefMetaGen {
     self: AbstractClassDef =>
@@ -32,19 +32,14 @@ trait AbstractClassDefMetaGen {
     def genUCRefs(implicit resolver: SchemaDef): Seq[String] = {
         val ucRef = strictUCs.map { x =>
             val ucAttrs = x.attrs.map { x =>
-                s"""val ${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
+                s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
             val ucAttrsParams = x.attrs.map { x =>
                 s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
-            s"""|class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]
-                |
-            |object ${x.classRefName} {
-                |  def apply(${ucAttrsParams}): ${x.classRefName} = new ${x.classRefName}(${x.attrNames.mkString(", ")})
-                |}
-                |""".stripMargin
+            s"""|case class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]""".newLine.stripMargin
         }
 
         ucRef
@@ -79,7 +74,12 @@ trait AbstractClassDefMetaGen {
 
     protected def genParamListAndImplWithOutLob(implicit resolver: SchemaDef): (String, String) = {
         val discrNames = discriminatorVals.map(_.toParentClass.discriminatorAttrName)
-        val attrsNotCalculated = attrNames.map(attr).filter(x => (!x.isCalculated) && (!discrNames.exists(_ === x.name))).filter(attr => attr.attrType != DomainClob && attr.attrType != DomainBlob)
+        val attrsNotCalculated = attrNames.map(attr).filter(x => (!x.isCalculated) && (!discrNames.exists(_ === x.name))).filter(
+            attr =>
+                attr.attrType != DomainClob &&
+                attr.attrType != DomainJson &&
+                  attr.attrType != DomainBlob
+        )
 
         val fksWithoutEnums = fks.filter(x => !resolver.enumClasses.exists(_.selfRef === x.referencedClassRef))
 
@@ -140,9 +140,14 @@ trait AbstractClassDefMetaGen {
 
         //out append genCompanionObject(resolve)
 
-        val attrs = (strictAttrs ++ (strictFKs.flatMap(_.attrNames).map(attr(_)))).filter(attr => attr.attrType != DomainClob && attr.attrType != DomainBlob)
+        val attrs = (strictAttrs ++ (strictFKs.flatMap(_.attrNames).map(attr(_)))).filter(
+            attr =>
+                attr.attrType != DomainClob &&
+                attr.attrType != DomainJson &&
+                  attr.attrType != DomainBlob
+        )
 
-        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  val ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
+        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
 
         val calculatedAttrDefs = attrs.withFilter(_.isCalculated).map(x => s"  def ${x.name}: ${x.scalaTypeAsString(group, resolver)} = ${x.formula.get}")
 
@@ -164,7 +169,7 @@ trait AbstractClassDefMetaGen {
 
 
         val classDef =
-            s"""|class ${className.capitalize} (
+            s"""|case class ${className.capitalize} (
                 |${attrDefs.mkString(",".newLine)}) extends Product {
                 |${calculatedAttrDefs.mkString(newLine)}
                 |${ucAttrs.mkString(newLine)}
@@ -185,13 +190,11 @@ trait AbstractClassDefMetaGen {
 
         val (paramList, paramImpl) = genParamListAndImplWithOutLob
 
-
         val objDef =
             s"""|object ${className.capitalize} {
-                |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}(${param4ObjDefs.mkString(",".space)})
-                |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
-                |}
-                |""".stripMargin
+            |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
+            |}
+            |""".stripMargin
         out append newLine
         out append objDef
         out append fill("end from AbstractClassDefMetaGen (genClassDefsWithOutLob)").newLine
@@ -199,7 +202,12 @@ trait AbstractClassDefMetaGen {
 
     def genClassDefsWithLob(out: StringBuilder)(implicit resolver: SchemaDef): Unit = {
 
-        val attrs = strictAttrs.filter(attr => attr.attrType == DomainClob || attr.attrType == DomainBlob)
+        val attrs = strictAttrs.filter(
+            attr =>
+                attr.attrType == DomainClob ||
+                attr.attrType == DomainJson ||
+                  attr.attrType == DomainBlob
+        )
 
         if (attrs.length > 0) {
             val attrsPk = strictUCs.filter(_.ucType == PK).flatMap(_.attrNames).map(attr)
@@ -222,7 +230,7 @@ trait AbstractClassDefMetaGen {
 
 
                     val classDef =
-                        s"""|class ${className.capitalize}${attr.name.capitalize} (
+                        s"""|case class ${className.capitalize}${attr.name.capitalize} (
                             |${attrDefs.mkString(",".newLine)}) extends Product {
                             |
                             |${productCanEquals}
@@ -243,7 +251,6 @@ trait AbstractClassDefMetaGen {
 
                     val objDef =
                         s"""|object ${className.capitalize}${attr.name.capitalize} {
-                            |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}${attr.name.capitalize}(${param4ObjDefs.mkString(",".space)})
                             |   def apply(${paramList}) = new ${className.capitalize}${attr.name.capitalize}(${paramImpl})
                             |}
                             |""".stripMargin
@@ -260,13 +267,13 @@ trait AbstractClassDefMetaGen {
         val metaDef =
             s"""|object ${classMetaName} {
                 |
-                      |  def insert() = {}
+                |  def insert() = {}
                 |  def insertAll() = {}
                 |  def delete() = {}
                 |  def deleteAll() = {}
                 |  def selectByID() = {}
                 |
-                      |}""".stripMargin
+                |}""".stripMargin
 
         out append metaDef
 

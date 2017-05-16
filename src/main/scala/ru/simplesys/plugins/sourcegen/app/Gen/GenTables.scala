@@ -5,6 +5,7 @@ import java.net.URI
 import com.simplesys.common.Strings._
 import com.simplesys.common._
 import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
@@ -14,7 +15,6 @@ import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
 
 class GenTables(val appFilePath: Path,
                 val outFilePath: Path,
@@ -79,7 +79,13 @@ class GenTables(val appFilePath: Path,
 
         tableObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(
+                  ScalaClassParametr(
+                      name = "dataSource",
+                      `type` = ScalaBoneCPDataSource,
+                      parametrType = ParametrImplicit)
+              ), serrializeToOneString = true,
+              body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(

@@ -3,7 +3,7 @@ package sourcegen
 package meta
 
 import com.simplesys.common.equality.SimpleEquality._
-import ru.simplesys.meta.types.{DomainBlob, DomainClob, Locator}
+import ru.simplesys.meta.types.{DomainBlob, DomainClob, DomainJson, Locator}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.xml.Elem
@@ -68,8 +68,18 @@ trait AbstractClassDef {
     def attrNames(implicit resolver: SchemaDef): Seq[String] = strictAttrs.map(_.name) ++ strictFKs.flatMap(_.attrNames)
 
     def attrs(implicit resolver: SchemaDef): Seq[AttrDef[_]] = attrNames.map(attr)
-    def attrsWithOutLob(implicit resolver: SchemaDef): Seq[AttrDef[_]] = attrNames.map(attr).filter(attr => attr.attrType != DomainClob && attr.attrType != DomainBlob)
-    def attrsWithLob(implicit resolver: SchemaDef): Seq[AttrDef[_]] = attrNames.map(attr).filter(attr => attr.attrType == DomainClob || attr.attrType == DomainBlob)
+    def attrsWithOutLob(implicit resolver: SchemaDef): Seq[AttrDef[_]] = attrNames.map(attr).filter(
+        attr =>
+            attr.attrType != DomainClob &&
+            attr.attrType != DomainJson &&
+              attr.attrType != DomainBlob
+    )
+    def attrsWithLob(implicit resolver: SchemaDef): Seq[AttrDef[_]] = attrNames.map(attr).filter(
+        attr =>
+            attr.attrType == DomainClob ||
+            attr.attrType == DomainJson ||
+              attr.attrType == DomainBlob
+    )
 
     protected def ucsOriginal(resolver: SchemaDef): Seq[UniqueConstraintDef] = strictUCs
     protected def fksOriginal(resolver: SchemaDef): Seq[ForeignKeyConstraintDef] = strictFKs
@@ -136,7 +146,12 @@ trait AbstractClassDef {
     def toXml(implicit resolver: SchemaDef): Seq[Elem] = {
         val _attr = (attrNames map attr)
 
-        val allAttrsWithOutLob = _attr.filter(attr => attr.attrType != DomainClob && attr.attrType != DomainBlob)
+        val allAttrsWithOutLob = _attr.filter(
+            attr =>
+                attr.attrType != DomainClob &&
+                attr.attrType != DomainJson &&
+                  attr.attrType != DomainBlob
+        )
         val res = ArrayBuffer.empty[Elem]
 
         res += <class fullClassName={className} name={className} caption={classCaption} group={group} groupCaption={resolver.groups.filter(_.selfRef === group).head.caption} isAbstract={isAbstract.toString} groupPrefix={resolver.groups.filter(_.selfRef === group).head.prefix}>
@@ -151,7 +166,12 @@ trait AbstractClassDef {
         val pkAttrs = pk.attrNames
 
         val allAttrsPk: Seq[AttrDef[_]] = _attr.filter(attr => pkAttrs.contains(attr.name))
-        val allAttrsWithLob = _attr.filter(attr => attr.attrType == DomainClob || attr.attrType == DomainBlob)
+        val allAttrsWithLob = _attr.filter(
+            attr =>
+                attr.attrType == DomainClob ||
+                attr.attrType == DomainJson ||
+                  attr.attrType == DomainBlob
+        )
 
         allAttrsWithLob.foreach {
             attrLob =>

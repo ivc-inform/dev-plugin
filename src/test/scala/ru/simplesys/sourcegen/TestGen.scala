@@ -2,9 +2,10 @@ package ru.simplesys
 package sourcegen
 package test
 
+import java.io.File
+
 import org.scalatest.FunSuite
-import sbt._
-import ru.simplesys.plugins.sourcegen.meta.{ForeignKeyConstraintType, PK}
+import ru.simplesys.plugins.sourcegen.meta.ForeignKeyConstraintType
 
 //import com.simplesys.log.Logging
 //import ru.simplesys.sourcegen.Generator
@@ -27,32 +28,36 @@ protected final class Log extends Logger {
 
 class TestGen extends FunSuite /*with Logging*/ {
 
-/*
-  def genSources(sourceDir: File, outputDir: File, pkgName: String, outputCreateScriptsDir: File, logger: Logger): Seq[File] = {
-    if (!outputDir.exists) outputDir.mkdirs
+    /*
+      def genSources(sourceDir: File, outputDir: File, pkgName: String, outputCreateScriptsDir: File, logger: Logger): Seq[File] = {
+        if (!outputDir.exists) outputDir.mkdirs
 
-    outputCreateScriptsDir.delete
-    outputCreateScriptsDir.mkdirs
+        outputCreateScriptsDir.delete
+        outputCreateScriptsDir.mkdirs
 
-    logger.log(Level.Info, "before Generator, dir is " + sourceDir.toString() + ", package name is: " + pkgName + ", schema create scripts: " + outputCreateScriptsDir.toString)
-    implicit val log = logger
+        logger.log(Level.Info, "before Generator, dir is " + sourceDir.toString() + ", package name is: " + pkgName + ", schema create scripts: " + outputCreateScriptsDir.toString)
+        implicit val log = logger
 
-    Generator.processXml((sourceDir ** "*.xml").get, outputDir, pkgName, outputCreateScriptsDir)
-  }
-*/
+        Generator.processXml((sourceDir ** "*.xml").get, outputDir, pkgName, outputCreateScriptsDir)
+      }
+    */
 
-/*
-  test("generation") {
-    val sourceDir = new File("/home/andrew/JOB/fsm-generation/src/main/resources/defs/")
-    val outputDir = new File("/home/andrew/JOB/fsm-generation/source-gen/src/test/scala/out")
-    val pkgName = "ru.simplesys.defs"
-    val outputCreateScriptsDir = new File("/home/andrew/JOB/fsm-generation/source-gen/src/test/scala/out")
+    /*
+      test("generation") {
+        val sourceDir = new File("/home/andrew/JOB/fsm-generation/src/main/resources/defs/")
+        val outputDir = new File("/home/andrew/JOB/fsm-generation/source-gen/src/test/scala/out")
+        val pkgName = "ru.simplesys.defs"
+        val outputCreateScriptsDir = new File("/home/andrew/JOB/fsm-generation/source-gen/src/test/scala/out")
 
-    genSources(sourceDir, outputDir, pkgName, outputCreateScriptsDir, new Log)
-  }
-*/
+        genSources(sourceDir, outputDir, pkgName, outputCreateScriptsDir, new Log)
+      }
+    */
 
-  test("simple test") {
-    ForeignKeyConstraintType.constraintTypes.values.foreach(println)
-  }
+    test("simple test") {
+        ForeignKeyConstraintType.constraintTypes.values.foreach(println)
+    }
+
+    test("File path separator") {
+        println(File.separatorChar)
+    }
 }

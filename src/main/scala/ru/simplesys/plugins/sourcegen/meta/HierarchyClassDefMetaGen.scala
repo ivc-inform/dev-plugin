@@ -5,7 +5,7 @@ package meta
 //import ru.simplesys.meta.types.StringAddons
 import com.simplesys.common.Strings._
 import com.simplesys.common.equality.SimpleEquality._
-import ru.simplesys.meta.types.{DomainBlob, DomainClob}
+import ru.simplesys.meta.types.{DomainBlob, DomainClob, DomainJson}
 
 /*trait HierarchyClassDefMetaGen {
   self: HierarchyClassDef =>
@@ -45,7 +45,12 @@ trait HierarchyClassDefWSettingMetaGen extends AbstractClassDefMetaGen {
             if (!isAbstract)
                 super.genClassDefs(resolver)
             else {
-                val attrs = (strictAttrs ++ (strictFKs.flatMap(_.attrNames).map(attr(_)))).filter(attr => attr.attrType != DomainClob && attr.attrType != DomainBlob)
+                val attrs = (strictAttrs ++ (strictFKs.flatMap(_.attrNames).map(attr(_)))).filter(
+                    attr =>
+                        attr.attrType != DomainClob &&
+                        attr.attrType != DomainJson &&
+                          attr.attrType != DomainBlob
+                )
 
                 val calculatedAttrDefs = attrs.withFilter(_.isCalculated).map(x => s"  def ${x.name}: ${x.attrType.scalaTypeAsString(group, resolver)} = ${x.formula.get}")
 

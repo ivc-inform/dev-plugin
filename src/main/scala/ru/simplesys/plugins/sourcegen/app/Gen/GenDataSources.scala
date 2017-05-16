@@ -12,7 +12,7 @@ import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
-import scalax.file.{Path, PathSet}
+import com.simplesys.file.{Path, PathSet}
 
 class GenDataSources(val appFilePath: Path,
                      val schemaPath: URI,

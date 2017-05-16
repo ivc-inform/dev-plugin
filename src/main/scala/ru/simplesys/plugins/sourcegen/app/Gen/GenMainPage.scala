@@ -3,15 +3,13 @@ package ru.simplesys.plugins.sourcegen.app.Gen
 import java.net.URI
 
 import com.simplesys.common.Strings._
+import com.simplesys.file.Path
 import com.simplesys.genSources._
-import com.simplesys.io._
 import com.simplesys.scalaGen._
 import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
+import com.simplesys.io._
 import sbt.{File, Logger}
-
-import scalax.file.ImplicitConversions._
-import scalax.file.Path
 
 class GenMainPage(val appFilePath: Path,
                   val schemaPath: URI,
@@ -19,7 +17,7 @@ class GenMainPage(val appFilePath: Path,
                   val packageName: String,
                   val logger: Logger) extends GenScala {
 
-    val boFilePath: Path = ""
+    val boFilePath: Path = Path("")
 
     def create: File = {
         val res = outFilePath.createFile(failIfExists = false).toFile

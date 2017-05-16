@@ -4,15 +4,15 @@ import java.net.URI
 
 import com.simplesys.common.Strings.{newLine, _}
 import com.simplesys.common._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
-import com.simplesys.io._
 import com.simplesys.scalaGen._
 import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
+import com.simplesys.io._
 
 import scala.collection.mutable.ArrayBuffer
-import scalax.file.{Path, PathSet}
 
 class GenListGridFields(val appFilePath: Path,
                         val schemaPath: URI,
@@ -112,6 +112,7 @@ class GenListGridFields(val appFilePath: Path,
                             case "ss_SimpleType" =>
                             case "bBoolean_SimpleType" =>
                             case "blob_SimpleType" =>
+                            case "json_SimpleType" =>
                             case _ => "TextItem"
                         }
 
@@ -165,6 +166,7 @@ class GenListGridFields(val appFilePath: Path,
                             case "ss_SimpleType" =>
                             case "bBoolean_SimpleType" =>
                             case "blob_SimpleType" =>
+                            case "json_SimpleType" =>
                             case _ => "TextItem"
                         }
 
@@ -231,7 +233,7 @@ class GenListGridFields(val appFilePath: Path,
         val moduleDataSourcesJS = new ScalaModule(
             (packageName + ".ScalaJSGen").pkg,
             newLine,
-            "com.simplesys.SmartClient.Forms.FormsItems.props.FormItemProps".imp,
+            "com.simplesys.SmartClient.Forms.formsItems.props.FormItemProps".imp,
             "com.simplesys.SmartClient.Grids.props.listGrid.ListGridFieldProps".imp,
             "com.simplesys.SmartClient.System.{FormItem, Implicits}".imp,
             "com.simplesys.System.Types.{Alignment, FormItemType, ListGridFieldType}".imp,
