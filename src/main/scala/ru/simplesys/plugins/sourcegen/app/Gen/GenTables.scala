@@ -79,13 +79,7 @@ class GenTables(val appFilePath: Path,
 
         tableObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(
-                      name = "dataSource",
-                      `type` = ScalaBoneCPDataSource,
-                      parametrType = ParametrImplicit)
-              ), serrializeToOneString = true,
-              body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(

@@ -118,19 +118,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(ds)"""), serrializeToOneString = true),
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!! END DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
                                       newLine,
-                                      ScalaMethod(name = "receiveBase", `type` = "Option[Actor.Receive]".tp, body = ScalaBody("None"), serrializeToOneString = true),
-                                      newLine,
-                                      ScalaMethod(
-                                          name = "wrapperBlobGetter",
-                                          `type` = ScalaString,
-                                          parametrs = ScalaClassParametrs(
-                                              ScalaClassParametr(
-                                                  name = "blob",
-                                                  `type` = "Blob".tp
-                                              )
-                                          ),
-                                          body = ScalaBody("blob.asString"),
-                                          serrializeToOneString = true)
+                                      ScalaMethod(name = "receiveBase", `type` = "Option[Actor.Receive]".tp, body = ScalaBody("None"), serrializeToOneString = true)
                                       )
 
                                     val module = ScalaModule(
@@ -140,7 +128,6 @@ class GenBOContainer(val appFilePath: Path,
                                         "com.simplesys.isc.system.ServletActorDyn".imp,
                                         "com.simplesys.isc.dataBinging.DSRequestDyn".imp,
                                         "com.simplesys.common.Strings._".imp,
-                                        "com.simplesys.jdbc.control.clob.Blob".imp,
                                         "akka.actor.Actor".imp,
                                         firstAddImport,
                                         newLine,
@@ -294,36 +281,17 @@ class GenBOContainer(val appFilePath: Path,
                                               val name = (x: IscElem).getStringValue("Name")
                                               val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
                                               val lookup = (x: IscElem).getBooleanValue("Lookup")
-                                              val getterType: String = (x: IscElem).getStringValue("GetterType")
+                                              val getterType = (x: IscElem).getStringValue("GetterType")
                                               val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
-                                              def blobWrapper(str: String): String = {
-                                                  if (getterType == "Blob")
-                                                      s"wrapperBlobGetter($str)"
-                                                  else
-                                                      str
-                                              }
 
                                               if (itemName == strEmpty)
-                                                  ScalaClassParametr(
-                                                      name = name.dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper(_boName),
-                                                      sign = ScalaSignArrowRight
-                                                  )
+                                                  ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = _boName, sign = ScalaSignArrowRight)
                                               else if (!lookup)
-                                                  ScalaClassParametr(
-                                                      name = name.dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper({
-                                                          if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
-                                                      } + boName), sign = ScalaSignArrowRight)
+                                                  ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = {
+                                                      if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
+                                                  } + boName, sign = ScalaSignArrowRight)
                                               else
-                                                  ScalaClassParametr(
-                                                      name = name.dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper(s"data.get${getterType}(${name.dblQuoted})"),
-                                                      sign = ScalaSignArrowRight
-                                                  )
+                                                  ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})", sign = ScalaSignArrowRight)
                                       }: _*
                                   )
                             )
@@ -341,126 +309,49 @@ class GenBOContainer(val appFilePath: Path,
                                 res
                             }
 
-                            val getDataBody = ScalaBody()
-
-                            def getDSResponse(body: ScalaBody): ScalaBody = {
-                                val res = new ScalaClassDeclare {
-                                    scalaClassGen = "DSResponseDyn".cls
-                                    typeScalaClass = AnonimousScalaClass
-                                }
-                                res addMember ("Status = RPCResponseDyn.statusSuccess")
-
-                                res addMember (
-                                  ScalaVariable(
-                                      name = "Data",
-                                      body = body,
-                                      variableType = AssignVariable))
-
-                                ScalaBody(res)
-                            }
+                            val GetDataBody = ScalaBody()
 
                             mode match {
                                 case "Add" =>
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}".imp
 
-                                    val insertBody = ScalaCase(
-                                        expression = "requestData.Transaction.TransactionNum".expr,
-                                        ScalaCaseLine(
-                                            expression = "null".expr,
-                                            caseBody = ScalaBody(
-                                                ScalaVariable(
-                                                    name = "data",
-                                                    body = "requestData.Data".body,
-                                                    serrializeToOneString = true
-                                                ),
-                                                newLine,
-                                                "logger debug s\"data: ${newLine + data.toPrettyString}\"",
-                                                newLine,
-                                                ScalaVariable(name = s"${boName}Data".unCapitalize, body = ScalaBody(boData(true))),
-                                                newLine,
-                                                ScalaVariable(
-                                                    name = "listResponse",
-                                                    variableType = AssignVariable,
-                                                    sign = "append",
-                                                    body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
-                                                    serrializeToOneString = true
-                                                ),
-                                                newLine,
-                                                s"dataSet.insertP(${boName.unCapitalize}Data)"
-                                            )
-                                        ),
-                                        ScalaCaseLine(
-                                            expression = "_".expr,
-                                            caseBody = ScalaBody(
-                                                ScalaControlStruct(
-                                                    name = "transaction(dataSet.dataSource)",
-                                                    body = ScalaControlBody(
-                                                        expression = "connection".expr,
-                                                        ScalaVariable(name = "values",
-                                                            `type` = s"Seq[${boName.capitalize}]".tp,
-                                                            body = ScalaBody(ScalaControlStruct(
-                                                                name = "requestData.Transaction.Operations.map",
-                                                                body = ScalaControlBody(
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = s"${boName}Data".unCapitalize,
-                                                                                body = ScalaBody(boData(true))),
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            newLine,
-                                                                            s"${boName.unCapitalize}Data"
-                                                                        )
-                                                                    ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
-                                                                    )
-                                                                )
-                                                            ),
-                                                                "dataSet.insertPWithoutCommit(connection = connection, values: _*)"
-                                                            )
-                                                        )
-                                                    ))
-                                            )
-                                        ))
-
-                                    getDataBody ++= (
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayDyn.empty[DSResponseDyn]".body),
+                                    GetDataBody ++=(
+                                      ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.Data".body),
+                                      "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(
-                                          name = "insert",
-                                          `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
-                                          body = ScalaBody(insertBody),
-                                          serrializeToOneString = true
-                                      ),
+                                      ScalaVariable(name = s"${boName}Data".unCapitalize, body = ScalaBody(boData(true))),
+                                      newLine,
+                                      ScalaVariable(name = "insert", body = s"dataSet.insertP(${boName.unCapitalize}Data)".body, serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
-                                          name = "array",
+                                          name = "classDyn",
                                           `type` = ScalaImplicitType,
                                           defaultValue = ScalaCase(expression = "insert result".expr,
                                               ScalaCaseLine(expression = "Success(res)".expr,
                                                   caseBody = ScalaBody(
                                                       "res foreach (x => logger debug (s\"Inserted: ${x} line(s).\"))",
-                                                      "listResponse".body
+                                                      newLine,
+                                                      ScalaVariable(name = "resp",
+                                                          body = ScalaBody(
+                                                              {
+                                                                  val res = new ScalaClassDeclare {
+                                                                      scalaClassGen = "DSResponseDyn".cls
+                                                                      typeScalaClass = AnonimousScalaClass
+                                                                  }
+                                                                  res addMember ("Status = RPCResponseDyn.statusSuccess")
+
+                                                                  res addMember (ScalaVariable(name = "Data", body = ScalaBody(recordDyn(s"${boName}Data".unCapitalize)), variableType = AssignVariable))
+
+                                                                  res
+                                                              }
+                                                          ),
+                                                          serrializeToOneString = false
+                                                      ),
+                                                      "resp"
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(insert))")
+                                                  caseBody = ScalaBody("new DSResponseFailureExDyn(insert)")
                                               )
                                           )
                                       ))),
@@ -471,18 +362,14 @@ class GenBOContainer(val appFilePath: Path,
                                 case "Fetch" =>
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}DS".imp
 
-                                    getDataBody ++= (
+                                    GetDataBody ++=(
                                       ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.Data".body),
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "RecordsDynList()".body, serrializeToOneString = true),
                                       ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.StartRow.toInt".body, serrializeToOneString = true),
                                       newLine,
-                                      ScalaVariable(
-                                          name = "select",
-                                          body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DSRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.StartRow, endRow = requestData.EndRow, sortBy = requestData.SortBy, data = data, textMatchStyle = requestData.TextMatchStyle.toString))"),
-                                          serrializeToOneString = true),
+                                      ScalaVariable(name = "select", body = ScalaBody(s"dataSet.Fetch(dsRequest = DSRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.StartRow, endRow = requestData.EndRow, sortBy = requestData.SortBy, data = data, textMatchStyle = requestData.TextMatchStyle.toString))"), serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
                                           name = "classDyn",
@@ -494,10 +381,7 @@ class GenBOContainer(val appFilePath: Path,
                                                           body =
                                                             ScalaBody(
                                                                 ScalaCase(
-                                                                    ScalaCaseLine(
-                                                                        expression = ScalaExpressionBody(ScalaBody(tuple),
-                                                                            serrializeToOneString = true
-                                                                        ),
+                                                                    ScalaCaseLine(expression = ScalaExpressionBody(ScalaBody(tuple), serrializeToOneString = true),
                                                                         caseBody = ScalaBody(
                                                                             ScalaVariable(name = "_data", variableType = AssignVariable, sign = "+=",
                                                                                 body = ScalaBody(recordDyn(strEmpty, boName)),
@@ -536,116 +420,60 @@ class GenBOContainer(val appFilePath: Path,
 
                                 case "Update" =>
                                     def getUpdateSatement: ScalaVariable = {
+                                        var step = 0
+                                        var body = ""
 
-                                        def getBody(statement: String): String = {
-                                            val body = new StringBuilder
-                                            val clazz = schema.resolveClass(LinkRefToClassOld(groupName = groupName, objectName = fullClassName))
+                                        val clazz = schema.resolveClass(LinkRefToClassOld(groupName = groupName, objectName = fullClassName))
 
-                                            clazz.pk.attrNames.zipWithIndex.foreach {
-                                                case (attr, index) =>
-                                                    if (index == 0)
-                                                        body append s"${statement} values = ${boName.unCapitalize}Data, where = Where(dataSet.${attr}${fullClassName.capitalize} === ${boName.unCapitalize}Data.${attr})"
-                                                    else
-                                                        body append space + s"And (dataSet.${attr}${fullClassName.capitalize} === ${boName.unCapitalize}Data.${attr})"
-
-                                            }
-                                            body.toString()
+                                        clazz.pk.attrNames.foreach {
+                                            attr =>
+                                                if (step == 0)
+                                                    body = s"dataSet.updateP(${boName.unCapitalize}Data, where = Where(dataSet.${attr}${fullClassName.capitalize} === ${boName.unCapitalize}Data.${attr})"
+                                                else
+                                                    body += space + s"And (dataSet.${attr}${boName.capitalize} === ${boName.unCapitalize}Data.${attr})"
+                                                step += 1
                                         }
 
-                                        val updateBody = ScalaCase(
-                                            expression = "requestData.Transaction.TransactionNum".expr,
-                                            ScalaCaseLine(
-                                                expression = "null".expr,
-                                                caseBody = ScalaBody(
-                                                    ScalaVariable(
-                                                        name = "data",
-                                                        body = "requestData.OldValues ++ requestData.Data".body,
-                                                        serrializeToOneString = true
-                                                    ),
-                                                    newLine,
-                                                    "logger debug s\"data: ${newLine + data.toPrettyString}\"",
-                                                    ScalaVariable(name = s"${boName.unCapitalize}Data", body = ScalaBody(boData(false)), serrializeToOneString = false),
-                                                    newLine,
-                                                    ScalaVariable(
-                                                        name = "listResponse",
-                                                        variableType = AssignVariable,
-                                                        sign = "append",
-                                                        body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))
-                                                        ),
-                                                        serrializeToOneString = true),
-                                                    newLine,
-                                                    getBody("dataSet.updateP(") + ")"
-                                                )
-                                            ),
-                                            ScalaCaseLine(
-                                                expression = "_".expr,
-                                                caseBody = ScalaBody(
-                                                    ScalaControlStruct(
-                                                        name = "transaction(dataSet.dataSource)",
-                                                        body = ScalaControlBody(
-                                                            expression = "connection".expr,
-                                                            ScalaControlStruct(
-                                                                name = "requestData.Transaction.Operations.flatMap",
-                                                                body = ScalaControlBodyWithSuffix(
-                                                                    expression = NoneScalaExpression,
-                                                                    suffix = ".toList",
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            ScalaVariable(name = s"${boName.unCapitalize}Data", body = ScalaBody(boData(false)), serrializeToOneString = false),
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
-                                                                                serrializeToOneString = true),
-                                                                            getBody("dataSet.updatePWithoutCommit(connection = connection,") + ")"
-                                                                        )
-                                                                    ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
-                                                                    )
-                                                                )
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-
-                                        ScalaVariable(
-                                            name = "update",
-                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
-                                            body = ScalaBody(updateBody), serrializeToOneString = true
-                                        )
+                                        ScalaVariable(name = "update", body = (body + ")").body, serrializeToOneString = true)
                                     }
 
-                                    getDataBody ++= (
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayDyn.empty[DSResponseDyn]".body),
+                                    GetDataBody ++=(
+                                      ScalaVariable(name = "data", body = "requestData.OldValues ++ requestData.Data".body, serrializeToOneString = true),
+                                      "logger debug s\"data: ${newLine + data.toPrettyString}\"",
+                                      newLine,
+                                      ScalaVariable(name = s"${boName.unCapitalize}Data", body = ScalaBody(boData(false)), serrializeToOneString = false),
                                       newLine,
                                       getUpdateSatement,
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
-                                          name = "array",
+                                          name = "classDyn",
                                           `type` = ScalaImplicitType,
                                           defaultValue = ScalaCase(expression = "update result".expr,
                                               ScalaCaseLine(expression = "Success(res)".expr,
                                                   caseBody = ScalaBody(
                                                       "res foreach (x => logger debug (s\"Updated: ${x} line(s).\"))",
-                                                      "listResponse".body
+                                                      newLine,
+                                                      ScalaVariable(name = "resp",
+                                                          body = ScalaBody(
+                                                              {
+                                                                  val res = new ScalaClassDeclare {
+                                                                      scalaClassGen = "DSResponseDyn".cls
+                                                                      typeScalaClass = AnonimousScalaClass
+                                                                  }
+                                                                  res addMember ("Status = RPCResponseDyn.statusSuccess")
+
+                                                                  res addMember (ScalaVariable(name = "Data", body = ScalaBody(recordDyn(s"${boName.unCapitalize}Data")), serrializeToOneString = true, variableType = AssignVariable))
+
+                                                                  res
+                                                              }
+                                                          ),
+                                                          serrializeToOneString = false
+                                                      ),
+                                                      "resp"
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(update))")
+                                                  caseBody = ScalaBody("new DSResponseFailureExDyn(update)")
                                               )
                                           )
                                       ))),
@@ -662,120 +490,59 @@ class GenBOContainer(val appFilePath: Path,
                                     }
 
                                     def getDeleteSatement: ScalaVariable = {
-                                        def getBody(statement: String): String = {
-                                            val body = new StringBuilder
-                                            val clazz = schema.resolveClass(
-                                                LinkRefToClassOld(
-                                                    groupName = groupName,
-                                                    objectName = fullClassName
-                                                ))
+                                        var step = 0
+                                        var body = ""
 
-                                            clazz.pk.attrNames.zipWithIndex.foreach {
-                                                case (attr, index) =>
-                                                    if (index == 0)
-                                                        body append s"$statement.${attr}${fullClassName.capitalize} === ${attr})"
-                                                    else
-                                                        body append space + s"And (dataSet.${attr}${fullClassName.capitalize} === ${attr})"
-                                            }
-                                            body.toString()
+                                        val clazz = schema.resolveClass(LinkRefToClassOld(groupName = groupName, objectName = fullClassName))
+
+                                        clazz.pk.attrNames.foreach {
+                                            attr =>
+                                                if (step == 0)
+                                                    body = s"dataSet.delete(where = Where(dataSet.${attr}${fullClassName.capitalize} === ${attr})"
+                                                else
+                                                    body += space + s"And (dataSet.${attr}${boName.capitalize} === ${attr})"
+                                                step += 1
                                         }
 
-                                        val deleteBody = ScalaCase(
-                                            expression = "requestData.Transaction.TransactionNum".expr,
-                                            ScalaCaseLine(
-                                                expression = "null".expr,
-                                                caseBody = ScalaBody(
-                                                    ScalaVariable(
-                                                        name = "data",
-                                                        body = "requestData.Data".body,
-                                                        serrializeToOneString = true
-                                                    ),
-                                                    newLine,
-                                                    "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                    getPrimarykeyVariables,
-                                                    ScalaVariable(
-                                                        name = "listResponse",
-                                                        variableType = AssignVariable,
-                                                        sign = "append",
-                                                        body = getDSResponse(ScalaBody("JsonObject()")),
-                                                        serrializeToOneString = true),
-                                                    getBody("dataSet.delete(where = Where(dataSet") + ")"
-                                                )
-                                            ),
-                                            ScalaCaseLine(
-                                                expression = "_".expr,
-                                                caseBody = ScalaBody(
-                                                    ScalaControlStruct(
-                                                        name = "transaction(dataSet.dataSource)",
-                                                        body = ScalaControlBody(
-                                                            expression = "connection".expr,
-                                                            ScalaControlStruct(
-                                                                name = "requestData.Transaction.Operations.flatMap",
-                                                                body = ScalaControlBodyWithSuffix(
-                                                                    expression = NoneScalaExpression,
-                                                                    suffix = ".toList",
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            getPrimarykeyVariables,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody("JsonObject()")),
-                                                                                serrializeToOneString = true),
-                                                                            getBody("dataSet.deleteWithoutCommit(connection = connection, where = Where(dataSet") + ")"
-                                                                        )
-                                                                    ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
-                                                                    )
-                                                                )
-                                                            )
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-
-                                        ScalaVariable(
-                                            name = "delete",
-                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
-                                            body = ScalaBody(deleteBody),
-                                            serrializeToOneString = true
-                                        )
+                                        ScalaVariable(name = "delete", body = (body + ")").body, serrializeToOneString = true)
                                     }
 
-                                    getDataBody ++= (
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayDyn.empty[DSResponseDyn]".body),
+                                    GetDataBody ++=(
+                                      ScalaVariable(name = "data", body = "requestData.Data".body, serrializeToOneString = true),
+                                      "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
+                                      newLine,
+                                      getPrimarykeyVariables,
                                       getDeleteSatement,
                                       newLine,
-                                      ScalaApplyObject(
-                                          name = "Out",
-                                          parametrs = ScalaClassParametrs(ScalaClassParametr(
-                                              name = "array",
-                                              `type` = ScalaImplicitType,
-                                              defaultValue = ScalaCase(
-                                                  expression = "delete result".expr,
-                                                  ScalaCaseLine(expression = "Success(res)".expr,
-                                                      caseBody = ScalaBody(
-                                                          "res foreach (x => logger debug (s\"Deleted: ${x} line(s).\"))",
-                                                          "listResponse".body
-                                                      )
-                                                  ),
-                                                  ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(delete))")
+                                      ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
+                                          name = "classDyn",
+                                          `type` = ScalaImplicitType,
+                                          defaultValue = ScalaCase(expression = "delete result".expr,
+                                              ScalaCaseLine(expression = "Success(res)".expr,
+                                                  caseBody = ScalaBody(
+                                                      "res foreach (x => logger debug (s\"Deleted: ${x} line(s).\"))",
+                                                      newLine,
+                                                      ScalaVariable(name = "resp",
+                                                          body = ScalaBody(
+                                                              {
+                                                                  val res = new ScalaClassDeclare {
+                                                                      scalaClassGen = "DSResponseDyn".cls
+                                                                      typeScalaClass = AnonimousScalaClass
+                                                                  }
+                                                                  res addMember ("Status = RPCResponseDyn.statusSuccess")
+                                                                  res
+                                                              }
+                                                          ),
+                                                          serrializeToOneString = false
+                                                      ),
+                                                      "resp"
                                                   )
+                                              ),
+                                              ScalaCaseLine(expression = "Failure(_)".expr,
+                                                  caseBody = ScalaBody("new DSResponseFailureExDyn(delete)")
                                               )
-                                          ))),
+                                          )
+                                      ))),
                                       newLine,
                                       "selfStop()"
                                       )
@@ -784,7 +551,7 @@ class GenBOContainer(val appFilePath: Path,
                             val recieveBody = ScalaCase(
                                 ScalaCaseLine(
                                     expression = "GetData".expr,
-                                    caseBody = getDataBody),
+                                    caseBody = GetDataBody),
                                 ScalaCaseLine(
                                     expression = "x".expr,
                                     caseBody = "throw new RuntimeException(s\"Bad branch $x\")".body)
@@ -815,14 +582,11 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.isc.system.{ClassDyn, ServletActorDyn}".imp,
                             "com.simplesys.jdbc._".imp,
                             "com.simplesys.common._".imp,
-                            "com.simplesys.jdbc.control.{DSRequest, ValidationEx}".imp,
+                            "com.simplesys.jdbc.control.DSRequest".imp,
                             "com.simplesys.jdbc.control.classBO.Where".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
                             "com.simplesys.servlet.{GetData, ServletContext}".imp,
-                            "com.simplesys.jdbc.control.SessionStructures._".imp,
                             "com.simplesys.tuple._".imp,
-                            "com.simplesys.isc.system.ArrayDyn".imp,
-                            "com.simplesys.json.JsonObject".imp,
                             "scalaz.{Failure, Success}".imp
                         )
 
