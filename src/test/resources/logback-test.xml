@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration debug="true">
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <withJansi>true</withJansi>
+    <encoder>
+      <!--<pattern>%d{HH:mm:ss.SSS} [%t] %-5p %logger{255} - %msg%n</pattern>-->
+      <pattern>%logger{255}: %msg%n</pattern>
+      <!--<pattern>[%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>-->
+    </encoder>
+  </appender>
+
+  <logger name="ru.simplesys.sourcegen.app.Tests" level="debug"/>
+  <logger name="com.simplesys.saxon.XsltTransformer" level="trace"/>
+  <logger name="com.simplesys.saxon.XsltTransformer" level="trace"/>
+
+  <root level="trace">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>
