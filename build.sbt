@@ -2,11 +2,11 @@ sbtPlugin := true
 
 name := "dev-plugin"
 
-enablePlugins(GitVersioning)
+//enablePlugins(GitVersioning)
 
 organization := "ru.simplesys"
 
-//version := "1.0.10-SNAPSHOT"
+version := "1.0.35"
 
 scalaVersion := "2.10.6"
 
