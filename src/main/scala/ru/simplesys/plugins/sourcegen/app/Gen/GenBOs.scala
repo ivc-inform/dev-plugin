@@ -581,7 +581,7 @@ class GenBOs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(
@@ -608,7 +608,7 @@ class GenBOs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -634,7 +634,7 @@ class GenBOs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(s"${productName}(${allColumnsP})"),
@@ -647,7 +647,7 @@ class GenBOs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 

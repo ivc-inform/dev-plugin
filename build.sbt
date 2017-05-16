@@ -2,11 +2,9 @@ sbtPlugin := true
 
 name := "dev-plugin"
 
-enablePlugins(GitVersioning)
-
 organization := "ru.simplesys"
 
-//version := "1.0.4"
+version := "1.0.9"
 
 scalaVersion := "2.10.6"
 
@@ -35,7 +33,7 @@ publishMavenStyle := true
 libraryDependencies ++= {
 	val ssysCoreVersion = "1.2.55"
 	//val ssysCoreVersion = "1.2-SNAPSHOT"
-	val scalazVersion = "7.2.4"
+	val scalazVersion = "7.1.3"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
         "com.simplesys.core" %% "core-utils" % ssysCoreVersion,
@@ -66,6 +64,4 @@ logLevel := Level.Info
 //logedBos := Seq("JurContractor")
 
 //logedBos := Seq()
-
-git.baseVersion := "1.0.4"
 
