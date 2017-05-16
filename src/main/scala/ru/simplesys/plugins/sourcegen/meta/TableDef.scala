@@ -19,18 +19,6 @@ trait TableDef {
   def tableDBName(implicit resolver: SchemaDef): String = autoTableDBName
   val selfRef: LinkRefToTable = LinkRefToTable(group, tableName)
   def columns: Seq[ColumnDef[_]]
-  def columnsWithOutLob: Seq[ColumnDef[_]] = columns.filter(
-    dt =>
-      dt.dataType != DomainClob &&
-      dt.dataType != DomainJson &&
-        dt.dataType != DomainBlob
-  )
-  def columnsWithLob: Seq[ColumnDef[_]] = columns.filter(
-    dt =>
-      dt.dataType == DomainClob ||
-      dt.dataType == DomainJson ||
-        dt.dataType == DomainBlob
-  )
   lazy val columnsMap: Map[String, ColumnDef[_]] = columns.map(x => (x.scalaName, x)).toMap
 
   def ucs: Seq[UniqueTableConstraintDef]

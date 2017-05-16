@@ -7,8 +7,8 @@ import scala.collection.mutable.ArrayBuffer
 
 
 object SeqScalaClassJSON {
-    def apply(classes: ScalaClassJSON*) = new SeqScalaClassJSON("", classes: _ *)
-    def apply(opt: String, classes: ScalaClassJSON*) = new SeqScalaClassJSON(opt, classes: _ *)
+    def apply(classes: ScalaClassJSON*) = new SeqScalaClassJSON("",classes: _ *)
+    def apply(opt:String, classes: ScalaClassJSON*) = new SeqScalaClassJSON(opt,classes: _ *)
     def apply() = new SeqScalaClassJSON("")
 }
 

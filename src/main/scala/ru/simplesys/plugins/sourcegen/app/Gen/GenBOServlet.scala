@@ -633,7 +633,7 @@ class GenBOServlet(val appFilePath: Path,
                         val module = ScalaModule(
                             packageName.pkg,
                             newLine,
-                            "com.simplesys.jdbc.control.clob._".imp,
+                            "com.simplesys.jdbc.control.clob.Clob".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
                             "com.simplesys.isc.dataBinging.{DSResponseFailureExDyn, DSResponseFailureDyn, DSRequestDyn, DSResponseDyn}".imp,
                             "com.simplesys.isc.dataBinging.RPC.RPCResponseDyn".imp,

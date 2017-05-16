@@ -43,7 +43,7 @@ object DevPlugin extends AutoPlugin {
     //val isGenerateJSCode = settingKey[Boolean]("Should we generate Scala->JS files")
 
     val liquibaseUrl = settingKey[String]("The url for liquibase")
-    val liquibaseUsername = settingKey[String]("Username.")
+    val liquibaseUsername = settingKey[String]("Username yo.")
     val liquibasePassword = settingKey[String]("Password")
     val liquibaseDriver = settingKey[String]("DB Driver")
     val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
@@ -169,7 +169,7 @@ object DevPlugin extends AutoPlugin {
         liquibaseUpgradeChangelog <<= (outputUpgradeChangelogDir) {
             _ / "db.changelog-upgrade.xml"
         },
-        liquibaseChangelog := liquibaseUpgradeChangelog.value,
+        liquibaseChangelog <<= (liquibaseUpgradeChangelog),
         liquibaseContext := "",
         liquibaseDefaultSchemaName := None,
         //---------------------------------------------------------------------------------
@@ -206,18 +206,17 @@ object DevPlugin extends AutoPlugin {
                 }
         },*/
         generateScalaCode := {
-            val tmp = tmpResourcesDir.value
-            val baseDir = baseDirectory.value
-            val out = streams.value
-            val srcBoDir = sourceBoDir.value
-            val pkgBOName = startPackageBOName.value
-            val srcAppDir = sourceAppDir.value
-            val pkgAppName = startPackageAppName.value
-            val cntxtPath = contextPath.value
-            val sourceBOFiles = sourceSchemaBOFiles.value
-            val outScalaAppDir = outputScalaCodeAppDir.value
-            val srcMain = sourceMainDir.value
-            val arr = maxArity.value
+            val tmp: File = tmpResourcesDir.value
+            val out: std.TaskStreams[Def.ScopedKey[_]] = streams.value
+            val srcBoDir: File = sourceBoDir.value
+            val pkgBOName: String = startPackageBOName.value
+            val srcAppDir: File = sourceAppDir.value
+            val pkgAppName: String = startPackageAppName.value
+            val cntxtPath: String = contextPath.value
+            val sourceBOFiles: Seq[File] = sourceSchemaBOFiles.value
+            val outScalaAppDir: File = outputScalaCodeAppDir.value
+            val srcMain: File = sourceMainDir.value
+            val arr: Int = maxArity.value
 
             import meta.SchemaDef
             import scalax.file.ImplicitConversions._
@@ -234,7 +233,6 @@ object DevPlugin extends AutoPlugin {
                 Thread.currentThread setContextClassLoader cl2Set
 //                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
                   AppDef.generateScalaCode(
-                      baseDirectory = baseDir,
                       tmp = tmp,
                       sourceBoDir = srcBoDir,
                       sourceAppDir = srcAppDir,
@@ -251,7 +249,6 @@ object DevPlugin extends AutoPlugin {
             }
 
         },
-
         generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted) map {
             (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls) => {
 
@@ -308,7 +305,6 @@ object DevPlugin extends AutoPlugin {
                 poso ++ res764 ++ res819 ++ res844 ++ res938
             }
         },
-
         N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName) map {
             (tmp, out, sourceBoDir, sourceAppDir, pkgBoName) => {
 
@@ -378,7 +374,6 @@ object DevPlugin extends AutoPlugin {
                 createChLogs
             }
         },
-
         generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted) map {
             (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls) => {
 
@@ -390,13 +385,11 @@ object DevPlugin extends AutoPlugin {
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
             }
         },
-
         generateJavaScript <<= (streams, sourceSchemaBOFiles, sourceAppFiles, outputJavaScriptDir) map {
             (out, sourceBOFiles, sourceDSFiles, outJSDir) => {
                 Seq()
             }
         },
-
         generateAllButUpgrade <<= (streams, sourceSchemaBOFiles, outputScalaCodeBODir, startPackageBOName, sourceAppFiles, outputScalaCodeAppDir, startPackageAppName, liquibaseCreateChangelog, outputJavaScriptDir, quoted) map {
             (out, sourceBOFiles, outScalaBODir, pkgBOName, sourceDSFiles, outScalaDSDir, pkgDSName, /*outCreateChLogDir, */ createChLogFile, outJSDir, useQuotes4Tbls) => {
 
@@ -410,7 +403,6 @@ object DevPlugin extends AutoPlugin {
                 scalaBOFiles
             }
         },
-
         generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ ) map {
             (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/) => {
 

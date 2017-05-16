@@ -1,21 +1,19 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
+import scalax.file.{PathSet, Path}
+import com.simplesys.io._
 import java.io.File
-import java.net.URI
-
+import sbt.Logger
+import ru.simplesys.plugins.sourcegen.meta._
 import com.simplesys.common.Strings._
+import scala.util.Sorting
+import com.simplesys.genSources._
 import com.simplesys.common._
 import com.simplesys.common.equality.SimpleEquality._
-import com.simplesys.genSources._
-import com.simplesys.io._
 import com.simplesys.scalaGen._
-import ru.simplesys.plugins.sourcegen.app._
-import ru.simplesys.plugins.sourcegen.meta._
-import sbt.Logger
-
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import ru.simplesys.plugins.sourcegen.app._
+import java.net.URI
 
 class GenBOs(val appFilePath: Path,
              val outFilePath: Path,
@@ -32,29 +30,9 @@ class GenBOs(val appFilePath: Path,
 
     def create: File = ????
 
-    private def genBOs(clazz: IClass): Seq[File] = {
-        val res = ArrayBuffer.empty[File]
-
-        val attrs: Array[AttrDef[_]] = clazz.attrsWithOutLob.toArray
-        Sorting.quickSort(attrs)(AttrDefOrd)
+    private def genBO(clazz: IClass): File = {
 
         val className = clazz.className.bo
-        res += genBO(attrs, className, "", false, clazz)
-
-
-        clazz.attrsWithLob.toArray.foreach {
-            attr =>
-                val attrPk = clazz.strictUCs.filter(_.ucType == PK).flatMap(_.attrNames).map(clazz.attr).toArray
-                val _attrs = attrPk ++ Array(attr)
-                Sorting.quickSort(_attrs)(AttrDefOrd)
-                res += genBO(_attrs, s"${className}${attr.name.capitalize}", attr.name, true, clazz)
-        }
-
-        res
-    }
-
-    private def genBO(attrs: Array[AttrDef[_]], className: String, attrName: String, forLob: Boolean, clazz: IClass): File = {
-
         val addImports = ArrayBuffer.empty[ScalaObjectElement]
 
         implicit val discriminatorSeq = clazz.discriminatorColumnWVals
@@ -75,7 +53,7 @@ class GenBOs(val appFilePath: Path,
             })
         }
 
-        val productName = s"${clazz.className.capitalize}${attrName.capitalize}"
+        val productName = clazz.className.capitalize
         val boProductObjectParametrs = ScalaClassParametrs()
 
         val boObject = new ScalaClassDeclare {
@@ -128,8 +106,10 @@ class GenBOs(val appFilePath: Path,
           ScalaVariable(name = "quoted", serrializeToOneString = true, body = ScalaBody(quoted.toString))
           )
 
-        //val tables: Seq[ITable] = clazz.linkRefsToAllTables.map(_.toTable)
-        val tables: Seq[ITable] = if (!forLob) clazz.linkRefsToAllTables.map(_.toTable) else Seq(schema.tablesMap(LinkRefToTable(clazz.group, clazz.className)))
+        val attrs = clazz.attrs.toArray
+        Sorting.quickSort(attrs)(AttrDefOrd)
+
+        val tables = clazz.linkRefsToAllTables.map(_.toTable)
 
         var allColumns = strEmpty
         var allColumnsP = strEmpty
@@ -146,7 +126,7 @@ class GenBOs(val appFilePath: Path,
                 boClass addMember
                   ScalaVariable(name = s"${tableVal}", body = ScalaBody(
                       ScalaApplyObject(
-                          name = if (!forLob) s"""new ${tableVal}(alias = alias + "T${i}".als)""" else s"""new ${tableVal}${attrName.capitalize}(alias = alias + "T${i}".als)"""
+                          name = s"""new ${tableVal}(alias = alias + "T${i}".als)"""
                       )), serrializeToOneString = true)
                 if (tables.length === 1)
                     boClass addMember ScalaVariable(name = "fromTable", body = s"${tableVal}".body, serrializeToOneString = true, `override` = OverrideMofificator)
@@ -240,7 +220,7 @@ class GenBOs(val appFilePath: Path,
           ScalaVariable(name = "allColumns", serrializeToOneString = true, body = allColumns.body)
           )
 
-        boClass.getConstraints(clazz = clazz, forLob = forLob)
+        boClass getConstraints clazz
         boClass addMembers(ScalaEndComment("Columns for select"), newLine)
 
         boClass addMember ScalaComment("Columns for Insert/Update/Delete")
@@ -289,14 +269,7 @@ class GenBOs(val appFilePath: Path,
             table =>
                 val tableVal = table.tableName.tbl
 
-                val columns: Array[ColumnDef[_]] = if (!forLob) table.columnsWithOutLob.toArray
-                else {
-                    val columnPkColumnNames = table.pk.columnNames
-                    val columnPk: Array[ColumnDef[_]] = table.columns.filter(column => columnPkColumnNames.contains(column.scalaName)).toArray
-                    val attrColumn: ColumnDef[_] = table.columnsMap(attrName)
-                    columnPk ++ Array(attrColumn)
-                }
-
+                val columns = table.columns.toArray
                 Sorting.quickSort(columns)(ColumnDefOrd)
 
                 boClass addMember ScalaComment(s"Table: ${table.tableName}")
@@ -609,7 +582,7 @@ class GenBOs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(
@@ -636,7 +609,7 @@ class GenBOs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -662,7 +635,7 @@ class GenBOs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(s"${productName}(${allColumnsP})"),
@@ -675,7 +648,7 @@ class GenBOs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -905,11 +878,7 @@ class GenBOs(val appFilePath: Path,
         val classes = (schema.simpleClasses ++ schema.hierarchyClasses) toArray
 
         Sorting.quickSort(classes)(IClassOrd)
-
-        val res = ArrayBuffer.empty[File]
-
-        classes foreach (res ++= genBOs(_))
-
+        val res = classes map (genBO)
         logger info (s"Done #819.")
         res
     }

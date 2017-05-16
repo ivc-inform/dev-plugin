@@ -1,20 +1,18 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
-import java.io.File
-import java.net.URI
-
-import com.simplesys.common.Strings._
-import com.simplesys.common._
-import com.simplesys.genSources._
+import scalax.file.{PathSet, Path}
 import com.simplesys.io._
+import java.io.File
+import sbt.Logger
+import ru.simplesys.plugins.sourcegen.meta._
+import com.simplesys.common._
 import com.simplesys.scalaGen._
 import ru.simplesys.plugins.sourcegen.app._
-import ru.simplesys.plugins.sourcegen.meta._
-import sbt.Logger
-
-import scala.collection.mutable.ArrayBuffer
+import java.net.URI
+import com.simplesys.common.Strings._
+import com.simplesys.genSources._
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import scala.collection.mutable.{ArrayBuffer, Set}
 
 class GenDSs(val appFilePath: Path,
              val outFilePath: Path,
@@ -30,29 +28,10 @@ class GenDSs(val appFilePath: Path,
 
     def create: File = ????
 
-    private def genDSs(clazz: IClass): Seq[File] = {
-        val res = ArrayBuffer.empty[File]
-
-        val attrs: Array[AttrDef[_]] = clazz.attrsWithOutLob.toArray
-        Sorting.quickSort(attrs)(AttrDefOrd)
+    private def genDS(clazz: IClass): File = {
 
         val className = clazz.className.ds
-        res += genDS(attrs, "", false, clazz)
-
-
-        clazz.attrsWithLob.toArray.foreach {
-            attr =>
-                val attrPk = clazz.strictUCs.filter(_.ucType == PK).flatMap(_.attrNames).map(clazz.attr).toArray
-                res += genDS(attrPk ++ Array(attr), attr.name, true, clazz)
-        }
-
-        res
-    }
-
-    private def genDS(attrs: Array[AttrDef[_]], attrName: String, forLob: Boolean, clazz: IClass): File = {
-
-        val className = s"${clazz.className}${attrName.capitalize}".ds
-        val productName = s"${clazz.className}${attrName.capitalize}".ds + "Data"
+        val productName = clazz.className.ds + "Data"
 
         val addImports = ArrayBuffer.empty[ScalaObjectElement]
         val res: File = (outFilePath / clazz.group / (className + ".scala")).createFile(failIfExists = false).toFile
@@ -115,7 +94,7 @@ class GenDSs(val appFilePath: Path,
                                   )
                               ),
                               serrializeToOneString = true
-                          ), caseBody = ScalaBody(s"${productName}(${allColumnsP})")
+                          ), caseBody = ScalaBody(s"${clazz.className.ds + "Data"}(${allColumnsP})")
                         )
                     ))
                 )
@@ -172,7 +151,7 @@ class GenDSs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(
@@ -186,7 +165,7 @@ class GenDSs(val appFilePath: Path,
                                                                       )
                                                                   ),
                                                                   serrializeToOneString = true
-                                                              ), caseBody = ScalaBody(s"${productName}(${allColumnsP})")
+                                                              ), caseBody = ScalaBody(s"${clazz.className.ds + "Data"}(${allColumnsP})")
                                                             )
                                                         )
                                                     )
@@ -199,7 +178,7 @@ class GenDSs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             )
         )
@@ -240,7 +219,7 @@ class GenDSs(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "Success",
+                                    defaultValue = ScalaApplyObject(name = "success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = strEmpty, `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(s"${productName}(${allColumnsP})"),
@@ -253,7 +232,7 @@ class GenDSs(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -282,7 +261,7 @@ class GenDSs(val appFilePath: Path,
           newLine,
           ScalaComment(s"Class: ${clazz.className.bo}, group: ${clazz.group}"),
           newLine,
-          ScalaVariable(name = clazz.className.capitalize, serrializeToOneString = true, body = ScalaBody( s"""new ${clazz.className.bo}${attrName.capitalize}(alias = alias + "B${j}".als)""")),
+          ScalaVariable(name = clazz.className.capitalize, serrializeToOneString = true, body = ScalaBody( s"""new ${clazz.className.bo}(alias = alias + "B${j}".als)""")),
           newLine,
           ScalaVariable(name = "fromBO", serrializeToOneString = true, body = ScalaBody(clazz.className.capitalize)),
           newLine,
@@ -425,7 +404,7 @@ class GenDSs(val appFilePath: Path,
         j += 1
         var columnTypes = ""
         var columnTypes1 = ""
-        var forTupleTemplate = strEmpty
+        var forTuple = strEmpty
 
         var i = 0
         var i1 = 0
@@ -447,8 +426,6 @@ class GenDSs(val appFilePath: Path,
                         if (_fkName.isEmpty) strEmpty else s"_${_fkName}"
                     }
 
-                    val fieldName4TupleTemplate = s"${attr.name}${_clazz.className.capitalize}"
-
                     val _attrType = attr.attrType.scalaTypeAsString(clazz.group, schema)
                     val attrType = s"${if (attr.isMandatory) _attrType else s"Array[${_attrType}]"}"
 
@@ -457,7 +434,7 @@ class GenDSs(val appFilePath: Path,
                             if (!allColumns.exists(_.trim === fieldName)) {
                                 allColumns += fieldName.space
                                 columnTypes += attrType + ",".space
-                                forTupleTemplate += fieldName4TupleTemplate + ":".space + attrType + ",".space
+                                forTuple += fieldName + ":".space + attrType + ",".space
                                 dsCaseClassParameters += ScalaClassParametr(name = fieldName, `type` = attrType.tp)
                                 i += 1
                             } else {
@@ -481,7 +458,7 @@ class GenDSs(val appFilePath: Path,
                     }
             }
         }
-        addAttrs(_fkName = strEmpty, _attrs = attrs, _clazz = clazz)
+        addAttrs(_fkName = strEmpty, _attrs = clazz.attrs, _clazz = clazz)
 
         dsClass addMembers (elements: _*)
 
@@ -490,73 +467,68 @@ class GenDSs(val appFilePath: Path,
         dsClass addMember ScalaEndComment(s"Class: ${clazz.className.bo}, group: ${clazz.group}")
 
         val fks = clazz.fks.toArray
+
+        dsClass addMembers (ScalaVariable(name = "boCount", body = s"${fks.length + 1}".body, serrializeToOneString = true, `override` = OverrideMofificator))
+
         Sorting.quickSort(fks)(ForeignKeyConstraintDefOrd)
+        fks foreach {
+            case fk: ForeignKeyConstraintDef =>
+                val fkClass: IClass = fk.referencedClassRef.toClass
+                if (fkClass.className != clazz.className || fkClass.group != clazz.group) {
+                    classes += (fkClass -> fk.softNameForCompare)
 
-        dsClass addMembers (ScalaVariable(name = "boCount", body = if (!forLob) s"${fks.length + 1}".body else "1".body, serrializeToOneString = true, `override` = OverrideMofificator))
-
-        if (!forLob) {
-            fks foreach {
-                case fk: ForeignKeyConstraintDef =>
-                    val fkClass: IClass = fk.referencedClassRef.toClass
-                    if (fkClass.className != clazz.className || fkClass.group != clazz.group) {
-                        classes += (fkClass -> fk.softNameForCompare)
-
-                        if (fkClass.group != clazz.group) {
-                            addImports += s"${packageName}.${fkClass.group}.${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}".imp
-                            addImports += s"${packageName}.${fkClass.group}.${fkClass.className}".imp
-                        }
-
-                        elements.clear()
-                        addAttrs(_fkName = fk.softNameForCompare, _attrs = fkClass.pk.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}")
-                        addAttrs(_fkName = fk.softNameForCompare, _attrs = fkClass.defaultSettings.showAttrsResult, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}")
-
-                        import com.simplesys.common.equality.SimpleEquality._
-
-                        fkClass.ucs.filter(_.ucType !== PK) foreach {
-                            _uc =>
-                                addAttrs(_fkName = fk.softNameForCompare, _attrs = _uc.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}", add2AllColumns = false)
-                        }
-
-                        fkClass.fks foreach {
-                            _fk =>
-                                addAttrs(_fkName = fk.softNameForCompare, _attrs = _fk.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}", add2AllColumns = false)
-                        }
-                        dsClass addMembers(
-                          newLine,
-                          ScalaComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
-                          )
-                        if (elements.length > 0) {
-                            dsClass addMember
-                              ScalaVariable(name = s"${fkClass.className.capitalize}_${fk.softNameForCompare}", serrializeToOneString = true, body = ScalaBody( s"""new ${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}(alias = alias +"B${j}".als)"""))
-
-                            j += 1
-
-                            dsClass addMembers (elements: _*)
-
-                            dsClass addMember
-                              (s"_join.${if (fk.isMandatory) "InnerJoin" else "LeftJoin"}(${fkClass.className.capitalize + "_" + fk.softNameForCompare})" + (fk.attrMappingAttrDefs map {
-                                  case (currCl, refCl) => s"(${currCl.name}${clazz.className.capitalize} === ${refCl.name}${fkClass.className.capitalize}_${fk.softNameForCompare}).JoinCondition"
-                              }).mkString("(", space + "And".space, ")"))
-                        }
-                        dsClass addMember ScalaEndComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
+                    if (fkClass.group != clazz.group) {
+                        addImports += s"${packageName}.${fkClass.group}.${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}".imp
+                        addImports += s"${packageName}.${fkClass.group}.${fkClass.className}".imp
                     }
-            }
+
+                    elements.clear()
+                    addAttrs(_fkName = fk.softNameForCompare, _attrs = fkClass.pk.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}")
+                    addAttrs(_fkName = fk.softNameForCompare, _attrs = fkClass.defaultSettings.showAttrsResult, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}")
+
+                    import com.simplesys.common.equality.SimpleEquality._
+
+                    fkClass.ucs.filter(_.ucType !== PK) foreach {
+                        _uc =>
+                            addAttrs(_fkName = fk.softNameForCompare, _attrs = _uc.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}", add2AllColumns = false)
+                    }
+
+                    fkClass.fks foreach {
+                        _fk =>
+                            addAttrs(_fkName = fk.softNameForCompare, _attrs = _fk.attrs, _clazz = fkClass, selffAttrs = false, aliasBo = s"B${j}", add2AllColumns = false)
+                    }
+                    dsClass addMembers(
+                      newLine,
+                      ScalaComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
+                      )
+                    if (elements.length > 0) {
+                        dsClass addMember
+                          ScalaVariable(name = s"${fkClass.className.capitalize}_${fk.softNameForCompare}", serrializeToOneString = true, body = ScalaBody( s"""new ${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}(alias = alias +"B${j}".als)"""))
+
+                        j += 1
+
+                        dsClass addMembers (elements: _*)
+
+                        dsClass addMember
+                          (s"_join.${if (fk.isMandatory) "InnerJoin" else "LeftJoin"}(${fkClass.className.capitalize + "_" + fk.softNameForCompare})" + (fk.attrMappingAttrDefs map {
+                              case (currCl, refCl) => s"(${currCl.name}${clazz.className.capitalize} === ${refCl.name}${fkClass.className.capitalize}_${fk.softNameForCompare}).JoinCondition"
+                          }).mkString("(", space + "And".space, ")"))
+                    }
+                    dsClass addMember ScalaEndComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
+                }
         }
 
-        //Sorting.quickSort(fks)(ForeignKeyConstraintDefOrd)
-
-
-        dsClass.getConstraints(classes, forLob)
+        dsClass getConstraints classes
 
         columnTypes = "TupleSS" + i + "[" + columnTypes.delLastChar + "]"
         columnTypes1 = "TupleSS" + i1 + "[" + columnTypes1.delLastChar + "]"
         tupleType = "TupleSS" + i
 
-        forTupleTemplate = if (i > 0) forTupleTemplate.delLastChar else forTupleTemplate.trim
+        forTuple = if (i > 0) forTuple.delLastChar else forTuple.trim
 
         dsClass addMembers(
           newLine,
-          ScalaShortComment(s"For select tuple: ($forTupleTemplate)"),
+          ScalaShortComment(s"For select tuple: (${forTuple})"),
           newLine,
           ScalaAliasType(name = "ColumnTypes", body = ScalaBody(columnTypes)),
           ScalaMethod(name = "allColumns", serrializeToOneString = true, body = ScalaBody(allColumns.mkString(space + "~".space))),
@@ -584,7 +556,7 @@ class GenDSs(val appFilePath: Path,
                   name = "insertP",
                   body = s"${clazz.className.capitalize}.insertP(values: _*)".body,
                   serrializeToOneString = true,
-                  parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}*".tp)),
+                  parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}*".tp)),
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
               newLine,
               ScalaMethod(
@@ -602,7 +574,7 @@ class GenDSs(val appFilePath: Path,
                   body = s"${clazz.className.capitalize}.insertPWithoutCommit(connection = connection, values: _*)".body,
                   parametrs = ScalaClassParametrs(
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                      ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}*".tp)
+                      ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}*".tp)
                   ),
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
               ScalaEndComment("insert"),
@@ -622,7 +594,7 @@ class GenDSs(val appFilePath: Path,
                   serrializeToOneString = true,
                   body = s"${clazz.className.capitalize}.updateP(value = values, where = where)".body,
                   parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}".tp),
+                      ScalaClassParametr(name = "values", `type` = clazz.className.capitalize.tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
@@ -643,7 +615,7 @@ class GenDSs(val appFilePath: Path,
                   body = s"${clazz.className.capitalize}.updatePWithoutCommit(connection = connection, value = values, where = where)".body,
                   parametrs = ScalaClassParametrs(
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                      ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}".tp),
+                      ScalaClassParametr(name = "values", `type` = clazz.className.capitalize.tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
@@ -722,10 +694,7 @@ class GenDSs(val appFilePath: Path,
         val classes = (schema.simpleClasses ++ schema.hierarchyClasses) toArray
 
         Sorting.quickSort(classes)(IClassOrd)
-
-        val res = ArrayBuffer.empty[File]
-
-        classes foreach (res ++= genDSs(_))
+        val res = classes map (genDS)
         logger info (s"Done #938.")
         res
     }

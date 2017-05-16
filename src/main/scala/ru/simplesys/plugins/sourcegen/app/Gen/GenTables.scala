@@ -9,7 +9,7 @@ import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
 import ru.simplesys.plugins.sourcegen.app._
-import ru.simplesys.plugins.sourcegen.meta.{ColumnDef, ITable, SchemaDef}
+import ru.simplesys.plugins.sourcegen.meta.{ITable, SchemaDef}
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
@@ -30,30 +30,12 @@ class GenTables(val appFilePath: Path,
 
     def create: File = ????
 
-    private def genTables(table: ITable): Seq[File] = {
-        val res = ArrayBuffer.empty[File]
+    private def genTable(table: ITable): File = {
 
-        val columns = table.columnsWithOutLob.toArray
-        Sorting.quickSort(columns)(ColumnDefOrd)
+        val classes = table.linksToClasses map (_.toClass)
 
         val className = table.tableName.tbl
         val className4P = table.tableName.capitalize
-
-        res += genTable(columns, className, className4P, table)
-
-        table.columnsWithLob.toArray.foreach {
-            column =>
-                val columnPkColumnNames = column.tableRef.toTable.pk.columnNames
-                val columnPk: Seq[ColumnDef[_]] = columns.filter(column => columnPkColumnNames.contains(column.scalaName))
-
-                res += genTable(columnPk ++ Seq(column), s"${className}${column.scalaName.capitalize}", s"${className4P}${column.scalaName.capitalize}", table)
-        }
-        res
-    }
-
-    private def genTable(columns: Seq[ColumnDef[_]], className: String, className4P: String, table: ITable): File = {
-
-        val classes = table.linksToClasses map (_.toClass)
 
         val res: File = (outFilePath / table.group / (className + ".scala")).createFile(failIfExists = false).toFile
 
@@ -65,11 +47,10 @@ class GenTables(val appFilePath: Path,
             parametrsImplicit = ScalaClassParametrs(
                 ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
             )
-            extensibleClass = ScalaClassGenericExtensible(
-                new ScalaBaseClassDeclare {
-                    scalaClassGen = "Table".cls
-                    generics = ScalaGeneric(className)
-                })
+            extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
+                scalaClassGen = "Table".cls
+                generics = ScalaGeneric(className)
+            })
         }
 
         val tableObject = new ScalaClassDeclare {
@@ -79,13 +60,7 @@ class GenTables(val appFilePath: Path,
 
         tableObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(
-                      name = "dataSource",
-                      `type` = ScalaBoneCPDataSource,
-                      parametrType = ParametrImplicit)
-              ), serrializeToOneString = true,
-              body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(
@@ -109,6 +84,9 @@ class GenTables(val appFilePath: Path,
           ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.SQLDialect".body),
           newLine
           )
+
+        val columns = table.columns.toArray
+        Sorting.quickSort(columns)(ColumnDefOrd)
 
         var allColumns = ""
         var forTuple = ""
@@ -285,10 +263,7 @@ class GenTables(val appFilePath: Path,
         val tables = schema.tables.toArray
 
         Sorting.quickSort(tables)(ITableOrd)
-        val res = ArrayBuffer.empty[File]
-
-        tables foreach (res ++= genTables(_))
-
+        val res = tables map (genTable)
         logger info (s"Done #764.")
         res
     }
