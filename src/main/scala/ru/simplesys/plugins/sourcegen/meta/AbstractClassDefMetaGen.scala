@@ -32,14 +32,19 @@ trait AbstractClassDefMetaGen {
     def genUCRefs(implicit resolver: SchemaDef): Seq[String] = {
         val ucRef = strictUCs.map { x =>
             val ucAttrs = x.attrs.map { x =>
-                s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
+                s"""val ${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
             val ucAttrsParams = x.attrs.map { x =>
                 s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
-            s"""|case class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]""".newLine.stripMargin
+            s"""|class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]
+                |
+            |object ${x.classRefName} {
+                |  def apply(${ucAttrsParams}): ${x.classRefName} = new ${x.classRefName}(${x.attrNames.mkString(", ")})
+                |}
+                |""".stripMargin
         }
 
         ucRef
@@ -147,7 +152,7 @@ trait AbstractClassDefMetaGen {
                   attr.attrType != DomainBlob
         )
 
-        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
+        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  val ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
 
         val calculatedAttrDefs = attrs.withFilter(_.isCalculated).map(x => s"  def ${x.name}: ${x.scalaTypeAsString(group, resolver)} = ${x.formula.get}")
 
@@ -169,7 +174,7 @@ trait AbstractClassDefMetaGen {
 
 
         val classDef =
-            s"""|case class ${className.capitalize} (
+            s"""|class ${className.capitalize} (
                 |${attrDefs.mkString(",".newLine)}) extends Product {
                 |${calculatedAttrDefs.mkString(newLine)}
                 |${ucAttrs.mkString(newLine)}
@@ -190,11 +195,13 @@ trait AbstractClassDefMetaGen {
 
         val (paramList, paramImpl) = genParamListAndImplWithOutLob
 
+
         val objDef =
             s"""|object ${className.capitalize} {
-            |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
-            |}
-            |""".stripMargin
+                |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}(${param4ObjDefs.mkString(",".space)})
+                |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
+                |}
+                |""".stripMargin
         out append newLine
         out append objDef
         out append fill("end from AbstractClassDefMetaGen (genClassDefsWithOutLob)").newLine
@@ -230,7 +237,7 @@ trait AbstractClassDefMetaGen {
 
 
                     val classDef =
-                        s"""|case class ${className.capitalize}${attr.name.capitalize} (
+                        s"""|class ${className.capitalize}${attr.name.capitalize} (
                             |${attrDefs.mkString(",".newLine)}) extends Product {
                             |
                             |${productCanEquals}
@@ -251,6 +258,7 @@ trait AbstractClassDefMetaGen {
 
                     val objDef =
                         s"""|object ${className.capitalize}${attr.name.capitalize} {
+                            |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}${attr.name.capitalize}(${param4ObjDefs.mkString(",".space)})
                             |   def apply(${paramList}) = new ${className.capitalize}${attr.name.capitalize}(${paramImpl})
                             |}
                             |""".stripMargin
@@ -267,13 +275,13 @@ trait AbstractClassDefMetaGen {
         val metaDef =
             s"""|object ${classMetaName} {
                 |
-                |  def insert() = {}
+                      |  def insert() = {}
                 |  def insertAll() = {}
                 |  def delete() = {}
                 |  def deleteAll() = {}
                 |  def selectByID() = {}
                 |
-                |}""".stripMargin
+                      |}""".stripMargin
 
         out append metaDef
 

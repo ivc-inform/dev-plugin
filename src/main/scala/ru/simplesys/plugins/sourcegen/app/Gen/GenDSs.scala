@@ -14,7 +14,7 @@ import sbt.Logger
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import com.simplesys.file.{Path, PathSet}
+import scalax.file.{Path, PathSet}
 
 class GenDSs(val appFilePath: Path,
              val outFilePath: Path,
@@ -560,7 +560,6 @@ class GenDSs(val appFilePath: Path,
           newLine,
           ScalaAliasType(name = "ColumnTypes", body = ScalaBody(columnTypes)),
           ScalaMethod(name = "allColumns", serrializeToOneString = true, body = ScalaBody(allColumns.mkString(space + "~".space))),
-          ScalaMethod(name = "allColumns1", serrializeToOneString = true, body = ScalaBody(s"Seq(${allColumns.mkString(space + ",".space)})")),
           newLine,
           ScalaComment("Fetch Product"),
           selectPMethod(name = "selectPList", ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics(productName)))), sb = selectPBody(name = "selectListRoot", suffix = strEmpty)),

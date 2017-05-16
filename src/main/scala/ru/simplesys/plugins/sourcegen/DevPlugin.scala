@@ -3,10 +3,11 @@ package sourcegen
 
 //import sbt.{`package` => _, _}
 
-import com.simplesys.file.{Path, PathSet}
-import sbt.{`package` ⇒ _, _}
+import sbt.{`package` => _, _}
+
 import sbt.Keys._
 import sbt.classpath.ClasspathUtilities
+
 import liquibase.Liquibase
 import liquibase.database.Database
 import liquibase.integration.commandline.CommandLineUtils
@@ -219,7 +220,7 @@ object DevPlugin extends AutoPlugin {
             val arr = maxArity.value
 
             import meta.SchemaDef
-            import com.simplesys.file.ImplicitConversions._
+            import scalax.file.ImplicitConversions._
 
             implicit val logger = out.log
             implicit val schema = SchemaDef(pkgBOName, sourceBOFiles)
@@ -256,7 +257,8 @@ object DevPlugin extends AutoPlugin {
 
                 import meta.SchemaDef
                 import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
-                import com.simplesys.file.ImplicitConversions._
+                import scalax.file.ImplicitConversions._
+                import scalax.file.Path
 
                 implicit val logger = out.log
                 implicit val schema = SchemaDef(pkgBoName, sourceBOFiles)
@@ -310,9 +312,10 @@ object DevPlugin extends AutoPlugin {
         N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName) map {
             (tmp, out, sourceBoDir, sourceAppDir, pkgBoName) => {
 
-                import com.simplesys.file.ImplicitConversions._
+                import scalax.file.ImplicitConversions._
                 import com.simplesys.saxon._
                 import com.simplesys.saxon.XsltTransformer._
+                import scalax.file.{Path, PathSet}
                 import com.simplesys.io._
 
                 val logger = out.log

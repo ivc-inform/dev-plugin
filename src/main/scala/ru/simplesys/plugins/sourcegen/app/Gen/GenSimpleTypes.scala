@@ -1,16 +1,15 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
-import sbt.{File, Logger}
+import sbt.{Logger, File}
 import com.simplesys.common.Strings.newLine
+import scalax.file.Path
 import com.simplesys.io._
 import com.simplesys.genSources._
 import com.simplesys.scalaGen._
 import java.net.URI
-
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import com.simplesys.xhtml.XHTML._
 import com.simplesys.common.Strings._
-import com.simplesys.file.Path
 
 class GenSimpleTypes(val appFilePath: Path,
                      val schemaPath: URI,
