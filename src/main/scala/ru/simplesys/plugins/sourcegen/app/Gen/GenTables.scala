@@ -1,20 +1,19 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
-import java.net.URI
-
+import scalax.file.{PathSet, Path}
+import sbt.{File, Logger}
+import ru.simplesys.plugins.sourcegen.meta.{ITable, SchemaDef}
+import com.simplesys.io._
 import com.simplesys.common.Strings._
+import scala.util.Sorting
+import com.simplesys.scalaGen._
+import com.simplesys.genSources._
 import com.simplesys.common._
 import com.simplesys.common.equality.SimpleEquality._
-import com.simplesys.genSources._
-import com.simplesys.io._
-import com.simplesys.scalaGen._
-import ru.simplesys.plugins.sourcegen.app._
-import ru.simplesys.plugins.sourcegen.meta.{ColumnDef, ITable, SchemaDef}
-import sbt.{File, Logger}
-
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import java.net.URI
+import ru.simplesys.plugins.sourcegen.app._
+import ru.simplesys.plugins.sourcegen.app.Gen._
 
 class GenTables(val appFilePath: Path,
                 val outFilePath: Path,
@@ -30,30 +29,12 @@ class GenTables(val appFilePath: Path,
 
     def create: File = ????
 
-    private def genTables(table: ITable): Seq[File] = {
-        val res = ArrayBuffer.empty[File]
+    private def genTable(table: ITable): File = {
 
-        val columns = table.columnsWithOutLob.toArray
-        Sorting.quickSort(columns)(ColumnDefOrd)
+        val classes = table.linksToClasses map (_.toClass)
 
         val className = table.tableName.tbl
         val className4P = table.tableName.capitalize
-
-        res += genTable(columns, className, className4P, table)
-
-        table.columnsWithLob.toArray.foreach {
-            column =>
-                val columnPkColumnNames = column.tableRef.toTable.pk.columnNames
-                val columnPk: Seq[ColumnDef[_]] = columns.filter(column => columnPkColumnNames.contains(column.scalaName))
-
-                res += genTable(columnPk ++ Seq(column), s"${className}${column.scalaName.capitalize}", s"${className4P}${column.scalaName.capitalize}", table)
-        }
-        res
-    }
-
-    private def genTable(columns: Seq[ColumnDef[_]], className: String, className4P: String, table: ITable): File = {
-
-        val classes = table.linksToClasses map (_.toClass)
 
         val res: File = (outFilePath / table.group / (className + ".scala")).createFile(failIfExists = false).toFile
 
@@ -65,11 +46,10 @@ class GenTables(val appFilePath: Path,
             parametrsImplicit = ScalaClassParametrs(
                 ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
             )
-            extensibleClass = ScalaClassGenericExtensible(
-                new ScalaBaseClassDeclare {
-                    scalaClassGen = "Table".cls
-                    generics = ScalaGeneric(className)
-                })
+            extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
+                scalaClassGen = "Table".cls
+                generics = ScalaGeneric(className)
+            })
         }
 
         val tableObject = new ScalaClassDeclare {
@@ -79,13 +59,7 @@ class GenTables(val appFilePath: Path,
 
         tableObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(
-                      name = "dataSource",
-                      `type` = ScalaBoneCPDataSource,
-                      parametrType = ParametrImplicit)
-              ), serrializeToOneString = true,
-              body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(
@@ -109,6 +83,9 @@ class GenTables(val appFilePath: Path,
           ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.SQLDialect".body),
           newLine
           )
+
+        val columns = table.columns.toArray
+        Sorting.quickSort(columns)(ColumnDefOrd)
 
         var allColumns = ""
         var forTuple = ""
@@ -200,45 +177,40 @@ class GenTables(val appFilePath: Path,
               ))),
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int"))))
+                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+          newLine,
+          ScalaComment("P Methods"),
+          newLine,
+          ScalaMethod(
+              name = "insertP",
+              body = ScalaBody(ScalaApplyObject(name = "insertRoot", parametrs = ScalaClassParametrs(
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "allColumns"),
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
+              ))),
+              parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)),
+              serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+          newLine,
+          ScalaMethod(name = "batch4PInsert",
+              body = ScalaBody(ScalaApplyObject(name = "batch4Insert", parametrs = ScalaClassParametrs(
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "preparedStatement"),
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
+              ))),
+              parametrs = ScalaClassParametrs(
+                  ScalaClassParametr(name = "preparedStatement", `type` = "PreparedStatement".tp),
+                  ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaUnit),
+          newLine,
+          ScalaMethod(name = "insertPWithoutCommit",
+              body = ScalaBody(ScalaApplyObject(name = "insertWithoutCommit", parametrs = ScalaClassParametrs(
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "connection"),
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "allColumns"),
+                  ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
+              ))),
+              parametrs = ScalaClassParametrs(
+                  ScalaClassParametr(name = "connection", `type` = "Connection".tp),
+                  ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+          newLine,
+          ScalaEndComment("P Methods")
           )
-
-
-        if (table.linksToClasses.filter(_.toClass.isAbstract).toSeq.length == 0)
-            tableClass addMembers(
-              newLine,
-              ScalaComment("P Methods"),
-              newLine,
-              ScalaMethod(
-                  name = "insertP",
-                  body = ScalaBody(ScalaApplyObject(name = "insertRoot", parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "allColumns"),
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
-                  ))),
-                  parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)),
-                  serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
-              newLine,
-              ScalaMethod(name = "batch4PInsert",
-                  body = ScalaBody(ScalaApplyObject(name = "batch4Insert", parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "preparedStatement"),
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
-                  ))),
-                  parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "preparedStatement", `type` = "PreparedStatement".tp),
-                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaUnit),
-              newLine,
-              ScalaMethod(name = "insertPWithoutCommit",
-                  body = ScalaBody(ScalaApplyObject(name = "insertWithoutCommit", parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "connection"),
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = "allColumns"),
-                      ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
-                  ))),
-                  parametrs = ScalaClassParametrs(
-                      ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
-              newLine,
-              ScalaEndComment("P Methods")
-              )
 
         val module = ScalaModule(
             packageName.pkg,
@@ -285,10 +257,7 @@ class GenTables(val appFilePath: Path,
         val tables = schema.tables.toArray
 
         Sorting.quickSort(tables)(ITableOrd)
-        val res = ArrayBuffer.empty[File]
-
-        tables foreach (res ++= genTables(_))
-
+        val res = tables map (genTable)
         logger info (s"Done #764.")
         res
     }

@@ -1,13 +1,12 @@
 package ru.simplesys.plugins.sourcegen.app.xml
 
-import com.simplesys.common.Strings._
-import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.xml.Elem
+import scala.xml.{NodeSeq, Node}
+import ru.simplesys.plugins.sourcegen.app._
 import com.simplesys.log.Logging
 import com.simplesys.scalaGen._
-import com.simplesys.xml.Elem
-import ru.simplesys.plugins.sourcegen.app._
-
-import scala.xml.{Node, NodeSeq}
+import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.common.Strings._
 
 object IscElem {
     implicit def apply(elem: Elem): IscElem = new IscElem(elem)
@@ -32,8 +31,6 @@ class IscElem(protected val proxy: Elem) extends Logging {
         if (res.isEmpty) false else res.toBoolean
     }
 
-    def isEmpty (path: String): Boolean =  (proxy \ path).isEmpty
-    def isDefigned (path: String): Boolean =  !isEmpty(path)
 
     def getArttributeValue(path: String): String = {
         (proxy \ s"@${path}").text
@@ -105,8 +102,6 @@ class IscElem(protected val proxy: Elem) extends Logging {
                                 res = (label -> _value).property
                             case "clob" =>
                                 res = (label -> _value).property
-                            case "blob" =>
-                                res = (label -> _value).property
                             case "double" =>
                                 res = (label -> _value.toDouble).property
                             case "integer" =>
@@ -148,126 +143,6 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             res = (label -> value.unQuotedValue1).property
                         } else if (_type.indexOf("Enum") != -1) {
                             res = (label -> value.unQuotedValue).property
-                        } else
-                            throw new RuntimeException(s"Unknown implemantation label:${label} type: ${_type}")
-                }
-        }
-
-        res
-    }
-
-    def getScalaClassJSONPropertyJS: ScalaClassJSONProperty = {
-        var res: ScalaClassJSONProperty = null
-
-        label match {
-            case "useSelfName" | "JObjectFieldName" | "Calculated" | "GetterType" | "JdbcType" | "Discriminator" | "GenBySeq" =>
-            case _ =>
-                `type` match {
-                    case "DblQuoted" =>
-                        res = (label.unCapitalize -> value).dblQuotedProperty
-                    case "UnQuoted" =>
-                        res = (label.unCapitalize -> value).UnQuotedProperty
-                    case "url" =>
-                        res = (label.unCapitalize -> value).URLProperty
-                    case "urlWithVar" =>
-                        val _value = if (value.indexOf("@") == -1) value else value.substring(0, value.indexOf("@"))
-                        res = (label.unCapitalize -> _value).property
-                    case "unq" =>
-                        res = (label.unCapitalize -> value).UnqProperty
-                    case "JSFileURL" =>
-                        res = (label.unCapitalize -> value).URLProperty
-                    case "JSFunction" =>
-                        res = (label.unCapitalize -> value).JSCodeProperty
-                    case "integer" =>
-                        res = (label.unCapitalize -> value.toInt).property
-                    case "double" =>
-                        res = (label.unCapitalize -> value.toDouble).property
-                    case "boolean" =>
-                        res = (label.unCapitalize -> value.toBoolean).property
-                    case "string" =>
-                        res = (label.unCapitalize -> value).property
-                    case "IDREF" | "NMTOKEN" =>
-                        res = (label.unCapitalize -> value.unQuotedValue).property
-                    case "IDREF1" | "IDREF2" =>
-                        res = (label.unCapitalize -> value).UnqProperty
-                    case "token" if label == "ID" =>
-                        res = (label -> value).property
-                    case "token" if label == "Type" =>
-                        res = ("`type`" -> s"FieldType.$value.opt".unQuotedValue).property
-                    case "token" =>
-                        res = (label.unCapitalize -> value).property
-                    case "ID" | "PersentNumberType" =>
-                        res = (label.unCapitalize -> value).property
-                    case "HTMLString" =>
-                        res = (label.unCapitalize -> value.ApproxValue).property
-                    case "EllipsisString" =>
-                        if ((proxy \ ("@Ellipsis")).text == "true")
-                            res = (label.unCapitalize -> value).EllipsisProperty
-                        else
-                            res = (label.unCapitalize -> value).property
-                    case "Any" =>
-                        val chld = (proxy: IscElem).child.filter(_.label !== "#PCDATA") head
-                        val variant = chld.label
-
-                        if (variant.isEmpty)
-                            throw new RuntimeException(s"Unknown implemantation label:${label} type: ${`type`}")
-
-
-                        val _value = ((proxy \ variant): IscElem).value
-
-                        variant match {
-                            case "string" =>
-                                res = (label.unCapitalize -> _value).property
-                            case "clob" =>
-                                res = (label.unCapitalize -> _value).property
-                            case "blob" =>
-                                res = (label.unCapitalize -> _value).property
-                            case "double" =>
-                                res = (label.unCapitalize -> _value.toDouble).property
-                            case "integer" =>
-                                res = (label.unCapitalize -> _value.toInt).property
-                            case "long" =>
-                                res = (label.unCapitalize -> _value.toDouble).property
-                            case "boolean" =>
-                                res = (label.unCapitalize -> _value.toBoolean).property
-                            case "date" =>
-                                res = (label.unCapitalize -> _value.toLocalDateTime()).property
-                            case "localDateTime" =>
-                                res = (label.unCapitalize -> _value.toLocalDateTime()).property
-                            case "dateTime" =>
-                                res = (label.unCapitalize -> _value.toLocalDateTime()).propertyWithTm
-                            case _ =>
-                                throw new RuntimeException(s"Unknown implemantation :${label.dblQuoted} type: ${`type`}")
-                        }
-
-                        res
-                    case _type =>
-                        if (_type.indexOf("JsonList") != -1)
-                            res = (label.unCapitalize -> SeqScalaClassJSON("opt")).property
-                        else if (_type.indexOf("ArrayType") != -1)
-                            res = (label.unCapitalize -> SeqScalaClassJSON("opt")).property
-                        else if (_type.indexOf("Type") != -1) {
-                            val className = _type.substring(0, _type.lastIndexOf("Type")) + _type.substring(_type.lastIndexOf("Type") + 4)
-
-                            val `class` = new ScalaClassJSON {
-                                scalaClassGen = className.replace("Dyn", "Props").cls
-                                wrappadOperator = if (className.contains("SimpleType")) "SimpleType.create" else ""
-                            }
-
-                            res = (label.unCapitalize -> ScalaClassJSONPropertyClassJSON(`class`)).property
-                            //res.log
-                        } else if (_type.indexOf("Enum1") != -1) {
-                            res = (label.unCapitalize -> value.unQuotedValue1).property
-                        } else if (_type.indexOf("Enum") != -1) {
-                            val _value = value match {
-                                case "dtftJSON" => "DSDataFormat.json.opt"
-                                case "dsprtPostXML" => "DSProtocol.postXML.opt"
-                                case "dsOptTypeAdd" => "DSOperationType.add.opt"
-                                case "dsOptTypeFetch" => "DSOperationType.fetch.opt"
-                                case "dsOptTypeRemove" => "DSOperationType.remove.opt"
-                                case "dsOptTypeUpdate" => "DSOperationType.update.opt"
-                            }
-                            res = (label.unCapitalize -> _value.unQuotedValue).property
                         } else
                             throw new RuntimeException(s"Unknown implemantation label:${label} type: ${_type}")
                 }

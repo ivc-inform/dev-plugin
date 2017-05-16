@@ -24,7 +24,6 @@ class GenBOServlet(val appFilePath: Path,
                    val outFilePath: Path,
                    val packageName: String,
                    val pkgBOName: String,
-                   val stage: String,
                    val logger: Logger) extends GenScala1 {
 
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
@@ -77,7 +76,7 @@ class GenBOServlet(val appFilePath: Path,
                                 res += dataURL
                             res.dblQuoted
                         }
-                        val classServletAnnotation = ScalaAnnotation("WebServlet", "asyncSupported" -> "true", "urlPatterns" -> ("Array(" + _dataURL + ")"))
+                        val classServletAnnotation = ScalaClassAnnotation("WebServlet", "asyncSupported" -> "true", "urlPatterns" -> ("Array(" + _dataURL + ")"))
 
                         val classServlet = new ScalaClassDeclare {
                             annotation = classServletAnnotation
@@ -674,7 +673,7 @@ class GenBOServlet(val appFilePath: Path,
                         if (!schema.enumClasses.exists(_.className === boName)) {
                             res <== {
                                 out =>
-                                    out(genMessageCreating(s"GenBOServlet, stage: $stage"))
+                                    out(genMessageCreating("GenBOServlet"))
                                     out(newLine)
                                     out(newLine)
                                     out(module.serrialize())

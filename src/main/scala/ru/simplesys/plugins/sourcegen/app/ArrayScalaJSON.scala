@@ -1,20 +1,17 @@
 package ru.simplesys.plugins.sourcegen.app
 
 import com.simplesys.common.Strings._
-import com.simplesys.scalaGen._
-
 import scala.collection.mutable.ArrayBuffer
+import com.simplesys.scalaGen._
+import com.simplesys.json._
 
-
-object SeqScalaClassJSON {
-    def apply(classes: ScalaClassJSON*) = new SeqScalaClassJSON("", classes: _ *)
-    def apply(opt: String, classes: ScalaClassJSON*) = new SeqScalaClassJSON(opt, classes: _ *)
-    def apply() = new SeqScalaClassJSON("")
+object ArrayScalaClassJSON {
+    def apply(classes: ScalaClassJSON*) = new ArrayScalaClassJSON(classes: _ *)
+    def apply() = new ArrayScalaClassJSON()
 }
 
-class SeqScalaClassJSON(opt: String, classes: ScalaClassJSON*) extends ScalaPropertyElement {
-    private val _classes = ArrayBuffer.empty[ScalaObjectElement] ++ classes
-    protected val className = "Seq"
+class ArrayScalaClassJSON(classes: ScalaClassJSON*) extends ScalaPropertyElement {
+    private val _classes = ArrayBuffer(classes: _*)
 
     def +=(`class`: ScalaClassJSON) = {
         _classes += `class`
@@ -34,19 +31,10 @@ class SeqScalaClassJSON(opt: String, classes: ScalaClassJSON*) extends ScalaProp
     def serrialize(indent: Int = 0) = {
         val res = (_classes map (newLine + spaces(indent + com.simplesys.scalaGen.indentSize) + _.serrialize(indent + com.simplesys.scalaGen.indentSize).trim)).mkString(",")
         if (!res.isEmpty)
-            s"$className(" + res.newLine + spaces(indent) + s")${if (opt != "") s".$opt" else opt}"
+            "ArrayDyn(" + res.newLine + spaces(indent) + ")"
         else
-            s"$className()${if (opt != "") s".$opt" else opt}"
+            "ArrayDyn()"
     }
-}
-
-object ArrayScalaClassJSON {
-    def apply(classes: ScalaClassJSON*) = new ArrayScalaClassJSON(classes: _ *)
-    def apply() = new ArrayScalaClassJSON()
-}
-
-class ArrayScalaClassJSON(classes: ScalaClassJSON*) extends SeqScalaClassJSON("", classes: _*) {
-    override protected val className = "ArrayDyn"
 }
 
 object JsonListScalaClassJSON {

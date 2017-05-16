@@ -15,7 +15,6 @@ class GenSimpleTypes(val appFilePath: Path,
                      val schemaPath: URI,
                      val outFilePath: Path,
                      val packageName: String,
-                     val stage:String,
                      val logger: Logger) extends GenScala {
 
     override def create: File = {
@@ -68,7 +67,7 @@ class GenSimpleTypes(val appFilePath: Path,
 
         res <== {
             out =>
-                out(genMessageCreating(s"GenSimpleTypes, stage: $stage"))
+                out(genMessageCreating("GenSimpleTypes"))
                 out(newLine)
                 out(module.serrialize())
         }

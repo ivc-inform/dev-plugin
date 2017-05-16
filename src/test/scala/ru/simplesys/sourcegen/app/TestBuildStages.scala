@@ -64,14 +64,14 @@ class TestBuildStages extends FunSuite with Logging {
         else
             logger info (s"Done #932#2.")
 
-//        logger info (s"Begin #932#3.")
-//        new GenSimpleTypes(
-//            appFilePath = tmp / "SimpleTypes.xml",
-//            schemaPath = "schemaISC.xsd".xsdURI,
-//            outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
-//            packageName = pkgAppName + ".scala",
-//            logger = _logger).create
-//        logger info (s"Done #932#3.")
+        logger info (s"Begin #932#3.")
+        new GenSimpleTypes(
+            appFilePath = tmp / "SimpleTypes.xml",
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
+            packageName = pkgAppName + ".scala",
+            logger = _logger).create
+        logger info (s"Done #932#3.")
         logger info (s"Done #756.")
     }
 
@@ -168,6 +168,13 @@ class TestBuildStages extends FunSuite with Logging {
 
     test("#761") {
         logger info (s"Begin #761.")
+
+        new GenScalaApp(
+            appFilePath = xmlPath,
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = scalaOut,
+            packageName = pkgAppName + ".scala",
+            logger = _logger).createSeq
 
         logger info (s"Done #761.")
     }

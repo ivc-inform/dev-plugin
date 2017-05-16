@@ -20,7 +20,6 @@ class GenEnums(val appFilePath: Path,
                val packageName: String,
                val pkgBOName: String,
                val quoted: Boolean,
-               val stage: String,
                val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
@@ -534,6 +533,7 @@ class GenEnums(val appFilePath: Path,
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
+
         def insertBody = ScalaControlStruct(
             name = "transaction(dataSource)",
             body = insertPartOfBody
@@ -655,7 +655,7 @@ class GenEnums(val appFilePath: Path,
 
         res <== {
             out =>
-                out(genMessageCreating(s"GenEnums, stage: $stage"))
+                out(genMessageCreating("GenEnums"))
                 out(newLine)
                 out(newLine)
                 out(module.serrialize())

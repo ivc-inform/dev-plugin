@@ -1,17 +1,16 @@
 package ru.simplesys.plugins.sourcegen.app
 
-import com.simplesys.io._
+import sbt.{Logger, File}
+import scalax.file.{PathSet, Path}
+import scala.collection.mutable.ArrayBuffer
+import net.sf.saxon.lib.FeatureKeys
 import com.simplesys.saxon.XsltTransformer._
 import com.simplesys.saxon._
-import net.sf.saxon.lib.FeatureKeys
-import ru.simplesys.meta.types.DataTypes
-import ru.simplesys.plugins.sourcegen.XmlUtil
 import ru.simplesys.plugins.sourcegen.app.Gen._
+import ru.simplesys.plugins.sourcegen.XmlUtil
+import ru.simplesys.meta.types.DataTypes
 import ru.simplesys.plugins.sourcegen.meta.SchemaDef
-import sbt.{File, Logger}
-
-import scala.collection.mutable.ArrayBuffer
-import scalax.file.{Path, PathSet}
+import com.simplesys.io._
 
 object AppDef {
     def generateScalaCode(tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
@@ -25,7 +24,7 @@ object AppDef {
 
         val boFiles: PathSet[Path] = sourceBoDir * "*.xml"
         val appFiles: PathSet[Path] = sourceAppDir / "macroBo" * "*.xml"
-        val sourceBOFiles: PathSet[Path] = sourceBoDir * "*.xml"
+        var sourceBOFiles: PathSet[Path] = sourceBoDir * "*.xml"
 
         val jsDir: Path = sourceMain / "webapp" / "managed" / "javascript" / "common-webapp" / "developed"
 
@@ -53,12 +52,11 @@ object AppDef {
             logger info (s"Done #932#2.")
 
         logger info (s"Begin #932#3.")
-        res += new GenSimpleTypes1(
+        res += new GenSimpleTypes(
             appFilePath = tmp / "SimpleTypes.xml",
             schemaPath = "schemaISC.xsd".xsdURI,
             outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
             packageName = pkgAppName + ".scala",
-            stage = "#932#3",
             logger = logger).create
         logger info (s"Done #932#3.")
 
@@ -83,7 +81,7 @@ object AppDef {
         //</editor-fold>
 
         //<editor-fold desc="#758">
-        /*logger info (s"Begin #758.")
+        logger info (s"Begin #758.")
         if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
             params =>
                 params("ContextPath") = contextPath
@@ -96,47 +94,78 @@ object AppDef {
         } > 0)
             throw new RuntimeException("Execution terminated, due to an error(s) in #758 !!!")
         else
-            logger info (s"Done #758.")*/
+            logger info (s"Done #758.")
+        //</editor-fold>
+
+        if (!xmlPath.exists) xmlPath.createDirectory()
+
+        val generetedFiles: PathSet[Path] = xmlPath * "*.xml"
+
+        if (generetedFiles.files.length > 0) {
+            //<editor-fold desc="#762">
+            logger info (s"Begin #762.")
+            if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
+                params =>
+                    params("files") = generetedFiles
+                    params("tmpDir") = tmp
+                    params("jsDir") = jsDir
+                    Transform(xsltPath = xslPath / "MakeDynamicPartOfRibbon.xsl", initialTemplate = "MakeDynRibbon")
+            } > 0)
+                throw new RuntimeException("Execution terminated, due to an error(s) in #762 !!!")
+            else
+                logger info (s"Done #762.")
+            //</editor-fold>
+        }
+
+        //<editor-fold desc="#778">
+        logger info (s"Begin #778.")
+        if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
+            params =>
+                params("tmpDir") = tmp
+                params("jsDir") = jsDir
+                Transform(xsltPath = xslPath / "EmbeddingDynamicPartOfRibbon.xsl", initialTemplate = "Embedding")
+        } > 0)
+            throw new RuntimeException("Execution terminated, due to an error(s) in #778 !!!")
+        else
+            logger info (s"Done #778.")
         //</editor-fold>
 
         //<editor-fold desc="#760">
         //<editor-fold desc="#761">
 
         logger info (s"Begin #761.")
-        res ++= new GenDataSources(
-            appFilePath = tmp,
+        res ++= new GenScalaApp(
+            appFilePath = xmlPath,
             schemaPath = "schemaISC.xsd".xsdURI,
             outFilePath = scalaOut,
             packageName = pkgAppName + ".gen.scala",
-            stage = "#761",
             logger = logger).createSeq
 
         logger info (s"Done #761.")
-        logger info (s"Begin #761.1.")
-        res ++= new GenListGridFields(
-            appFilePath = tmp,
-            schemaPath = "schemaISC.xsd".xsdURI,
-            outFilePath = scalaOut,
-            packageName = pkgAppName + ".gen.scala",
-            stage = "#761.1",
-            logger = logger).createSeq
-
-        logger info (s"Done #761.1.")
         //</editor-fold>
+        //</editor-fold>
+
+        //<editor-fold desc="#763">
+        logger info (s"Begin #763.")
+        res += new GenMainPage(
+            appFilePath = tmp / "FullMainView.xml",
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = outScalaAppDir / "scala" / "servlet" / "MainPageServlet.scala",
+            packageName = pkgAppName + ".scala.mainPage",
+            logger = logger).create
+        logger info (s"Done #763.")
         //</editor-fold>
 
         //<editor-fold desc="#765">
         logger info (s"Begin #765.")
 
-        res ++= new GenBOContainer(
-            appFilePath = tmp,
+        res ++= new GenBOServlet(
+            appFilePath = xmlPath,
             boFilePath = sourceBoDir,
             schemaPath = "schemaApp.xsd".xsdURI,
-            sourceMain = sourceMain,
             outFilePath = outScalaAppDir,
-            packageName = pkgAppName + ".scala.container",
+            packageName = pkgAppName + ".scala.servlet",
             pkgBOName,
-            stage = "#765",
             logger = logger).createSeq
 
         logger info (s"Done #765.")
