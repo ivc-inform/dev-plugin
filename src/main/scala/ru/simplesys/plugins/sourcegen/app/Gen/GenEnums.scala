@@ -20,6 +20,7 @@ class GenEnums(val appFilePath: Path,
                val packageName: String,
                val pkgBOName: String,
                val quoted: Boolean,
+               val stage: String,
                val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
@@ -463,7 +464,7 @@ class GenEnums(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = "", `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "success",
+                                    defaultValue = ScalaApplyObject(name = "Success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = "", `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(
@@ -490,7 +491,7 @@ class GenEnums(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -516,7 +517,7 @@ class GenEnums(val appFilePath: Path,
                         ScalaApplyObject(name = "ValidationEx",
                             parametrs = ScalaClassParametrs(
                                 ScalaClassParametr(name = "", `type` = ScalaImplicitType,
-                                    defaultValue = ScalaApplyObject(name = "success",
+                                    defaultValue = ScalaApplyObject(name = "Success",
                                         parametrs = ScalaClassParametrs(
                                             ScalaClassParametr(name = "", `type` = ScalaImplicitType,
                                                 defaultValue = ScalaBody(s"${productName}(${allColumnsP})"),
@@ -529,7 +530,7 @@ class GenEnums(val appFilePath: Path,
                         )
                     )
                 ),
-                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(failure(x))")),
+                ScalaCaseLine(expression = "Failure(x)".expr, caseBody = ScalaBody("ValidationEx(Failure(x))")),
                 ScalaCaseLine(expression = "x".expr, caseBody = ScalaBody("throw new RuntimeException(s\"Bad branch. (${x})\")"))
             ))
 
@@ -654,7 +655,7 @@ class GenEnums(val appFilePath: Path,
 
         res <== {
             out =>
-                out(genMessageCreating("GenEnums"))
+                out(genMessageCreating(s"GenEnums, stage: $stage"))
                 out(newLine)
                 out(newLine)
                 out(module.serrialize())
