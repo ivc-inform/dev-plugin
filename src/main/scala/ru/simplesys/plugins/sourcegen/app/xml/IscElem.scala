@@ -195,7 +195,7 @@ class IscElem(protected val proxy: Elem) extends Logging {
                     case "token" if label == "ID" =>
                         res = (label -> value).property
                     case "token" if label == "Type" =>
-                        res = ("`type`" -> s"FieldType.$value.opt".unQuotedValue).property
+                        res = ("`type`" -> s"FieldType.$value".unQuotedValue).property
                     case "token" =>
                         res = (label.unCapitalize -> value).property
                     case "ID" | "PersentNumberType" =>
