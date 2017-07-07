@@ -9,12 +9,7 @@ import com.simplesys.common.XMLs._
 
 //---------------------------------------------------------------------------------
 
-trait SimpleClassEnumProvider extends EnumProvider/* {
-  def keyAttrName: String
-  def nameAttrName: String
-  def keyMemberName: String = keyAttrName
-  def nameMemberName: String = nameMemberName
-}*/
+trait SimpleClassEnumProvider extends EnumProvider
 
 //---------------------------------------------------------------------------------
 
@@ -64,8 +59,7 @@ object EnumClassDef {
     val lKeyAttrName = (x \ "@keyAttr").text
     val lNameAttrName = (x \ "@nameAttr").text
     val lCaptionAttrName = (x \ "@captionAttr").text
-//    val lCaptionAttrName = (x \ "@captionAttr").text
-//    val lDescriptionAttrName = (x \ "@descriptionAttr").text
+    //val lDescriptionAttrName = (x \ "@descriptionAttr").text
     val lEnumValues = (x \ "value").map(EnumValueClass(lKeyAttrName, lNameAttrName, lCaptionAttrName, _))
 
     val ucs = (x \\ "uc").map(UniqueConstraintDef(selfRef, _)) ++ Seq(new SimpleUniqueConstraintDefData(selfRef, None, PK, Seq(lKeyAttrName)) with UniqueConstraintDef)

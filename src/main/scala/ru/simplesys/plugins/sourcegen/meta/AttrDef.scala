@@ -24,17 +24,10 @@ trait AttrDef[T] {
     def isGenBySeq: Boolean
 
     def isSystem: Boolean = {
-        //    import com.simplesys.common.equality.TypeWiseBalancedEquality._
         attrType == Domain.di || attrType == Domain.id || attrType == Domain.ss
     }
 
     def selfRef: LinkRefAttr = LinkRefAttr(currentOwner, name)
-
-    /*
-      def isOverride(implicit resolver: SchemaDef): Boolean = {
-        currentOwner.toClass.isAttrOverride(name)
-      }
-    */
 
     def autoColumnName: String = name
 
@@ -48,18 +41,6 @@ trait AttrDef[T] {
     def columns(implicit resolver: SchemaDef): Seq[ColumnDef[_]] = columnsRefs.map(_.toCol)
     def column(table: LinkRefToTable)(implicit resolver: SchemaDef): ColumnDef[_] = currentOwner.toClass.columnByAttrAndTable(name, table).toCol
     def columnOption(table: LinkRefToTable)(implicit resolver: SchemaDef): Option[ColumnDef[_]] = currentOwner.toClass.columnByAttrAndTableOption(name, table).map(_.toCol)
-
-    /*  def getProxy(CurrentOwner: LinkRefToAbstractClass,
-                   Name: String = this.name,
-                   Caption: String = this.caption,
-                   IsMandatory: Boolean = this.isMandatory,
-                   IsCalculated: Boolean = this.isCalculated,
-                   Formula: Option[String] = this.formula): AttrDef[T]
-
-      def getProxy(CurrentOwner: LinkRefToAbstractClass,
-                   mappingSetting: AttrMapping,
-                   isMandatory: Boolean
-                    ): AttrDef[T]*/
 
     def toXML(implicit resolver: SchemaDef): Elem = {
         val typeColumn = s"${if (!attrType.isComplexDataType) attrType.scalaTypeAsString(currentOwner.groupName, resolver) else s"${attrType.simpleScalaType}"}${if (isMandatory) "" else "Opt"}"
@@ -110,15 +91,6 @@ trait AttrDef[T] {
         mappingSetting.formula,
         Some(isHidden),
         Some(isGenBySeq))
-
-    /*
-      def getCopy(currentOwner: LinkRefToAbstractClass = this.currentOwner,
-                  name: String = this.name,
-                  caption: String = this.caption,
-                  isMandatory: Boolean = this.isMandatory,
-                  isCalculated: Boolean = this.isCalculated,
-                  formula: Option[String] = this.formula): AttrDef[T]
-    */
 }
 
 //---------------------------------------------------------------------------------
@@ -140,16 +112,6 @@ case class SimpleAttrDef[T](currentOwner: LinkRefToAbstractClass,
             case _ => attrType.simpleScalaType.stringToSourceValueConditional(isMandatory, s)
         }
     }
-
-    /*
-      def getCopy(CurrentOwner: LinkRefToAbstractClass = this.currentOwner,
-                  Name: String = this.name,
-                  Caption: String = this.caption,
-                  IsMandatory: Boolean = this.isMandatory,
-                  IsCalculated: Boolean = this.isCalculated,
-                  Formula: Option[String] = this.formula
-                 ): SimpleAttrDef[T] = this.copy(currentOwner = CurrentOwner, name = Name, caption = Caption, isMandatory = IsMandatory, isCalculated = IsCalculated, formula = Formula)
-    */
 }
 
 //---------------------------------------------------------------------------------
@@ -224,17 +186,6 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
         Some(isHidden),
         Some(isGenBySeq)
     )
-
-    /*
-      def getCopy(CurrentOwner: LinkRefToAbstractClass = this.currentOwner,
-                  Name: String = this.name,
-                  Caption: String = this.caption,
-                  IsMandatory: Boolean = this.isMandatory,
-                  IsCalculated: Boolean = this.isCalculated,
-                  Formula: Option[String] = this.formula
-
-                 ): EnumAttrDef[T] = this.copy(currentOwner = CurrentOwner, name = Name, caption = Caption, isMandatory = IsMandatory)//this.getCopy(CurrentOwner = CurrentOwner, Name = Name, Caption = Caption, IsMandatory = IsMandatory, IsCalculated = this.isCalculated, Formula = this.formula)
-    */
 }
 
 object EnumAttrDef {
@@ -269,23 +220,6 @@ class ProxyAttrDef[T](val proxy: AttrDef[T],
     def isHidden = proxyIsHidden getOrElse proxy.isHidden
     def isGenBySeq = proxyIsGenBySeq getOrElse proxy.isGenBySeq
     def stringToSourceValue(s: String)(implicit currentGroupName: Locator, resolver: SchemaDef): String = proxy.stringToSourceValue(s)(currentGroupName, resolver)
-
-    //  override def toXML(implicit resolver: SchemaDef): Elem = self.toXML(resolver)
-
-    /*  def getCopy(CurrentOwner: LinkRefToAbstractClass = this.currentOwner,
-                  Name: String = this.name,
-                  Caption: String = this.caption,
-                  IsMandatory: Boolean = this.isMandatory,
-                  IsCalculated: Boolean = this.isCalculated,
-                  Formula: Option[String] = this.formula
-                 ): ProxyAttrDef[T] = this.copy(currentOwner = CurrentOwner,
-                                             proxyName = {if (proxy.name != Name) Some(Name) else proxyName},
-                                             proxyCaption = {if (proxy.caption != Caption) Some(Caption) else proxyCaption},
-                                             proxyIsMandatory = {if (proxy.isMandatory != IsMandatory) Some(IsMandatory) else proxyIsMandatory},
-                                             proxyIsCalculated = {if (proxy.isCalculated != IsCalculated) Some(IsCalculated) else proxyIsCalculated},
-                                             proxyFormula = {if (proxy.formula != Formula) Formula else proxyFormula}
-                                            )*/
-
 }
 
 //---------------------------------------------------------------------------------
