@@ -118,24 +118,11 @@ object DevPlugin extends AutoPlugin {
         sourceBoDir := sourceSchemaDir.value / "bo",
         outputScalaCodeBODir := outputScalaCodeDir.value / "bo",
         startPackageBOName := startPackageName.value + ".bo",
-        sourceAppFiles <<= (sourceSchemaDir) {
-            x => {
-                (x / "app") * "*.xml"
-            }.get
-        },
-        outputScalaCodeAppDir <<= (outputScalaCodeDir) {
-            _ / "app" / "generated"
-        },
-        startPackageAppName <<= (startPackageName) {
-            _ + ".app"
-        },
-
-        liquibaseCreateChangelog <<= (outputCreateChangelogDir) {
-            _ / "db.changelog-create.xml"
-        },
-        liquibaseUpgradeChangelog <<= (outputUpgradeChangelogDir) {
-            _ / "db.changelog-upgrade.xml"
-        },
+        sourceAppFiles := ((sourceSchemaDir.value / "app") * "*.xml").get,
+        outputScalaCodeAppDir := outputScalaCodeDir.value / "app" / "generated",
+        startPackageAppName := startPackageName.value + ".app",
+        liquibaseCreateChangelog := outputCreateChangelogDir.value / "db.changelog-create.xml",
+        liquibaseUpgradeChangelog := outputUpgradeChangelogDir.value / "db.changelog-upgrade.xml",
         liquibaseChangelog := liquibaseUpgradeChangelog.value,
         liquibaseContext := "",
         liquibaseDefaultSchemaName := None,
