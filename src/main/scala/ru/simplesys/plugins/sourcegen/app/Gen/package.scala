@@ -7,13 +7,6 @@ import com.simplesys.scalaGen.{ScalaApplyObject, ScalaBody, ScalaClassParametr, 
 import ru.simplesys.plugins.sourcegen.meta.{LinkToColumnWValue, _}
 
 package object Gen extends Logging {
-    /*implicit class ColumnDefOpt(column: ColumnDef[_]) {
-        def columnType = {
-            val _columnType = column.dataType.scalaTypeAsString(column.)
-            val columnType = s"${if (column.isMandatory) _columnType else s"Array[${_columnType}]"}"
-        }
-    }*/
-
     implicit class Imp(string: String) {
         def tbl = s"${string.capitalize}Tbl"
         def bo = s"${string.capitalize}Bo"
