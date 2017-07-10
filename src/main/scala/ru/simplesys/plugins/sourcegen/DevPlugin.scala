@@ -239,129 +239,122 @@ object DevPlugin extends AutoPlugin {
 
         generateBoScalaCode := {
 
-                import meta.SchemaDef
-                import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
-                import com.simplesys.file.ImplicitConversions._
+            import meta.SchemaDef
+            import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
+            import com.simplesys.file.ImplicitConversions._
 
-                implicit val logger = streams.value.log
-                implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            implicit val logger = streams.value.log
+            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
 
-                val _outDir: Path = outputScalaCodeBODir.value
+            val _outDir: Path = outputScalaCodeBODir.value
 
-                val poso = schema.generateScalaCode(outputScalaCodeBODir.value, startPackageBOName.value)
+            val poso = schema.generateScalaCode(outputScalaCodeBODir.value, startPackageBOName.value)
 
-                val res764 = new GenTables(
-                    appFilePath = sourceBoDir.value,
-                    outFilePath = _outDir / "table",
-                    packageName = startPackageBOName.value,
-                    pkgBOName = startPackageBOName.value,
-                    quoted = quoted.value,
-                    useDbPrefix = useDbPrefix.value,
-                    logger = logger
-                ).createSeq
+            val res764 = new GenTables(
+                appFilePath = sourceBoDir.value,
+                outFilePath = _outDir / "table",
+                packageName = startPackageBOName.value,
+                pkgBOName = startPackageBOName.value,
+                quoted = quoted.value,
+                useDbPrefix = useDbPrefix.value,
+                logger = logger
+            ).createSeq
 
-                val res819 = new GenBOs(
-                    appFilePath = sourceBoDir.value,
-                    outFilePath = _outDir / "classBo",
-                    packageName = startPackageBOName.value,
-                    pkgBOName = startPackageBOName.value,
-                    quoted = quoted.value,
-                    stage = "#819",
-                    useDbPrefix = useDbPrefix.value,
-                    logger = logger
-                ).createSeq
+            val res819 = new GenBOs(
+                appFilePath = sourceBoDir.value,
+                outFilePath = _outDir / "classBo",
+                packageName = startPackageBOName.value,
+                pkgBOName = startPackageBOName.value,
+                quoted = quoted.value,
+                stage = "#819",
+                useDbPrefix = useDbPrefix.value,
+                logger = logger
+            ).createSeq
 
-                val res844 = new GenEnums(
-                    appFilePath = sourceBoDir.value,
-                    outFilePath = _outDir / "classEnum",
-                    packageName = startPackageBOName.value,
-                    pkgBOName = startPackageBOName.value,
-                    quoted = quoted.value,
-                    stage = "#844",
-                    useDbPrefix = useDbPrefix.value,
-                    logger = logger
-                ).createSeq
+            val res844 = new GenEnums(
+                appFilePath = sourceBoDir.value,
+                outFilePath = _outDir / "classEnum",
+                packageName = startPackageBOName.value,
+                pkgBOName = startPackageBOName.value,
+                quoted = quoted.value,
+                stage = "#844",
+                useDbPrefix = useDbPrefix.value,
+                logger = logger
+            ).createSeq
 
-                val res938 = new GenDSs(
-                    appFilePath = sourceBoDir.value,
-                    outFilePath = _outDir / "dataSets",
-                    packageName = startPackageBOName.value,
-                    pkgBOName = startPackageBOName.value,
-                    quoted = quoted.value,
-                    useDbPrefix = useDbPrefix.value,
-                    logger = logger
-                ).createSeq
+            val res938 = new GenDSs(
+                appFilePath = sourceBoDir.value,
+                outFilePath = _outDir / "dataSets",
+                packageName = startPackageBOName.value,
+                pkgBOName = startPackageBOName.value,
+                quoted = quoted.value,
+                useDbPrefix = useDbPrefix.value,
+                logger = logger
+            ).createSeq
 
-                poso ++ res764 ++ res819 ++ res844 ++ res938
+            poso ++ res764 ++ res819 ++ res844 ++ res938
         },
 
         N877 := {
 
-                import com.simplesys.file.ImplicitConversions._
-                import com.simplesys.saxon._
-                import com.simplesys.saxon.XsltTransformer._
-                import com.simplesys.io._
+            import com.simplesys.file.ImplicitConversions._
+            import com.simplesys.saxon._
+            import com.simplesys.saxon.XsltTransformer._
+            import com.simplesys.io._
 
-                val logger = streams.value.log
-                val _tmp: Path = tmpResourcesDir.value
-                val _sourceAppDir: Path = sourceAppDir.value
+            val logger = streams.value.log
+            val _tmp: Path = tmpResourcesDir.value
+            val _sourceAppDir: Path = sourceAppDir.value
 
-                val xslPath: Path = _sourceAppDir / "xsl"
-                val macroPath: Path = _sourceAppDir / "macroBo"
-                var sourceBOFiles: PathSet[Path] = sourceBoDir.value * "*.xml"
+            val xslPath: Path = _sourceAppDir / "xsl"
+            val macroPath: Path = _sourceAppDir / "macroBo"
+            var sourceBOFiles: PathSet[Path] = sourceBoDir.value * "*.xml"
 
-                val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceBOFiles.files)
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceBOFiles.files)
 
-                XmlUtil.save(schema.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "allBo.xml").toFile)
-                XmlUtil.save(DataTypes.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "domains.xml").toFile)
+            XmlUtil.save(schema.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "allBo.xml").toFile)
+            XmlUtil.save(DataTypes.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "domains.xml").toFile)
 
-                val cl2Save = Thread.currentThread.getContextClassLoader
-                val cl2Set = this.getClass.getClassLoader
+            val cl2Save = Thread.currentThread.getContextClassLoader
+            val cl2Set = this.getClass.getClassLoader
 
-                try {
-                    Thread.currentThread setContextClassLoader cl2Set
-                    if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
-                        params =>
-                            params("inputBoFile") = _tmp / "allBo.xml"
-                            params("macroDir") = macroPath
-                            Transform(xsltPath = xslPath / "InitialMacroOfClasses.xsl", initialTemplate = "ProcessingAll")
-                    } > 0)
-                        throw new RuntimeException("Execution terminated, due to an error(s) # 877 !!!")
-                    else
-                        logger info (s"Done #877.")
-                }
-                finally {
-                    Thread.currentThread setContextClassLoader cl2Save
-                }
+            try {
+                Thread.currentThread setContextClassLoader cl2Set
+                if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
+                    params =>
+                        params("inputBoFile") = _tmp / "allBo.xml"
+                        params("macroDir") = macroPath
+                        Transform(xsltPath = xslPath / "InitialMacroOfClasses.xsl", initialTemplate = "ProcessingAll")
+                } > 0)
+                    throw new RuntimeException("Execution terminated, due to an error(s) # 877 !!!")
+                else
+                    logger info (s"Done #877.")
+            }
+            finally {
+                Thread.currentThread setContextClassLoader cl2Save
+            }
         },
 
         generateMockupUI := {
 
-                import balsamiq._
+            import balsamiq._
 
-                implicit val logger = streams.value.log
-                val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
-                val uiGenerator = UIGenerator(schema, sourceMockupUIFiles.value)
+            implicit val logger = streams.value.log
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            val uiGenerator = UIGenerator(schema, sourceMockupUIFiles.value)
 
-                uiGenerator generateFiles outputUIDir.value
+            uiGenerator generateFiles outputUIDir.value
         },
 
         generateCreateChangelog := {
 
-                import meta.SchemaDef
+            import meta.SchemaDef
 
-                implicit val logger = streams.value.log
-                val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
-                val createChLogs = schema generateCreateChangelog liquibaseCreateChangelog.value
-                val tables = schema.tables
-                createChLogs
+            implicit val logger = streams.value.log
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            schema generateCreateChangelog liquibaseCreateChangelog.value
         },
 
-
-        /*
-        * generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted, useDbPrefix) map {
-                    (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls, useDbPrefix) => {
-        * */
 
         generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted, useDbPrefix) map {
             (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls, useDbPrefix) => {
@@ -375,10 +368,8 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        generateJavaScript <<= (streams, sourceSchemaBOFiles, sourceAppFiles, outputJavaScriptDir) map {
-            (out, sourceBOFiles, sourceDSFiles, outJSDir) => {
-                Seq()
-            }
+        generateJavaScript := {
+            Seq()
         },
 
         generateAllButUpgrade <<= (streams, sourceSchemaBOFiles, outputScalaCodeBODir, startPackageBOName, sourceAppFiles, outputScalaCodeAppDir, startPackageAppName, liquibaseCreateChangelog, outputJavaScriptDir, quoted, useDbPrefix) map {
@@ -388,15 +379,12 @@ object DevPlugin extends AutoPlugin {
 
                 implicit val logger = out.log
                 val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
-                val scalaBOFiles = schema.generateScalaCode(outScalaBODir, pkgBOName)
-                val jsFiles = schema.generateJavaScript(outJSDir)
-                val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
-                scalaBOFiles
+                schema.generateScalaCode(outScalaBODir, pkgBOName)
             }
         },
 
         generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ , useDbPrefix) map {
-            (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/, useDbPrefix) => {
+            (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/ , useDbPrefix) => {
 
                 import meta.SchemaDef
 
