@@ -53,7 +53,7 @@ class GenListGridFields(val appFilePath: Path,
                             scalaClassGen = listFridFieldObjectName.cls
                             typeScalaClass = TypeScalaObject
                             extensibleClass = "NameStrong".ext
-                            annotation = ScalaAnnotation("ScalaJSDefined")
+                            //annotation = ScalaAnnotation("ScalaJSDefined")
                         }
                         listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
                         collectionElemObject += listFridFieldObject
@@ -240,7 +240,7 @@ class GenListGridFields(val appFilePath: Path,
             "com.simplesys.option.ScOption._".imp,
             "com.simplesys.System.NameStrong".imp,
             "com.simplesys.System.Types.Alignment._".imp,
-            "scala.scalajs.js.annotation.ScalaJSDefined".imp,
+            //"scala.scalajs.js.annotation.ScalaJSDefined".imp,
             newLine
         )
 

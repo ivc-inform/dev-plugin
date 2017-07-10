@@ -8,14 +8,6 @@ case class AttrToColumnMapping(attrLink: LinkRefAttr,
   def column(implicit resolver: SchemaDef): ColumnDef[_] = columnLink.toCol
 }
 
-/*
-trait ConstraintMapping {
-  def classConstraintRef: LinkRefToClassConstraint
-  def implConstraint: LinkRefToConstraintImpl
-  def implDetails: ConstraintImplShortDetails
-}
-*/
-
 case class ConstraintMapping(classConstraintRef: LinkRefToClassConstraint, implConstraint: LinkRefToConstraintImpl, implDetails: ConstraintImplShortDetails)
 
 /*читаем хардкоденные маппинги

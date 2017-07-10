@@ -91,7 +91,7 @@ class GenBOContainer(val appFilePath: Path,
                         val recordTrait = new ScalaClassDeclare {
                             scalaClassGen = (s"${boName.capitalize}DataRecord").cls
                             typeScalaClass = TypeScalaTrait
-                            annotation = ScalaAnnotation("ScalaJSDefined")
+                            //annotation = ScalaAnnotation("ScalaJSDefined")
                             extensibleClass = "js.Object".ext
                         }
 
@@ -874,7 +874,7 @@ class GenBOContainer(val appFilePath: Path,
                             "scalaz.{Failure, Success}".imp,
                             "com.simplesys.isc.system.misc.Number".imp,
                             "com.simplesys.messages.Message".imp,
-                            "scala.scalajs.js.annotation.ScalaJSDefined".imp,
+                            //"scala.scalajs.js.annotation.ScalaJSDefined".imp,
                             "scala.scalajs.js".imp
                         )
 
