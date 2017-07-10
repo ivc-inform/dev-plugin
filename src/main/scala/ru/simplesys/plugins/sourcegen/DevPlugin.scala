@@ -94,30 +94,30 @@ object DevPlugin extends AutoPlugin {
     lazy val devPluginGeneratorSettings: Seq[Setting[_]] = inConfig(DevConfig)(Seq[Setting[_]](
         // Default settings
         //---------------------------------------------------------------------------------
-        sourceSchemaDir <<= (sourceDirectory in Compile) {
-            _ / "schema"
+        sourceSchemaDir := {
+            (sourceDirectory in Compile).value / "schema"
         },
-        sourceMainDir <<= (sourceDirectory in Compile),
-        tmpResourcesDir <<= (sourceManaged in Compile) {
-            _ / "defs" / "app" / "tmp"
+        sourceMainDir := (sourceDirectory in Compile).value,
+        tmpResourcesDir := {
+            (sourceManaged in Compile).value / "defs" / "app" / "tmp"
         },
-        sourceAppDir <<= (sourceSchemaDir) {
-            _ / "app"
+        sourceAppDir := {
+            sourceSchemaDir.value / "app"
         },
-        outputScalaCodeDir <<= (sourceManaged in Compile) {
-            _ / "defs"
+        outputScalaCodeDir := {
+            (sourceManaged in Compile).value / "defs"
         },
-        outputCreateChangelogDir <<= (sourceManaged in Compile) {
-            _ / "migration" / "create"
+        outputCreateChangelogDir := {
+            (sourceManaged in Compile).value / "migration" / "create"
         },
-        outputUpgradeChangelogDir <<= (resourceDirectory in Compile) {
-            _ / "migration" / "upgrade"
+        outputUpgradeChangelogDir := {
+            (resourceDirectory in Compile).value / "migration" / "upgrade"
         },
-        outputJavaScriptDir <<= (resourceManaged in Compile) {
-            _ / "javascript"
+        outputJavaScriptDir := {
+            (resourceManaged in Compile).value / "javascript"
         },
-        startPackageName <<= (organization, name) {
-            (x, y) => x + "." + y
+        startPackageName := {
+            organization.value + "." + name.value
         },
 
         //quoted := true,
