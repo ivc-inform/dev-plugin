@@ -177,9 +177,8 @@ object DevPlugin extends AutoPlugin {
 
         // Internal structures initialization
         //---------------------------------------------------------------------------------
-        liquibaseDatabase <<= (liquibaseUrl, liquibaseUsername, liquibasePassword, liquibaseDriver, liquibaseDefaultSchemaName, fullClasspath in Runtime) map {
-            (url: String, uname: String, pass: String, driver: String, schemaName: Option[String], cpath) =>
-                CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader(cpath.map(_.data)), url, uname, pass, driver, null, schemaName.getOrElse(null), null, null)
+        liquibaseDatabase := {
+                CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader(fullClasspath.value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null)
         },
         liquibase <<= (liquibaseChangelog, liquibaseDatabase) map {
             (cLog: File, dBase: Database) => new Liquibase(cLog.getPath, new FileSystemResourceAccessor, dBase)
@@ -231,11 +230,6 @@ object DevPlugin extends AutoPlugin {
             }
 
         },
-
-        /*
-        * generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted, useDbPrefix) map {
-                    (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls, useDbPrefix) => {
-        * */
 
         generateBoScalaCode := {
 
