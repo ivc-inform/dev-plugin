@@ -355,15 +355,9 @@ object DevPlugin extends AutoPlugin {
             schema generateCreateChangelog liquibaseCreateChangelog.value
         },
 
-
-        generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted, useDbPrefix) map {
-            (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls, useDbPrefix) => {
-
-                import meta.SchemaDef
-
-                implicit val logger = out.log
-                LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
-            }
+        generateUpgradeChangelog := {
+                implicit val logger = streams.value.log
+                LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
         },
 
         generateJavaScript := {
