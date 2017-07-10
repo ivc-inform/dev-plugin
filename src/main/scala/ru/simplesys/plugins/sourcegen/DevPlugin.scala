@@ -364,15 +364,14 @@ object DevPlugin extends AutoPlugin {
             Seq()
         },
 
-        generateAllButUpgrade <<= (streams, sourceSchemaBOFiles, outputScalaCodeBODir, startPackageBOName, sourceAppFiles, outputScalaCodeAppDir, startPackageAppName, liquibaseCreateChangelog, outputJavaScriptDir, quoted, useDbPrefix) map {
-            (out, sourceBOFiles, outScalaBODir, pkgBOName, sourceDSFiles, outScalaDSDir, pkgDSName, /*outCreateChLogDir, */ createChLogFile, outJSDir, useQuotes4Tbls, useDbPrefix) => {
+        generateAllButUpgrade := {
 
                 import meta.SchemaDef
 
-                implicit val logger = out.log
-                val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
-                schema.generateScalaCode(outScalaBODir, pkgBOName)
-            }
+                implicit val logger = streams.value.log
+                val schema = SchemaDef( startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+                schema.generateScalaCode(outputScalaCodeBODir.value,  startPackageBOName.value)
+
         },
 
         generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ , useDbPrefix) map {
