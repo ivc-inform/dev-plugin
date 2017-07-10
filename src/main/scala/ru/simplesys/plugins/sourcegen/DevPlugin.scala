@@ -136,13 +136,10 @@ object DevPlugin extends AutoPlugin {
 
         // Tasks implementations
         //---------------------------------------------------------------------------------
-        liquibaseUpdate <<= (liquibase, liquibaseContext) map {
-            (liquibase: Liquibase, context: String) => liquibase.update(context)
-        },
-        liquibaseCreate <<= (liquibaseCreateChangelog, liquibaseDatabase, liquibaseContext) map {
-            (cLog: File, dBase: Database, context: String) =>
-                val liquibase = new Liquibase(cLog.getPath, new FileSystemResourceAccessor, dBase)
-                liquibase.update(context)
+        liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
+        liquibaseCreate := {
+                val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
+                liquibase update liquibaseContext.value
         },
         generateScalaCode := {
 
