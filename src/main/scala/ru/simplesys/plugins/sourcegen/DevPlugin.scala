@@ -363,7 +363,6 @@ object DevPlugin extends AutoPlugin {
 
                 implicit val logger = out.log
                 val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
-                val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
             }
         },
@@ -390,12 +389,8 @@ object DevPlugin extends AutoPlugin {
 
                 implicit val logger = out.log
                 val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
-                //val jsFiles = schema.generateJavaScript(outJSDir)
-                val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
-                //jsFiles /* ++ filesFromUpdate?*/
-                val res: Seq[File] = Seq()
-                res
+                Seq.empty[File]
             }
         } runBefore (`package` in Compile),
 
