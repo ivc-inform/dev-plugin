@@ -94,31 +94,15 @@ object DevPlugin extends AutoPlugin {
     lazy val devPluginGeneratorSettings: Seq[Setting[_]] = inConfig(DevConfig)(Seq[Setting[_]](
         // Default settings
         //---------------------------------------------------------------------------------
-        sourceSchemaDir := {
-            (sourceDirectory in Compile).value / "schema"
-        },
+        sourceSchemaDir := (sourceDirectory in Compile).value / "schema",
         sourceMainDir := (sourceDirectory in Compile).value,
-        tmpResourcesDir := {
-            (sourceManaged in Compile).value / "defs" / "app" / "tmp"
-        },
-        sourceAppDir := {
-            sourceSchemaDir.value / "app"
-        },
-        outputScalaCodeDir := {
-            (sourceManaged in Compile).value / "defs"
-        },
-        outputCreateChangelogDir := {
-            (sourceManaged in Compile).value / "migration" / "create"
-        },
-        outputUpgradeChangelogDir := {
-            (resourceDirectory in Compile).value / "migration" / "upgrade"
-        },
-        outputJavaScriptDir := {
-            (resourceManaged in Compile).value / "javascript"
-        },
-        startPackageName := {
-            organization.value + "." + name.value
-        },
+        tmpResourcesDir := (sourceManaged in Compile).value / "defs" / "app" / "tmp",
+        sourceAppDir := sourceSchemaDir.value / "app",
+        outputScalaCodeDir := (sourceManaged in Compile).value / "defs",
+        outputCreateChangelogDir := (sourceManaged in Compile).value / "migration" / "create",
+        outputUpgradeChangelogDir := (resourceDirectory in Compile).value / "migration" / "upgrade",
+        outputJavaScriptDir := (resourceManaged in Compile).value / "javascript",
+        startPackageName := organization.value + "." + name.value,
 
         //quoted := true,
         //useDbPrefix := true,
@@ -126,14 +110,8 @@ object DevPlugin extends AutoPlugin {
 
         //---------------------------------------------------------------------------------
 
-        sourceSchemaBOFiles <<= (sourceSchemaDir) {
-            x => {
-                (x / "bo") ** "*.xml"
-            }.get
-        },
-        sourceMockupUIDir <<= (sourceSchemaDir) {
-            _ / "ui"
-        },
+        sourceSchemaBOFiles := ((sourceSchemaDir.value / "bo") ** "*.xml").get,
+        sourceMockupUIDir := sourceSchemaDir.value / "ui",
         sourceMockupUIFiles <<= (sourceMockupUIDir) {
             x => {
                 x ** "*.bmml"
