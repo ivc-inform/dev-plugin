@@ -232,64 +232,67 @@ object DevPlugin extends AutoPlugin {
 
         },
 
-        generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted, useDbPrefix) map {
-            (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls, useDbPrefix) => {
+        /*
+        * generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted, useDbPrefix) map {
+                    (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls, useDbPrefix) => {
+        * */
+
+        generateBoScalaCode := {
 
                 import meta.SchemaDef
                 import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
                 import com.simplesys.file.ImplicitConversions._
 
-                implicit val logger = out.log
-                implicit val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
+                implicit val logger = streams.value.log
+                implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
 
-                val _outDir: Path = outScalaBoDir
+                val _outDir: Path = outputScalaCodeBODir.value
 
-                val poso = schema.generateScalaCode(outScalaBoDir, pkgBoName)
+                val poso = schema.generateScalaCode(outputScalaCodeBODir.value, startPackageBOName.value)
 
                 val res764 = new GenTables(
-                    appFilePath = sourceBoDir,
+                    appFilePath = sourceBoDir.value,
                     outFilePath = _outDir / "table",
-                    packageName = pkgBoName,
-                    pkgBOName = pkgBoName,
-                    quoted = useQuotes4Tbls,
-                    useDbPrefix = useDbPrefix,
+                    packageName = startPackageBOName.value,
+                    pkgBOName = startPackageBOName.value,
+                    quoted = quoted.value,
+                    useDbPrefix = useDbPrefix.value,
                     logger = logger
                 ).createSeq
 
                 val res819 = new GenBOs(
-                    appFilePath = sourceBoDir,
+                    appFilePath = sourceBoDir.value,
                     outFilePath = _outDir / "classBo",
-                    packageName = pkgBoName,
-                    pkgBOName = pkgBoName,
-                    quoted = useQuotes4Tbls,
+                    packageName = startPackageBOName.value,
+                    pkgBOName = startPackageBOName.value,
+                    quoted = quoted.value,
                     stage = "#819",
-                    useDbPrefix = useDbPrefix,
+                    useDbPrefix = useDbPrefix.value,
                     logger = logger
                 ).createSeq
 
                 val res844 = new GenEnums(
-                    appFilePath = sourceBoDir,
+                    appFilePath = sourceBoDir.value,
                     outFilePath = _outDir / "classEnum",
-                    packageName = pkgBoName,
-                    pkgBOName = pkgBoName,
-                    quoted = useQuotes4Tbls,
+                    packageName = startPackageBOName.value,
+                    pkgBOName = startPackageBOName.value,
+                    quoted = quoted.value,
                     stage = "#844",
-                    useDbPrefix = useDbPrefix,
+                    useDbPrefix = useDbPrefix.value,
                     logger = logger
                 ).createSeq
 
                 val res938 = new GenDSs(
-                    appFilePath = sourceBoDir,
+                    appFilePath = sourceBoDir.value,
                     outFilePath = _outDir / "dataSets",
-                    packageName = pkgBoName,
-                    pkgBOName = pkgBoName,
-                    quoted = useQuotes4Tbls,
-                    useDbPrefix = useDbPrefix,
+                    packageName = startPackageBOName.value,
+                    pkgBOName = startPackageBOName.value,
+                    quoted = quoted.value,
+                    useDbPrefix = useDbPrefix.value,
                     logger = logger
                 ).createSeq
 
                 poso ++ res764 ++ res819 ++ res844 ++ res938
-            }
         },
 
         N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName, useDbPrefix) map {
