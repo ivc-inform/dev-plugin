@@ -120,9 +120,9 @@ object DevPlugin extends AutoPlugin {
             (x, y) => x + "." + y
         },
 
-        quoted := true,
-        useDbPrefix := true,
-        maxArity := 254,
+        //quoted := true,
+        //useDbPrefix := true,
+        //maxArity := 254,
 
         //---------------------------------------------------------------------------------
 
@@ -196,37 +196,15 @@ object DevPlugin extends AutoPlugin {
                 val liquibase = new Liquibase(cLog.getPath, new FileSystemResourceAccessor, dBase)
                 liquibase.update(context)
         },
-        /*logMetamodel <<= (streams, sourceSchemaBOFiles, startPackageBOName, logedBos) map {
-            import meta.SchemaDef
-            (out, boFiles, pkgBOName, bos) =>
-                new {
-                    implicit val schema = SchemaDef(pkgBOName, boFiles)
-                    val logger = out.log
-                } with ru.simplesys.plugins.sourcegen.app.Log {
-                    logBo(bos)
-                }
-        },*/
         generateScalaCode := {
-            val tmp = tmpResourcesDir.value
-            val baseDir = baseDirectory.value
-            val out = streams.value
-            val srcBoDir = sourceBoDir.value
-            val pkgBOName = startPackageBOName.value
-            val srcAppDir = sourceAppDir.value
-            val pkgAppName = startPackageAppName.value
-            val cntxtPath = contextPath.value
-            val sourceBOFiles = sourceSchemaBOFiles.value
-            val outScalaAppDir = outputScalaCodeAppDir.value
-            val srcMain = sourceMainDir.value
-            val arr = maxArity.value
 
             import meta.SchemaDef
             import com.simplesys.file.ImplicitConversions._
 
-            implicit val logger = out.log
-            implicit val schema = SchemaDef(pkgBOName, useDbPrefix.value, sourceBOFiles)
+            implicit val logger = streams.value.log
+            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
 
-            tmp.mkdirs()
+            tmpResourcesDir.value.mkdirs()
 
             val cl2Save = Thread.currentThread.getContextClassLoader
             val cl2Set = this.getClass.getClassLoader
@@ -235,16 +213,16 @@ object DevPlugin extends AutoPlugin {
                 Thread.currentThread setContextClassLoader cl2Set
                 //                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
                 AppDef.generateScalaCode(
-                    baseDirectory = baseDir,
-                    tmp = tmp,
-                    sourceBoDir = srcBoDir,
-                    sourceAppDir = srcAppDir,
-                    outScalaAppDir = outScalaAppDir,
-                    sourceMain = srcMain,
-                    pkgAppName = pkgAppName,
-                    pkgBOName = pkgBOName,
-                    contextPath = cntxtPath,
-                    maxArity = arr,
+                    baseDirectory = baseDirectory.value,
+                    tmp = tmpResourcesDir.value,
+                    sourceBoDir = sourceBoDir.value,
+                    sourceAppDir = sourceAppDir.value,
+                    outScalaAppDir = outputScalaCodeAppDir.value,
+                    sourceMain = sourceMainDir.value,
+                    pkgAppName = startPackageAppName.value,
+                    pkgBOName = startPackageBOName.value,
+                    contextPath = contextPath.value,
+                    maxArity = maxArity.value,
                     useDbPrefix = useDbPrefix.value
                 )
             }
