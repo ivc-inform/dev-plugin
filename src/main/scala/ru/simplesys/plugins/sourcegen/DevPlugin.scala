@@ -362,7 +362,6 @@ object DevPlugin extends AutoPlugin {
                 import meta.SchemaDef
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
             }
         },
@@ -395,8 +394,8 @@ object DevPlugin extends AutoPlugin {
         } runBefore (`package` in Compile),
 
         //todo На кой мы апдейтим managedClasspath?
-        managedClasspath <<= (classpathTypes, update) map {
-            (cpt, up) => Classpaths.managedJars(DevConfig, cpt, up)
+        managedClasspath := {
+            Classpaths.managedJars(DevConfig, classpathTypes.value, update.value)
         }
     )) ++ Seq[Setting[_]](
         watchSources <++= (sourceSchemaDir in DevConfig) map {
