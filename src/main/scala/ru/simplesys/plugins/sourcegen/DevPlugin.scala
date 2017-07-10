@@ -112,24 +112,12 @@ object DevPlugin extends AutoPlugin {
 
         sourceSchemaBOFiles := ((sourceSchemaDir.value / "bo") ** "*.xml").get,
         sourceMockupUIDir := sourceSchemaDir.value / "ui",
-        sourceMockupUIFiles <<= (sourceMockupUIDir) {
-            x => {
-                x ** "*.bmml"
-            }.get
-        },
-        outputUIDir <<= (sourceSchemaDir) {
-            _ / "ui-generated"
-        },
+        sourceMockupUIFiles := (sourceMockupUIDir.value ** "*.bmml").get,
+        outputUIDir := sourceSchemaDir.value / "ui-generated",
 
-        sourceBoDir <<= (sourceSchemaDir) {
-            _ / "bo"
-        },
-        outputScalaCodeBODir <<= (outputScalaCodeDir) {
-            _ / "bo"
-        },
-        startPackageBOName <<= (startPackageName) {
-            _ + ".bo"
-        },
+        sourceBoDir := sourceSchemaDir.value / "bo",
+        outputScalaCodeBODir := outputScalaCodeDir.value / "bo",
+        startPackageBOName := startPackageName.value + ".bo",
         sourceAppFiles <<= (sourceSchemaDir) {
             x => {
                 (x / "app") * "*.xml"
