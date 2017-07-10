@@ -130,12 +130,8 @@ object DevPlugin extends AutoPlugin {
 
         // Internal structures initialization
         //---------------------------------------------------------------------------------
-        liquibaseDatabase := {
-                CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader(fullClasspath.value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null)
-        },
-        liquibase <<= (liquibaseChangelog, liquibaseDatabase) map {
-            (cLog: File, dBase: Database) => new Liquibase(cLog.getPath, new FileSystemResourceAccessor, dBase)
-        },
+        liquibaseDatabase := CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader(fullClasspath.value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null),
+        liquibase := new Liquibase(liquibaseChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value),
         //---------------------------------------------------------------------------------
 
         // Tasks implementations
