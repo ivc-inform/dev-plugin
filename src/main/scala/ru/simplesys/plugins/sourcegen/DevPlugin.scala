@@ -314,26 +314,17 @@ object DevPlugin extends AutoPlugin {
 
         },
 
-        generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ , useDbPrefix) map {
-            (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/ , useDbPrefix) => {
-
-                import meta.SchemaDef
-
-                implicit val logger = out.log
-                val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
-                LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
+        generateOnPackage := {
+                implicit val logger = streams.value.log
+                LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
                 Seq.empty[File]
-            }
-        } runBefore (`package` in Compile),
+        },
 
         //todo На кой мы апдейтим managedClasspath?
         managedClasspath := {
             Classpaths.managedJars(DevConfig, classpathTypes.value, update.value)
         }
-    )) ++ Seq[Setting[_]](
-        watchSources <++= (sourceSchemaDir in DevConfig) map {
-            (tdir) => (tdir ** "*.xml").get
-        },
+    )) ++ Seq[Setting[_]](watchSources ++=  ((sourceSchemaDir in DevConfig).value ** "*.xml").get,
         //todo А это зачем мы апдейтим?
         ivyConfigurations += DevConfig
     )
