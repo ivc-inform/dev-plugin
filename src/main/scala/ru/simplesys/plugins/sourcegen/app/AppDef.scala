@@ -16,7 +16,7 @@ import com.simplesys.io._
 import scala.collection.mutable.ArrayBuffer
 
 object AppDef {
-    def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
+    def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int, useDbPrefix: Boolean)(implicit logger: Logger): Seq[File] = {
         if (contextPath.isEmpty)
             throw new RuntimeException(s"ContextPath must be not Empty.")
         //Path("journal").deleteRecursively(force = true)
@@ -31,7 +31,7 @@ object AppDef {
 
         val jsDir: Path = sourceMain / "webapp" / "managed" / "javascript" / "common-webapp" / "developed"
 
-        val schema = SchemaDef(pkgBOName, sourceBOFiles.files)
+        val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles.files)
 
         logger info (s"Begin source generation.")
 
@@ -140,6 +140,7 @@ object AppDef {
             packageName = pkgAppName + ".scala.container",
             pkgBOName,
             stage = "#765",
+            useDbPrefix = useDbPrefix,
             logger = logger).createSeq
 
         logger info (s"Done #765.")

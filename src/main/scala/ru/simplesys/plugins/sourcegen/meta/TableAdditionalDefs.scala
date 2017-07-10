@@ -29,17 +29,17 @@ case class GeneratedColumnDef[T](val tableRef: LinkRefToTable,
                                  val name: String,
                                  val dataType: DataType[T],
                                  val isMandatory: Boolean
-                                ) extends ColumnDef[T] {
-  def dbName: String = (if (dataType.dbPrefix.toUpperCase === name.toUpperCase) name else (dataType.dbPrefix + name)).toUpperCase
+                                )(implicit schemaDef: SchemaDef) extends ColumnDef[T] {
+  def dbName: String = (if (schemaDef.useDbPrefix) if (dataType.dbPrefix.toUpperCase === name.toUpperCase) name else (dataType.dbPrefix + name) else name).toUpperCase
   def scalaName: String = name
 }
 
 object ColumnDef {
-  def apply[T](tableRef: LinkRefToTable, name: String, dataType: DataType[T], isMandatory: Boolean): ColumnDef[T] = {
+  def apply[T](tableRef: LinkRefToTable, name: String, dataType: DataType[T], isMandatory: Boolean)(implicit schemaDef: SchemaDef): ColumnDef[T] = {
     GeneratedColumnDef(tableRef, name, dataType, isMandatory)
   }
 
-  def apply(tableRef: LinkRefToTable, name: String, attrs: Seq[AttrDef[_]], classesInTable: Set[LinkRefToAbstractClass]): ColumnDef[_] = {
+  def apply(tableRef: LinkRefToTable, name: String, attrs: Seq[AttrDef[_]], classesInTable: Set[LinkRefToAbstractClass])(implicit schemaDef: SchemaDef): ColumnDef[_] = {
     //println(attrs.map(_.currentOwner).toSet.toString() + " - " + classesInTable.toString())
     val dataType = attrs.head.attrType
     val isMandatory = attrs.forall(curr => curr.isMandatory) && (attrs.map(_.currentOwner).toSet === classesInTable)

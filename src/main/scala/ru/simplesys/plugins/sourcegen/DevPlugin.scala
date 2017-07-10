@@ -48,6 +48,7 @@ object DevPlugin extends AutoPlugin {
     val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
 
     val quoted = settingKey[Boolean]("Use quotes for generating and using tables, columns, constraints")
+    val useDbPrefix = settingKey[Boolean]("Use DB Prefix from DataType[T] for generete columnName in DB Tables")
 
     //---------------------------------------------------------------------------------
     val liquibaseCreateChangelog = settingKey[File]("This is your liquibase create changelog file. Defaults to sourceManaged/migration/create/db.changelog-create.xml. Shouldn't be changed!")
@@ -120,6 +121,7 @@ object DevPlugin extends AutoPlugin {
         },
 
         quoted := true,
+        useDbPrefix := true,
         maxArity := 254,
 
         //---------------------------------------------------------------------------------
@@ -222,7 +224,7 @@ object DevPlugin extends AutoPlugin {
             import com.simplesys.file.ImplicitConversions._
 
             implicit val logger = out.log
-            implicit val schema = SchemaDef(pkgBOName, sourceBOFiles)
+            implicit val schema = SchemaDef(pkgBOName, useDbPrefix.value, sourceBOFiles)
 
             tmp.mkdirs()
 
@@ -231,19 +233,20 @@ object DevPlugin extends AutoPlugin {
 
             try {
                 Thread.currentThread setContextClassLoader cl2Set
-//                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
-                  AppDef.generateScalaCode(
-                      baseDirectory = baseDir,
-                      tmp = tmp,
-                      sourceBoDir = srcBoDir,
-                      sourceAppDir = srcAppDir,
-                      outScalaAppDir = outScalaAppDir,
-                      sourceMain = srcMain,
-                      pkgAppName = pkgAppName,
-                      pkgBOName = pkgBOName,
-                      contextPath = cntxtPath,
-                      maxArity = arr
-                  )
+                //                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
+                AppDef.generateScalaCode(
+                    baseDirectory = baseDir,
+                    tmp = tmp,
+                    sourceBoDir = srcBoDir,
+                    sourceAppDir = srcAppDir,
+                    outScalaAppDir = outScalaAppDir,
+                    sourceMain = srcMain,
+                    pkgAppName = pkgAppName,
+                    pkgBOName = pkgBOName,
+                    contextPath = cntxtPath,
+                    maxArity = arr,
+                    useDbPrefix = useDbPrefix.value
+                )
             }
             finally {
                 Thread.currentThread setContextClassLoader cl2Save
@@ -251,15 +254,15 @@ object DevPlugin extends AutoPlugin {
 
         },
 
-        generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted) map {
-            (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls) => {
+        generateBoScalaCode <<= (streams, sourceBoDir, startPackageAppName, startPackageBOName, sourceSchemaBOFiles, outputScalaCodeAppDir, outputScalaCodeBODir, quoted, useDbPrefix) map {
+            (out, sourceBoDir, pkgAppName, pkgBoName, sourceBOFiles, outScalaAppDir, outScalaBoDir, useQuotes4Tbls, useDbPrefix) => {
 
                 import meta.SchemaDef
                 import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
                 import com.simplesys.file.ImplicitConversions._
 
                 implicit val logger = out.log
-                implicit val schema = SchemaDef(pkgBoName, sourceBOFiles)
+                implicit val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
 
                 val _outDir: Path = outScalaBoDir
 
@@ -271,6 +274,7 @@ object DevPlugin extends AutoPlugin {
                     packageName = pkgBoName,
                     pkgBOName = pkgBoName,
                     quoted = useQuotes4Tbls,
+                    useDbPrefix = useDbPrefix,
                     logger = logger
                 ).createSeq
 
@@ -281,6 +285,7 @@ object DevPlugin extends AutoPlugin {
                     pkgBOName = pkgBoName,
                     quoted = useQuotes4Tbls,
                     stage = "#819",
+                    useDbPrefix = useDbPrefix,
                     logger = logger
                 ).createSeq
 
@@ -291,6 +296,7 @@ object DevPlugin extends AutoPlugin {
                     pkgBOName = pkgBoName,
                     quoted = useQuotes4Tbls,
                     stage = "#844",
+                    useDbPrefix = useDbPrefix,
                     logger = logger
                 ).createSeq
 
@@ -300,6 +306,7 @@ object DevPlugin extends AutoPlugin {
                     packageName = pkgBoName,
                     pkgBOName = pkgBoName,
                     quoted = useQuotes4Tbls,
+                    useDbPrefix = useDbPrefix,
                     logger = logger
                 ).createSeq
 
@@ -307,8 +314,8 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName) map {
-            (tmp, out, sourceBoDir, sourceAppDir, pkgBoName) => {
+        N877 <<= (tmpResourcesDir, streams, sourceBoDir, sourceAppDir, startPackageBOName, useDbPrefix) map {
+            (tmp, out, sourceBoDir, sourceAppDir, pkgBoName, useDbPrefix) => {
 
                 import com.simplesys.file.ImplicitConversions._
                 import com.simplesys.saxon._
@@ -323,7 +330,7 @@ object DevPlugin extends AutoPlugin {
                 val macroPath: Path = _sourceAppDir / "macroBo"
                 var sourceBOFiles: PathSet[Path] = sourceBoDir * "*.xml"
 
-                val schema = SchemaDef(pkgBoName, sourceBOFiles.files)
+                val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles.files)
 
                 XmlUtil.save(schema.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "allBo.xml").toFile)
                 XmlUtil.save(DataTypes.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "domains.xml").toFile)
@@ -349,26 +356,26 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        generateMockupUI <<= (tmpResourcesDir, streams, sourceSchemaBOFiles, sourceMockupUIFiles, startPackageBOName, outputUIDir) map {
-            (tmp, out, sourceBOFiles, sourceUIFiles, pkgBoName, outUIDir) => {
+        generateMockupUI <<= (tmpResourcesDir, streams, sourceSchemaBOFiles, sourceMockupUIFiles, startPackageBOName, outputUIDir, useDbPrefix) map {
+            (tmp, out, sourceBOFiles, sourceUIFiles, pkgBoName, outUIDir, useDbPrefix) => {
 
                 import balsamiq._
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBoName, sourceBOFiles)
+                val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
                 val uiGenerator = UIGenerator(schema, sourceUIFiles)
 
                 uiGenerator.generateFiles(outUIDir)
             }
         },
 
-        generateCreateChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, quoted) map {
-            (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, useQuotes4Tbls) => {
+        generateCreateChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, quoted, useDbPrefix) map {
+            (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, useQuotes4Tbls, useDbPrefix) => {
 
                 import meta.SchemaDef
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBoName, sourceBOFiles)
+                val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
                 val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
                 val tables = schema.tables
                 //tables.foreach(t => println(t.selfRef))
@@ -376,13 +383,13 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted) map {
-            (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls) => {
+        generateUpgradeChangelog <<= (streams, sourceSchemaBOFiles, startPackageBOName, /*outputCreateChangelogDir, */ liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory, quoted, useDbPrefix) map {
+            (out, sourceBOFiles, pkgBoName, /*outCreateChLogDir, */ createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir, useQuotes4Tbls, useDbPrefix) => {
 
                 import meta.SchemaDef
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBoName, sourceBOFiles)
+                val schema = SchemaDef(pkgBoName, useDbPrefix, sourceBOFiles)
                 val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
             }
@@ -394,13 +401,13 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        generateAllButUpgrade <<= (streams, sourceSchemaBOFiles, outputScalaCodeBODir, startPackageBOName, sourceAppFiles, outputScalaCodeAppDir, startPackageAppName, liquibaseCreateChangelog, outputJavaScriptDir, quoted) map {
-            (out, sourceBOFiles, outScalaBODir, pkgBOName, sourceDSFiles, outScalaDSDir, pkgDSName, /*outCreateChLogDir, */ createChLogFile, outJSDir, useQuotes4Tbls) => {
+        generateAllButUpgrade <<= (streams, sourceSchemaBOFiles, outputScalaCodeBODir, startPackageBOName, sourceAppFiles, outputScalaCodeAppDir, startPackageAppName, liquibaseCreateChangelog, outputJavaScriptDir, quoted, useDbPrefix) map {
+            (out, sourceBOFiles, outScalaBODir, pkgBOName, sourceDSFiles, outScalaDSDir, pkgDSName, /*outCreateChLogDir, */ createChLogFile, outJSDir, useQuotes4Tbls, useDbPrefix) => {
 
                 import meta.SchemaDef
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBOName, sourceBOFiles)
+                val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
                 val scalaBOFiles = schema.generateScalaCode(outScalaBODir, pkgBOName)
                 val jsFiles = schema.generateJavaScript(outJSDir)
                 val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
@@ -408,13 +415,13 @@ object DevPlugin extends AutoPlugin {
             }
         },
 
-        generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ ) map {
-            (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/) => {
+        generateOnPackage <<= (streams, sourceSchemaBOFiles, startPackageBOName, outputCreateChangelogDir, liquibaseCreateChangelog, outputUpgradeChangelogDir, liquibaseUpgradeChangelog, baseDirectory /*, outputJavaScriptDir*/ , useDbPrefix) map {
+            (out, sourceBOFiles, pkgBOName, outCreateChLogDir, createChLogFile, outUpgradeChLogDir, upgradeChLogFile, baseDir /*, outJSDir*/, useDbPrefix) => {
 
                 import meta.SchemaDef
 
                 implicit val logger = out.log
-                val schema = SchemaDef(pkgBOName, sourceBOFiles)
+                val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles)
                 //val jsFiles = schema.generateJavaScript(outJSDir)
                 val createChLogs = schema.generateCreateChangelog(/*outCreateChLogDir, */ createChLogFile)
                 LiquibaseUpgradeGen.generateUpgradeChangelog(outUpgradeChLogDir, createChLogFile, upgradeChLogFile, baseDir)
