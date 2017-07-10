@@ -22,12 +22,13 @@ class GenTables(val appFilePath: Path,
                 val pkgBOName: String,
                 val quoted: Boolean,
                 val useDbPrefix: Boolean,
+                val useTablePrefix: Boolean,
                 val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
 
     val sourceBOFiles: PathSet[Path] = appFilePath * "*.xml"
-    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles.files)
+    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
 
     def create: File = ????
 
@@ -99,7 +100,7 @@ class GenTables(val appFilePath: Path,
           newLine,
           ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(table.tableName.dblQuoted)),
           ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(table.group.dblQuoted))
-          )
+        )
 
         tableClass addMembers(
           newLine,
@@ -109,7 +110,7 @@ class GenTables(val appFilePath: Path,
           newLine,
           ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.SQLDialect".body),
           newLine
-          )
+        )
 
         var allColumns = ""
         var forTuple = ""
@@ -202,7 +203,7 @@ class GenTables(val appFilePath: Path,
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                   ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int"))))
-          )
+        )
 
 
         if (table.linksToClasses.filter(_.toClass.isAbstract).toSeq.length == 0)
@@ -239,7 +240,7 @@ class GenTables(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
               newLine,
               ScalaEndComment("P Methods")
-              )
+            )
 
         val module = ScalaModule(
             packageName.pkg,

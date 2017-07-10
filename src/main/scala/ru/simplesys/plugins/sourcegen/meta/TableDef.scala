@@ -13,13 +13,15 @@ trait TableDef {
   def group: Locator
 
   def tableName: String
+  def useTablePrefix: Boolean
   def scalaTableName: String = s"${tableName}JTbl"
 
-  def autoTableDBName(implicit resolver: SchemaDef): String = (resolver.resolveGroup(group).prefix + "_" + tableName).toUpperCase
+  def autoTableDBName(implicit resolver: SchemaDef): String = if (useTablePrefix) (resolver.resolveGroup(group).prefix + "_" + tableName).toUpperCase else tableName.toUpperCase
   def tableDBName(implicit resolver: SchemaDef): String = autoTableDBName
   val selfRef: LinkRefToTable = LinkRefToTable(group, tableName)
 
   def columns: Seq[ColumnDef[_]]
+
   def columnsWithOutLob: Seq[ColumnDef[_]] = columns.filter(
     dt =>
       dt.dataType != DomainClob &&
@@ -47,6 +49,7 @@ trait TableDef {
 
 class GeneratedTableDef(val group: Locator,
                         val name: String,
+                        val useTablePrefix: Boolean,
                         val columns: Seq[ColumnDef[_]],
                         val ucs: Seq[UniqueTableConstraintDef],
                         val fks: Seq[ForeignKeyTableConstraintDef]
@@ -58,5 +61,5 @@ object TableDef {
   def apply(tableRef: LinkRefToTable,
             columns: Seq[ColumnDef[_]],
             ucs: Seq[UniqueTableConstraintDef],
-            fks: Seq[ForeignKeyTableConstraintDef]): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
+            fks: Seq[ForeignKeyTableConstraintDef])(implicit schemaDef: SchemaDef): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, schemaDef.useTablePrefix, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
 }

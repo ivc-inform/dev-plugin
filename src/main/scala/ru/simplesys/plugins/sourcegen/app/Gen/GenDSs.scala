@@ -22,12 +22,13 @@ class GenDSs(val appFilePath: Path,
              val pkgBOName: String,
              val quoted: Boolean,
              val useDbPrefix: Boolean,
+             val useTablePrefix: Boolean,
              val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
 
     val sourceBOFiles: PathSet[Path] = appFilePath * "*.xml"
-    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles.files)
+    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
 
     def create: File = ????
 

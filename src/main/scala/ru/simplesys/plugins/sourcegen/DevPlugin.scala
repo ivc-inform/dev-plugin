@@ -49,6 +49,7 @@ object DevPlugin extends AutoPlugin {
 
     val quoted = settingKey[Boolean]("Use quotes for generating and using tables, columns, constraints")
     val useDbPrefix = settingKey[Boolean]("Use DB Prefix from DataType[T] for generete columnName in DB Tables")
+    val useTablePrefix = settingKey[Boolean]("Use Table Prefix from group prefix xml bo for generete columnName in DB Tables")
 
     //---------------------------------------------------------------------------------
     val liquibaseCreateChangelog = settingKey[File]("This is your liquibase create changelog file. Defaults to sourceManaged/migration/create/db.changelog-create.xml. Shouldn't be changed!")
@@ -147,7 +148,7 @@ object DevPlugin extends AutoPlugin {
             import com.simplesys.file.ImplicitConversions._
 
             implicit val logger = streams.value.log
-            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceSchemaBOFiles.value)
 
             tmpResourcesDir.value.mkdirs()
 
@@ -168,7 +169,8 @@ object DevPlugin extends AutoPlugin {
                     pkgBOName = startPackageBOName.value,
                     contextPath = contextPath.value,
                     maxArity = maxArity.value,
-                    useDbPrefix = useDbPrefix.value
+                    useDbPrefix = useDbPrefix.value,
+                    useTablePrefix = useTablePrefix.value
                 )
             }
             finally {
@@ -184,7 +186,7 @@ object DevPlugin extends AutoPlugin {
             import com.simplesys.file.ImplicitConversions._
 
             implicit val logger = streams.value.log
-            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            implicit val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceSchemaBOFiles.value)
 
             val _outDir: Path = outputScalaCodeBODir.value
 
@@ -197,6 +199,7 @@ object DevPlugin extends AutoPlugin {
                 pkgBOName = startPackageBOName.value,
                 quoted = quoted.value,
                 useDbPrefix = useDbPrefix.value,
+                useTablePrefix = useTablePrefix.value,
                 logger = logger
             ).createSeq
 
@@ -208,6 +211,7 @@ object DevPlugin extends AutoPlugin {
                 quoted = quoted.value,
                 stage = "#819",
                 useDbPrefix = useDbPrefix.value,
+                useTablePrefix = useTablePrefix.value,
                 logger = logger
             ).createSeq
 
@@ -219,6 +223,7 @@ object DevPlugin extends AutoPlugin {
                 quoted = quoted.value,
                 stage = "#844",
                 useDbPrefix = useDbPrefix.value,
+                useTablePrefix = useTablePrefix.value,
                 logger = logger
             ).createSeq
 
@@ -229,6 +234,7 @@ object DevPlugin extends AutoPlugin {
                 pkgBOName = startPackageBOName.value,
                 quoted = quoted.value,
                 useDbPrefix = useDbPrefix.value,
+                useTablePrefix = useTablePrefix.value,
                 logger = logger
             ).createSeq
 
@@ -250,7 +256,7 @@ object DevPlugin extends AutoPlugin {
             val macroPath: Path = _sourceAppDir / "macroBo"
             var sourceBOFiles: PathSet[Path] = sourceBoDir.value * "*.xml"
 
-            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceBOFiles.files)
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceBOFiles.files)
 
             XmlUtil.save(schema.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "allBo.xml").toFile)
             XmlUtil.save(DataTypes.toXML("http://toucan.simplesys.lan/xml/xsd"), (_tmp / "domains.xml").toFile)
@@ -280,7 +286,7 @@ object DevPlugin extends AutoPlugin {
             import balsamiq._
 
             implicit val logger = streams.value.log
-            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceSchemaBOFiles.value)
             val uiGenerator = UIGenerator(schema, sourceMockupUIFiles.value)
 
             uiGenerator generateFiles outputUIDir.value
@@ -291,7 +297,7 @@ object DevPlugin extends AutoPlugin {
             import meta.SchemaDef
 
             implicit val logger = streams.value.log
-            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+            val schema = SchemaDef(startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceSchemaBOFiles.value)
             schema generateCreateChangelog liquibaseCreateChangelog.value
         },
 
@@ -309,7 +315,7 @@ object DevPlugin extends AutoPlugin {
                 import meta.SchemaDef
 
                 implicit val logger = streams.value.log
-                val schema = SchemaDef( startPackageBOName.value, useDbPrefix.value, sourceSchemaBOFiles.value)
+                val schema = SchemaDef( startPackageBOName.value, useDbPrefix.value, useTablePrefix.value, sourceSchemaBOFiles.value)
                 schema.generateScalaCode(outputScalaCodeBODir.value,  startPackageBOName.value)
 
         },
