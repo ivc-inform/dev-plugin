@@ -5,10 +5,7 @@ package meta
 import ru.simplesys.meta.types._
 import com.simplesys.common.equality.SimpleEquality._
 
-//class TableDefData
-
 trait TableDef {
-//  self: TableDefData =>
 
   def group: Locator
 
