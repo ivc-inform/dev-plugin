@@ -37,6 +37,7 @@ trait AbstractClassDef {
     def strictUCs: Seq[UniqueConstraintDef]
     def strictFKs: Seq[ForeignKeyConstraintDef]
     def className: String
+    def useTablePrefix: Boolean
 
     //---------------------------------------------------------------------------------
     protected def inheritedAttrDef(attrName: String)(resolver: SchemaDef): Option[AttrDef[_]] = None

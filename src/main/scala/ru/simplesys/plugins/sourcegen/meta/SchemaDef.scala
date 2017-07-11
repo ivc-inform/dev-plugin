@@ -68,8 +68,9 @@ trait SchemaDef extends SchemaDefProto {
                     case (colName, currentTableMapping) =>
                         ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef))(this)
                 }.toSeq
-                
-                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()))
+
+                val iClass = resolveClass(LinkRefToClassOld(tblRef.groupName, tblRef.objectName))
+                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()), iClass.useTablePrefix)
         }.toSeq
         result
     }
