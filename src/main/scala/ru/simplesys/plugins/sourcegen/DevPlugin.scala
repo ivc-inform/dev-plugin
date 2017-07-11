@@ -103,10 +103,6 @@ object DevPlugin extends AutoPlugin {
         outputJavaScriptDir := (resourceManaged in Compile).value / "javascript",
         startPackageName := organization.value + "." + name.value,
 
-        //quoted := true,
-        //useDbPrefix := true,
-        //maxArity := 254,
-
         //---------------------------------------------------------------------------------
 
         sourceSchemaBOFiles := ((sourceSchemaDir.value / "bo") ** "*.xml").get,
