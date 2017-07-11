@@ -24,7 +24,7 @@ package object meta {
     type ISimpleClass = SimpleClassDef with AbstractClassDefMetaGen with SimpleClassDefMetaGen
     type IEnumClass = SimpleClassDef with EnumProvider with AbstractClassDefMetaGen with SimpleClassDefMetaGen with EnumProviderMetaGen
     type IHierarchyClass = HierarchyClassDef with AbstractClassDefMetaGen
-    // with HierarchyClassDefMetaGen
+
     type IRootHierarchyClass = RootHierarchyClassDef with HierarchyLevelSetting with AbstractClassDefMetaGen with HierarchyClassDefWSettingMetaGen
     type IBaseHierarchyClass = HierarchyClassDef with HierarchyLevelSetting with AbstractClassDefMetaGen with HierarchyClassDefWSettingMetaGen
     type IChildHierarchyClass = ChildHierarchyClassDef with AbstractClassDefMetaGen with ChildHierarchyClassDefMetaGen
