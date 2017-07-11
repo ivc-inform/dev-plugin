@@ -71,7 +71,7 @@ trait SchemaDef extends SchemaDefProto {
                     case (colName, currentTableMapping) =>
                         ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef))(this)
                 }.toSeq
-                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()))(this)
+                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()))
         }.toSeq
         result
     }

@@ -16,8 +16,9 @@ class RootHierarchyClassDefData(group: Locator,
                                 fks: Seq[ForeignKeyConstraintDef],
                                 defaultSettingsData: IDefaultSettings,
                                 isAutoTableMapping: Boolean,
+                                useTablePrefix: Boolean,
                                 val hierarchyMappingType: HierarchyMappingType,
-                                val discriminatorAttrName: String) extends HierarchyClassDefData(group, className, classCaption, isAbstract, strictAttrs, ucs, fks, defaultSettingsData, isAutoTableMapping) with HierarchyLevelSettingData
+                                val discriminatorAttrName: String) extends HierarchyClassDefData(group, className, classCaption, isAbstract, strictAttrs, ucs, fks, defaultSettingsData, isAutoTableMapping, useTablePrefix) with HierarchyLevelSettingData
 
 //---------------------------------------------------------------------------------
 

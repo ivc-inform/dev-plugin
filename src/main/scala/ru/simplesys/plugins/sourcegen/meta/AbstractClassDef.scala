@@ -25,6 +25,7 @@ trait AbstractClassDefData {
     def isAutoTableMapping: Boolean
 
     def defaultSettingsData: IDefaultSettings
+    def useTablePrefix: Boolean
 }
 
 trait AbstractClassDef {

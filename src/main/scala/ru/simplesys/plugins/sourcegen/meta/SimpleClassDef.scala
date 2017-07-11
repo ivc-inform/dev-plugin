@@ -20,9 +20,8 @@ class SimpleClassDefData(val group: Locator,
                          val strictUCs: Seq[UniqueConstraintDef],
                          val strictFKs: Seq[ForeignKeyConstraintDef],
                          val defaultSettingsData: IDefaultSettings,
-                         val isAutoTableMapping: Boolean) extends AbstractClassDefData {
-  //val pk: UniqueConstraintDef = ucs.filter(_.ucType === PK).head
-}
+                         val isAutoTableMapping: Boolean,
+                         val useTablePrefix: Boolean) extends AbstractClassDefData
 
 //---------------------------------------------------------------------------------
 
@@ -44,8 +43,9 @@ object SimpleClassDef{
     val fks = (x \\ "fk").map(ForeignKeyConstraintDef(selfRef, _))
 
     val defaultSettings = (x \ "defaults").map(DefaultSettings(selfRef, _)).head
+    val useTablePrefix  = (x \ "@useTablePrefix").text.asBoolean()
 
-    new SimpleClassDefData(group, className, classCaption, strictAttrs, ucs, fks, defaultSettings, isAutoTableMapping) with SimpleClassDef with AbstractClassDefMetaGen with SimpleClassDefMetaGen
+    new SimpleClassDefData(group, className, classCaption, strictAttrs, ucs, fks, defaultSettings, isAutoTableMapping, useTablePrefix) with SimpleClassDef with AbstractClassDefMetaGen with SimpleClassDefMetaGen
   }
 }
 
@@ -70,6 +70,7 @@ object EnumClassDef {
     val strictAttrs = (x \\ "attr").map(AttrDef(selfRef, Some(pkAttrNames, className), _))
 
     val defaultSettings = (x \ "defaults").map(DefaultSettings(selfRef, _)).head
+    val useTablePrefix  = (x \ "@useTablePrefix").text.asBoolean()
 
     new {
       val keyMemberName = lKeyAttrName
@@ -77,6 +78,6 @@ object EnumClassDef {
       val members: Map[String, (DataType[_], Boolean)] = strictAttrs.map(x => (x.name, (x.attrType, x.isMandatory))).toMap
       val enumValues = lEnumValues
       val objName = className
-    } with SimpleClassDefData(group, className, classCaption, strictAttrs, ucs, fks, defaultSettings, isAutoTableMapping) with SimpleClassDef with EnumProvider with AbstractClassDefMetaGen with SimpleClassDefMetaGen with EnumProviderMetaGen with EnumClassProviderMetaGen
+    } with SimpleClassDefData(group, className, classCaption, strictAttrs, ucs, fks, defaultSettings, isAutoTableMapping, useTablePrefix) with SimpleClassDef with EnumProvider with AbstractClassDefMetaGen with SimpleClassDefMetaGen with EnumProviderMetaGen with EnumClassProviderMetaGen
   }
 }

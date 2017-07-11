@@ -18,7 +18,8 @@ class ChildHierarchyClassDefData(group: Locator,
                                  val overrideFKs: Seq[ForeignKeyConstraintDef],
                                  defaultSettingsData: IDefaultSettings,
                                  isAutoTableMapping: Boolean,
-                                 val parentClassLink: LinkRefToParentClass) extends HierarchyClassDefData(group, className, classCaption, isAbstractData, strictAttrs, strictUCs, strictFKs, defaultSettingsData, isAutoTableMapping)
+                                 useTablePrefix: Boolean,
+                                 val parentClassLink: LinkRefToParentClass) extends HierarchyClassDefData(group, className, classCaption, isAbstractData, strictAttrs, strictUCs, strictFKs, defaultSettingsData, isAutoTableMapping, useTablePrefix)
 
 //---------------------------------------------------------------------------------
 
