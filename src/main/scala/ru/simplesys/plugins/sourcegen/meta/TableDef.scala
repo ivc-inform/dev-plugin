@@ -61,5 +61,5 @@ object TableDef {
   def apply(tableRef: LinkRefToTable,
             columns: Seq[ColumnDef[_]],
             ucs: Seq[UniqueTableConstraintDef],
-            fks: Seq[ForeignKeyTableConstraintDef])(implicit schemaDef: SchemaDef): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, schemaDef.useTablePrefix, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
+            fks: Seq[ForeignKeyTableConstraintDef])(implicit schemaDef: SchemaDef): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, tableRef.toTable.useTablePrefix, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
 }

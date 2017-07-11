@@ -2,6 +2,8 @@ package ru.simplesys.plugins
 package sourcegen
 package meta
 
+import java.io.{FileInputStream, InputStreamReader}
+
 import com.simplesys.common.equality.SimpleEquality._
 import ru.simplesys.meta.types.{Locator, SchemaDefProto}
 import sbt.File
@@ -12,7 +14,6 @@ import scala.xml.{Elem, XML}
 //---------------------------------------------------------------------------------
 class SchemaDefData(val prefixPath: String,
                     val useDbPrefix: Boolean,
-                    val useTablePrefix: Boolean,
                     val groups: Seq[IGroup],
                     val hierarchyClasses: Seq[IHierarchyClass],
                     val enumClasses: Seq[IEnumClass],
@@ -35,7 +36,6 @@ trait SchemaDef extends SchemaDefProto {
     def hierarchyClasses: Seq[IHierarchyClass]
     def classes: Seq[IClass]
     val useDbPrefix: Boolean
-    val useTablePrefix: Boolean
 
     // custom mapping will be here!
     protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap {
@@ -104,7 +104,7 @@ trait SchemaDef extends SchemaDefProto {
 //---------------------------------------------------------------------------------
 
 object SchemaDef {
-    def apply(prefixPath: String, useDbPrefix: Boolean, useTablePrefix: Boolean, xmlNodes: Array[Elem]): ISchema = {
+    def apply(prefixPath: String, useDbPrefix: Boolean, xmlNodes: Array[Elem]): ISchema = {
         val parseResults: Seq[(IGroup, Seq[IHierarchyClass], Seq[IEnumClass], Seq[ISimpleClass])] = {
             for (xmlPiece <- xmlNodes.toSeq) yield {
                 (xmlPiece \\ "group").map {
@@ -131,16 +131,11 @@ object SchemaDef {
             case (group, hierarchyClass, enumClass, simpleClass) => simpleClass
         }.flatten
 
-        val res = new SchemaDefData(prefixPath, useDbPrefix, useTablePrefix, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
-        //      res.classesMap.keys.foreach(println _)
-        res
+        new SchemaDefData(prefixPath, useDbPrefix, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
     }
 
-    def apply(prefixPath: String, useDbPrefix: Boolean, useTablePrefix: Boolean, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
-        val xmlPieces: Array[Elem] = files.map {
-            x =>               
-                XML.load(new java.io.InputStreamReader(new java.io.FileInputStream(x), XmlUtil.Encoding))
-        }(collection.breakOut)
-        apply(prefixPath, useDbPrefix, useTablePrefix, xmlPieces)
+    def apply(prefixPath: String, useDbPrefix: Boolean, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
+        val xmlPieces: Array[Elem] = files.map (x =>XML.load(new InputStreamReader(new FileInputStream(x), XmlUtil.Encoding)))(collection.breakOut)
+        apply(prefixPath, useDbPrefix, xmlPieces)
     }
 }

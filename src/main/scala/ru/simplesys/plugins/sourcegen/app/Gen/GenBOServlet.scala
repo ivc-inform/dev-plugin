@@ -26,7 +26,6 @@ class GenBOServlet(val appFilePath: Path,
                    val pkgBOName: String,
                    val stage: String,
                    val useDbPrefix: Boolean,
-                   val useTablePrefix: Boolean,
                    val logger: Logger) extends GenScala1 {
 
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
@@ -37,7 +36,7 @@ class GenBOServlet(val appFilePath: Path,
     def create: File = ????
 
     def createSeq: Seq[File] = {
-        implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
+        implicit val schema = SchemaDef(pkgBOName, useDbPrefix, sourceBOFiles.files)
 
         val resSeq = ArrayBuffer.empty[File]
         val servletes = ArrayBuffer.empty[String]
