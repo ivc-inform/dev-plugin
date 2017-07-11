@@ -13,7 +13,6 @@ import scala.xml.{Elem, XML}
 
 //---------------------------------------------------------------------------------
 class SchemaDefData(val prefixPath: String,
-                    val useDbPrefix: Boolean,
                     val groups: Seq[IGroup],
                     val hierarchyClasses: Seq[IHierarchyClass],
                     val enumClasses: Seq[IEnumClass],
@@ -35,7 +34,6 @@ trait SchemaDef extends SchemaDefProto {
     def enumClasses: Seq[IEnumClass]
     def hierarchyClasses: Seq[IHierarchyClass]
     def classes: Seq[IClass]
-    val useDbPrefix: Boolean
 
     // custom mapping will be here!
     protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap (_.autoAttrColumnMapping(this))
@@ -66,7 +64,7 @@ trait SchemaDef extends SchemaDefProto {
             case (tblRef, mapping) =>
                 val columns = mapping.groupBy(_.columnLink.name).map {
                     case (colName, currentTableMapping) =>
-                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef))(this)
+                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef), true)
                 }.toSeq
 
                 val iClass = resolveClass(LinkRefToClassOld(tblRef.groupName, tblRef.objectName))
@@ -103,7 +101,7 @@ trait SchemaDef extends SchemaDefProto {
 //---------------------------------------------------------------------------------
 
 object SchemaDef {
-    def apply(prefixPath: String, useDbPrefix: Boolean, xmlNodes: Array[Elem]): ISchema = {
+    def apply(prefixPath: String, xmlNodes: Array[Elem]): ISchema = {
         val parseResults: Seq[(IGroup, Seq[IHierarchyClass], Seq[IEnumClass], Seq[ISimpleClass])] = {
             for (xmlPiece <- xmlNodes.toSeq) yield {
                 (xmlPiece \\ "group").map {
@@ -130,11 +128,11 @@ object SchemaDef {
             case (group, hierarchyClass, enumClass, simpleClass) => simpleClass
         }.flatten
 
-        new SchemaDefData(prefixPath, useDbPrefix, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
+        new SchemaDefData(prefixPath, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
     }
 
-    def apply(prefixPath: String, useDbPrefix: Boolean, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
+    def apply(prefixPath: String, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
         val xmlPieces: Array[Elem] = files.map (x =>XML.load(new InputStreamReader(new FileInputStream(x), XmlUtil.Encoding)))(collection.breakOut)
-        apply(prefixPath, useDbPrefix, xmlPieces)
+        apply(prefixPath,  xmlPieces)
     }
 }
