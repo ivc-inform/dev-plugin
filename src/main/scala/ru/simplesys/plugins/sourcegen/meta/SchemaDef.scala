@@ -138,9 +138,7 @@ object SchemaDef {
 
     def apply(prefixPath: String, useDbPrefix: Boolean, useTablePrefix: Boolean, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
         val xmlPieces: Array[Elem] = files.map {
-            x =>
-                //println(x.getAbsolutePath)
-                //XML.loadFile(x)
+            x =>               
                 XML.load(new java.io.InputStreamReader(new java.io.FileInputStream(x), XmlUtil.Encoding))
         }(collection.breakOut)
         apply(prefixPath, useDbPrefix, useTablePrefix, xmlPieces)
