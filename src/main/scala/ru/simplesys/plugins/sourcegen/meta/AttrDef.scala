@@ -348,7 +348,8 @@ object AttrDef {
                     if (pkAttrNames.exists(_ === name)) {
                         val newDataType = new ComplexDataType(currentOwner.groupName, None, typeName, dataType)
                         SimpleAttrDef(currentOwner, name, caption, newDataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
-                    } else SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
+                    } else
+                        SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
                 }
                 case None =>
                     SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
