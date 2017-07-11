@@ -337,7 +337,7 @@ object AttrDef {
         val isGenBySeq = (x \ "@genBySeq").textOption.map(_.toBoolean).getOrElse(false)
         val formula = (x \ "@formula").textOption
         val isSimpleEnum = (x \ "@isSimpleEnum").textOption.map(_.toBoolean).getOrElse(false)
-        val useDbPrefix = (x \ "@useDbPrefix").textOption.map(_.asBoolean()).getOrElse(false)
+        val useDbPrefix = (x \ "@useDbPrefix").textOption.map(_.asBoolean()).getOrElse(true)
         if (isSimpleEnum) {
             val enumValues = (x \ "value").map(SimpleEnumValue(_))
             val newDataType = new ComplexDataType(currentOwner.groupName, None, currentOwner.objectName + name.capitalize, dataType)
