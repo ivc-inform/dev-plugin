@@ -2,10 +2,11 @@ package ru.simplesys.plugins
 package sourcegen
 package meta
 
-import ru.simplesys.meta.types._
-import scala.xml._
-import com.simplesys.common.equality.SimpleEquality._
 import com.simplesys.common.XMLs._
+import com.simplesys.common.equality.SimpleEquality._
+import ru.simplesys.meta.types._
+
+import scala.xml._
 
 //---------------------------------------------------------------------------------
 
@@ -22,6 +23,7 @@ trait AttrDef[T] {
     def formula: Option[String]
     def isHidden: Boolean
     def isGenBySeq: Boolean
+    def useDbPrefix: Boolean
 
     def isSystem: Boolean = {
         attrType == Domain.di || attrType == Domain.id || attrType == Domain.ss
@@ -47,9 +49,9 @@ trait AttrDef[T] {
         val discrNames = currentOwner.toClass.discriminatorVals.map(v => v.toParentClass.discriminatorAttrName)
 
         if (caption.isEmpty)
-           <attr name={name} type={attrType.simpleDataType.name} mandatory={isMandatory.toString} getterType={typeColumn} calculated={isCalculated.toString} isDiscriminator={discrNames.exists(_ === name).toString} hidden={(isHidden || (caption.isEmpty && isSystem)).toString} genBySeq={isGenBySeq.toString}/>
+                <attr name={name} type={attrType.simpleDataType.name} mandatory={isMandatory.toString} getterType={typeColumn} calculated={isCalculated.toString} isDiscriminator={discrNames.exists(_ === name).toString} hidden={(isHidden || (caption.isEmpty && isSystem)).toString} genBySeq={isGenBySeq.toString}/>
         else
-           <attr name={name} type={attrType.simpleDataType.name} caption={caption} mandatory={isMandatory.toString} getterType={typeColumn} calculated={isCalculated.toString} isDiscriminator={discrNames.exists(_ === name).toString} hidden={(isHidden || (caption.isEmpty && isSystem)).toString} genBySeq={isGenBySeq.toString}/>
+                <attr name={name} type={attrType.simpleDataType.name} caption={caption} mandatory={isMandatory.toString} getterType={typeColumn} calculated={isCalculated.toString} isDiscriminator={discrNames.exists(_ === name).toString} hidden={(isHidden || (caption.isEmpty && isSystem)).toString} genBySeq={isGenBySeq.toString}/>
     }
 
     def getProxy(CurrentOwner: LinkRefToAbstractClass,
@@ -59,30 +61,34 @@ trait AttrDef[T] {
                  IsCalculated: Boolean = this.isCalculated,
                  Formula: Option[String] = this.formula,
                  IsHidden: Boolean = this.isHidden,
-                 IsGenBySeq: Boolean = this.isGenBySeq
-                  ): AttrDef[T] = new ProxyAttrDef(this,
-    CurrentOwner, {
-        if (Name === this.name) None else Some(Name)
-    }, {
-        if (Caption === this.caption) None else Some(Caption)
-    }, {
-        if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
-    }, {
-        if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
-    }, {
-        if (Formula === this.formula) None else Formula
-    }, {
-        if (IsHidden === this.isHidden) None else Some(isHidden)
-    }, {
-        if (IsGenBySeq === this.isGenBySeq) None else Some(isGenBySeq)
-    })
+                 IsGenBySeq: Boolean = this.isGenBySeq,
+                 UseDbPrefix: Boolean = this.useDbPrefix
+                ): AttrDef[T] = new ProxyAttrDef(this,
+        CurrentOwner, {
+            if (Name === this.name) None else Some(Name)
+        }, {
+            if (Caption === this.caption) None else Some(Caption)
+        }, {
+            if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
+        }, {
+            if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
+        }, {
+            if (Formula === this.formula) None else Formula
+        }, {
+            if (IsHidden === this.isHidden) None else Some(isHidden)
+        }, {
+            if (IsGenBySeq === this.isGenBySeq) None else Some(isGenBySeq)
+        }, {
+            if (UseDbPrefix === this.useDbPrefix) None else Some(useDbPrefix)
+        })
 
     def getProxy(CurrentOwner: LinkRefToAbstractClass,
                  mappingSetting: AttrMapping,
                  isMandatory: Boolean,
                  isHidden: Boolean,
-                 isGenBySeq: Boolean
-                  ): AttrDef[T] = new ProxyAttrDef(this,
+                 isGenBySeq: Boolean,
+                 useDbPrefix: Boolean
+                ): AttrDef[T] = new ProxyAttrDef(this,
         CurrentOwner,
         Some(mappingSetting.localName),
         mappingSetting.localCaption,
@@ -90,7 +96,9 @@ trait AttrDef[T] {
         mappingSetting.isCalculated,
         mappingSetting.formula,
         Some(isHidden),
-        Some(isGenBySeq))
+        Some(isGenBySeq),
+        Some(useDbPrefix)
+    )
 }
 
 //---------------------------------------------------------------------------------
@@ -103,9 +111,10 @@ case class SimpleAttrDef[T](currentOwner: LinkRefToAbstractClass,
                             isCalculated: Boolean,
                             formula: Option[String],
                             isHidden: Boolean,
-                            isGenBySeq: Boolean
-                             ) extends AttrDef[T] {
-    //  self: SimpleAttrDefToXML[T] =>
+                            isGenBySeq: Boolean,
+                            useDbPrefix: Boolean
+                           ) extends AttrDef[T] {
+
     def stringToSourceValue(s: String)(implicit currentGroupName: Locator, resolver: SchemaDef): String = {
         currentOwner.toClass match {
             case x: EnumProvider => x.stringToSourceValue(s)(currentGroupName)
@@ -123,6 +132,7 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
                           isMandatory: Boolean,
                           isHidden: Boolean,
                           isGenBySeq: Boolean,
+                          useDbPrefix: Boolean,
                           enumValues: Seq[EnumValue]) extends AttrDef[T] with EnumProvider with EnumProviderMetaGen {
     def isCalculated = false
     def formula = None
@@ -133,7 +143,7 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
 
     def group = currentOwner.groupName
 
-    def members: Map[String, (DataType[_], Boolean)] = Map(keyMemberName ->(attrType, true), nameMemberName ->(Domain.sCaption, true), captionMemberName ->(Domain.sCaption, true))
+    def members: Map[String, (DataType[_], Boolean)] = Map(keyMemberName -> (attrType, true), nameMemberName -> (Domain.sCaption, true), captionMemberName -> (Domain.sCaption, true))
 
     def objName: String = attrType.scalaComplexType //currentOwner.objectName + name.capitalize
 
@@ -153,30 +163,34 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
                           IsCalculated: Boolean = this.isCalculated,
                           Formula: Option[String] = this.formula,
                           IsHidden: Boolean = this.isHidden,
-                          IsGenBySeq: Boolean = this.isGenBySeq
-                           ): AttrDef[T] = new EnumProxyAttrDef(this,
-    CurrentOwner, {
-        if (Name === this.name) None else Some(Name)
-    }, {
-        if (Caption === this.caption) None else Some(Caption)
-    }, {
-        if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
-    }, {
-        if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
-    }, {
-        if (Formula === this.formula) None else Formula
-    }, {
-        if (IsHidden === this.isHidden) None else Some(IsHidden)
-    }, {
-        if (IsGenBySeq === this.isGenBySeq) None else Some(IsGenBySeq)
-    })
+                          IsGenBySeq: Boolean = this.isGenBySeq,
+                          UseDbPrefix: Boolean = this.useDbPrefix
+                         ): AttrDef[T] = new EnumProxyAttrDef(this,
+        CurrentOwner, {
+            if (Name === this.name) None else Some(Name)
+        }, {
+            if (Caption === this.caption) None else Some(Caption)
+        }, {
+            if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
+        }, {
+            if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
+        }, {
+            if (Formula === this.formula) None else Formula
+        }, {
+            if (IsHidden === this.isHidden) None else Some(IsHidden)
+        }, {
+            if (IsGenBySeq === this.isGenBySeq) None else Some(IsGenBySeq)
+        }, {
+            if (UseDbPrefix === this.useDbPrefix) None else Some(UseDbPrefix)
+        })
 
     override def getProxy(CurrentOwner: LinkRefToAbstractClass,
                           mappingSetting: AttrMapping,
                           isMandatory: Boolean,
                           isHidden: Boolean,
-                          isGenBySeq: Boolean
-                           ): AttrDef[T] = new EnumProxyAttrDef(this,
+                          isGenBySeq: Boolean,
+                          useDbPrefix: Boolean
+                         ): AttrDef[T] = new EnumProxyAttrDef(this,
         CurrentOwner,
         Some(mappingSetting.localName),
         mappingSetting.localCaption,
@@ -184,7 +198,8 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
         mappingSetting.isCalculated,
         mappingSetting.formula,
         Some(isHidden),
-        Some(isGenBySeq)
+        Some(isGenBySeq),
+        Some(useDbPrefix)
     )
 }
 
@@ -207,9 +222,12 @@ class ProxyAttrDef[T](val proxy: AttrDef[T],
                       val proxyIsCalculated: Option[Boolean],
                       val proxyFormula: Option[String],
                       val proxyIsHidden: Option[Boolean],
-                      val proxyIsGenBySeq: Option[Boolean]
-                       ) extends AttrDef[T] {
+                      val proxyIsGenBySeq: Option[Boolean],
+                      val proxyUseDbPrefix: Option[Boolean]
+                     ) extends AttrDef[T] {
     //  self: AttrDefToXML[T] =>
+
+
     override def masterOwner: LinkRefToAbstractClass = proxy.masterOwner
     def name = proxyName getOrElse proxy.name
     def caption = proxyCaption getOrElse proxy.caption
@@ -219,6 +237,7 @@ class ProxyAttrDef[T](val proxy: AttrDef[T],
     def formula = proxyFormula orElse proxy.formula
     def isHidden = proxyIsHidden getOrElse proxy.isHidden
     def isGenBySeq = proxyIsGenBySeq getOrElse proxy.isGenBySeq
+    def useDbPrefix: Boolean = proxyUseDbPrefix getOrElse proxy.useDbPrefix
     def stringToSourceValue(s: String)(implicit currentGroupName: Locator, resolver: SchemaDef): String = proxy.stringToSourceValue(s)(currentGroupName, resolver)
 }
 
@@ -232,8 +251,9 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
                           proxyIsCalculated: Option[Boolean],
                           proxyFormula: Option[String],
                           proxyIsHidden: Option[Boolean],
-                          proxyIsGenBySeq: Option[Boolean]
-                           ) extends ProxyAttrDef[T](proxy, currentOwner, proxyName, proxyCaption, proxyIsMandatory, proxyIsCalculated, proxyFormula, proxyIsHidden, proxyIsGenBySeq) with EnumProvider {
+                          proxyIsGenBySeq: Option[Boolean],
+                          proxyUseDbPrefix: Option[Boolean]
+                         ) extends ProxyAttrDef[T](proxy, currentOwner, proxyName, proxyCaption, proxyIsMandatory, proxyIsCalculated, proxyFormula, proxyIsHidden, proxyIsGenBySeq, proxyUseDbPrefix) with EnumProvider {
 
     override def group: Locator = proxy.group
 
@@ -260,30 +280,34 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
                           IsCalculated: Boolean = this.isCalculated,
                           Formula: Option[String] = this.formula,
                           IsHidden: Boolean = this.isHidden,
-                          IsGenBySeq: Boolean = this.isGenBySeq
-                           ): AttrDef[T] = new EnumProxyAttrDef(this,
-    CurrentOwner, {
-        if (Name === this.name) None else Some(Name)
-    }, {
-        if (Caption === this.caption) None else Some(Caption)
-    }, {
-        if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
-    }, {
-        if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
-    }, {
-        if (Formula === this.formula) None else Formula
-    }, {
-        if (IsHidden === this.isHidden) None else Some(IsHidden)
-    }, {
-        if (IsGenBySeq === this.isGenBySeq) None else Some(IsGenBySeq)
-    })
+                          IsGenBySeq: Boolean = this.isGenBySeq,
+                          UseDbPrefix: Boolean = this.useDbPrefix
+                         ): AttrDef[T] = new EnumProxyAttrDef(this,
+        CurrentOwner, {
+            if (Name === this.name) None else Some(Name)
+        }, {
+            if (Caption === this.caption) None else Some(Caption)
+        }, {
+            if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
+        }, {
+            if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
+        }, {
+            if (Formula === this.formula) None else Formula
+        }, {
+            if (IsHidden === this.isHidden) None else Some(IsHidden)
+        }, {
+            if (IsGenBySeq === this.isGenBySeq) None else Some(IsGenBySeq)
+        }, {
+            if (UseDbPrefix === this.useDbPrefix) None else Some(UseDbPrefix)
+        })
 
     override def getProxy(CurrentOwner: LinkRefToAbstractClass,
                           mappingSetting: AttrMapping,
                           isMandatory: Boolean,
                           isHidden: Boolean,
-                          isGenBySeq: Boolean
-                           ): AttrDef[T] = new EnumProxyAttrDef(this,
+                          isGenBySeq: Boolean,
+                          useDbPrefix: Boolean
+                         ): AttrDef[T] = new EnumProxyAttrDef(this,
         CurrentOwner,
         Some(mappingSetting.localName),
         mappingSetting.localCaption,
@@ -291,11 +315,9 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
         mappingSetting.isCalculated,
         mappingSetting.formula,
         Some(isHidden),
-        Some(isGenBySeq)
+        Some(isGenBySeq),
+        Some(useDbPrefix)
     )
-
-    //override def toXML(implicit resolver: SchemaDef): Elem = super[EnumAttrDefToXML].toXML(resolver)
-
 }
 
 //---------------------------------------------------------------------------------
@@ -315,20 +337,21 @@ object AttrDef {
         val isGenBySeq = (x \ "@genBySeq").textOption.map(_.toBoolean).getOrElse(false)
         val formula = (x \ "@formula").textOption
         val isSimpleEnum = (x \ "@isSimpleEnum").textOption.map(_.toBoolean).getOrElse(false)
+        val useDbPrefix = (x \ "@useDbPrefix").textOption.map(_.asBoolean()).getOrElse(false)
         if (isSimpleEnum) {
             val enumValues = (x \ "value").map(SimpleEnumValue(_))
             val newDataType = new ComplexDataType(currentOwner.groupName, None, currentOwner.objectName + name.capitalize, dataType)
-            EnumAttrDef(currentOwner, name, caption, newDataType, isMandatory, isHidden, isGenBySeq, enumValues)
+            EnumAttrDef(currentOwner, name, caption, newDataType, isMandatory, isHidden, isGenBySeq, useDbPrefix, enumValues)
         } else {
             forPKAttrs match {
                 case Some((pkAttrNames, typeName)) => {
                     if (pkAttrNames.exists(_ === name)) {
                         val newDataType = new ComplexDataType(currentOwner.groupName, None, typeName, dataType)
-                        SimpleAttrDef(currentOwner, name, caption, newDataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq)
-                    } else SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq)
+                        SimpleAttrDef(currentOwner, name, caption, newDataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
+                    } else SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
                 }
                 case None =>
-                    SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq)
+                    SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
             }
 
         }

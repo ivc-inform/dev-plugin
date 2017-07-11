@@ -64,7 +64,8 @@ trait SchemaDef extends SchemaDefProto {
             case (tblRef, mapping) =>
                 val columns = mapping.groupBy(_.columnLink.name).map {
                     case (colName, currentTableMapping) =>
-                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef), true)
+                        val attr = currentTableMapping.map(_.attr(this)).find(_.name == colName).get
+                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef), attr.useDbPrefix)
                 }.toSeq
 
                 val iClass = resolveClass(LinkRefToClassOld(tblRef.groupName, tblRef.objectName))

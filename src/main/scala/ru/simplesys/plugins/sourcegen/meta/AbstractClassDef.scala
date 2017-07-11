@@ -48,8 +48,9 @@ trait AbstractClassDef {
         val attrMapping = temp._1
         val origAttrDef = temp._2
         val isMandatoryParent = foundFK.resolveUCConstraint.attrs.find(_.name === attrMapping.remoteName).get.isMandatory
+        val useDbPrefixParent = foundFK.resolveUCConstraint.attrs.find(_.name === attrMapping.remoteName).get.useDbPrefix
         val mandatory = if (foundFK.isMandatory) isMandatoryParent else false
-        origAttrDef.getProxy(selfRef, attrMapping, mandatory, false, false)
+        origAttrDef.getProxy(selfRef, attrMapping, mandatory, false, false, useDbPrefixParent)
     }
 
     private val privateAttr = Memoize2 {
