@@ -110,11 +110,7 @@ trait AbstractClassDef {
     def linkRefsToAllTables(implicit resolver: SchemaDef): Seq[LinkRefToTable] = Seq(linkRefToSpecificTable)
 
     def autoAttrColumnMapping(implicit resolver: SchemaDef): Seq[AttrToColumnMapping] = {
-        // here stub for custom mapping too
-        //strictAttrs.map(x => AttrToColumnMapping(selfRef, x.name, linkRefToSpecificTable, x.autoColumnName))
-        {
-            strictAttrs ++ strictFKs.flatMap(_.attrs)
-        }.map(x => AttrToColumnMapping(x.selfRef, LinkRefCol(linkRefToSpecificTable, x.autoColumnName)))
+        {strictAttrs ++ strictFKs.flatMap(_.attrs)}.map(x => AttrToColumnMapping(x.selfRef, LinkRefCol(linkRefToSpecificTable, x.autoColumnName)))
     }
 
     def discriminatorColumnWVals(implicit resolver: SchemaDef): Seq[LinkToColumnWValue] = discriminatorVals.map(_.columnWValue)

@@ -38,9 +38,7 @@ trait SchemaDef extends SchemaDefProto {
     val useDbPrefix: Boolean
 
     // custom mapping will be here!
-    protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap {
-        _.autoAttrColumnMapping(this)
-    }
+    protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap (_.autoAttrColumnMapping(this))
     protected lazy val mappingConstraints: Seq[ConstraintMapping] = classes.flatMap(x => x.ucs(this).map(_.autoMappingToConsImpl(this)) ++ x.fks(this).map(_.autoMappingToConsImpl(this)))
     protected lazy val nonMappedTableUCs: Seq[UniqueTableConstraintDef] = classes.flatMap(_.autoLowLevelTableUCs(this))
     protected lazy val nonMappedTableFKs: Seq[ForeignKeyTableConstraintDef] = classes.flatMap(_.autoLowLevelTableFKs(this))
@@ -63,9 +61,8 @@ trait SchemaDef extends SchemaDefProto {
 
 
     lazy val tables: Seq[ITable] = {
-        val allMappings = mappingAttrColumn
-        val tableMapping = allMappings.groupBy(_.columnLink.refTo)
-        val result = tableMapping.map {
+        
+        val result = mappingAttrColumn.groupBy(_.columnLink.refTo).map {
             case (tblRef, mapping) =>
                 val columns = mapping.groupBy(_.columnLink.name).map {
                     case (colName, currentTableMapping) =>
@@ -83,7 +80,7 @@ trait SchemaDef extends SchemaDefProto {
         case c: IChildHierarchyClass => c
         case _ => throw new RuntimeException(s"class ${cl} is not ICHildHierarchyClass!")
     }
-    //    def resolveClass(cl: LinkRefToClassOld) = classesMap(cl)
+
     def resolveTable(tl: LinkRefToTable) = tablesMap(tl)
     def resolveGroup(gr: Locator) = groupsMap(gr)
 
