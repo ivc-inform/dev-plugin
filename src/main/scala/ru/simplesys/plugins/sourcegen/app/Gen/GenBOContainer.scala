@@ -540,6 +540,10 @@ class GenBOContainer(val appFilePath: Path,
                                                                                 serrializeToOneString = true
                                                                             )
                                                                         )
+                                                                    ),
+                                                                    ScalaCaseLine(
+                                                                        expression = "x".expr,
+                                                                        caseBody = "new RuntimeException (s\"mached as : $x\")".body
                                                                     )
                                                                 )
                                                             ),
