@@ -154,7 +154,7 @@ class GenBOContainer(val appFilePath: Path,
                                     )
 
                                     val module = ScalaModule(
-                                        packageName.pkg,
+                                        s"$packageName.$groupName".pkg,
                                         newLine,
                                         "com.simplesys.app.SessionContextSupport".imp,
                                         "com.simplesys.isc.system.ServletActorDyn".imp,
