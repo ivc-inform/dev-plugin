@@ -187,6 +187,10 @@ class GenDSs(val appFilePath: Path,
                                                                   ),
                                                                   serrializeToOneString = true
                                                               ), caseBody = ScalaBody(s"${productName}(${allColumnsP})")
+                                                            ),
+                                                            ScalaCaseLine(
+                                                                expression = "x".expr,
+                                                                caseBody = "throw new RuntimeException (s\"mached as : $x\")".body
                                                             )
                                                         )
                                                     )
@@ -420,7 +424,7 @@ class GenDSs(val appFilePath: Path,
           newLine,
           ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
           ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
-          )
+        )
 
         j += 1
         var columnTypes = ""
@@ -524,7 +528,7 @@ class GenDSs(val appFilePath: Path,
                         dsClass addMembers(
                           newLine,
                           ScalaComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
-                          )
+                        )
                         if (elements.length > 0) {
                             dsClass addMember
                               ScalaVariable(name = s"${fkClass.className.capitalize}_${fk.softNameForCompare}", serrializeToOneString = true, body = ScalaBody( s"""new ${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}(alias = alias +"B${j}".als)"""))
@@ -569,7 +573,7 @@ class GenDSs(val appFilePath: Path,
           newLine,
           selectPOneMethod(ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric(s"${productName}"))), sb = selectPOneBody),
           ScalaEndComment("Fetch Product")
-          )
+        )
 
         if (!clazz.isAbstract)
             dsClass addMembers(
@@ -670,7 +674,7 @@ class GenDSs(val appFilePath: Path,
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
               ScalaEndComment("Delete"),
               newLine
-              )
+            )
 
         val module = ScalaModule(
             packageName.pkg,
@@ -698,7 +702,7 @@ class GenDSs(val appFilePath: Path,
         module ++= addImports.toArray.distinct
 
         dsCaseClass setParametrs dsCaseClassParameters
-        module ++=(
+        module ++= (
           newLine,
           dsCaseClass,
           newLine,
