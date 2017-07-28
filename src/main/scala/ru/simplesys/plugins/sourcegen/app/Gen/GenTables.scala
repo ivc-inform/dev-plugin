@@ -106,7 +106,7 @@ class GenTables(val appFilePath: Path,
           newLine,
           ScalaMethod(name = "databaseTablename", body = ScalaBody(table.tableDBName.dblQuoted), serrializeToOneString = true),
           newLine,
-          ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.SQLDialect".body),
+          ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.sqlDialect".body),
           newLine
         )
 
