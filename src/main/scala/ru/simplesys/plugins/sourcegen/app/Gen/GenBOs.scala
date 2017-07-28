@@ -67,7 +67,7 @@ class GenBOs(val appFilePath: Path,
                 ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp, parametrType = ParametrVal, defaultValue = strEmpty)
             )
             parametrsImplicit = ScalaClassParametrs(
-                ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
+                ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicitVal)
             )
             extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
                 scalaClassGen = "ClassBO".cls
@@ -86,7 +86,7 @@ class GenBOs(val appFilePath: Path,
         boObject addMembers(
           ScalaMethod(name = "apply",
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
@@ -94,7 +94,7 @@ class GenBOs(val appFilePath: Path,
                   ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp)
               ),
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
@@ -106,7 +106,7 @@ class GenBOs(val appFilePath: Path,
           ScalaComment(s"Class: ${clazz.className}, group: ${clazz.group}"),
           newLine,
           ScalaMethod(name = "this()", parametrsImplicit = ScalaClassParametrs(
-              ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+              ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
           ), body = "this(SQLAlias(strEmpty))(dataSource)".body, serrializeToOneString = true),
           newLine,
           ScalaMethod(name = "init",
@@ -551,7 +551,7 @@ class GenBOs(val appFilePath: Path,
                 ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                 ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
@@ -565,7 +565,7 @@ class GenBOs(val appFilePath: Path,
                 ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                 ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
@@ -589,7 +589,7 @@ class GenBOs(val appFilePath: Path,
                     ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                    ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                    ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                     ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
                 ),
                 `type` = returnType,

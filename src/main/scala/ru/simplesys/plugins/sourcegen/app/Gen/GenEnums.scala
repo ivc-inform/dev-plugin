@@ -44,7 +44,7 @@ class GenEnums(val appFilePath: Path,
                 ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp, parametrType = ParametrVal, defaultValue = strEmpty)
             )
             parametrsImplicit = ScalaClassParametrs(
-                ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
+                ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicitVal)
             )
             extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
                 scalaClassGen = "ClassBO".cls
@@ -62,14 +62,14 @@ class GenEnums(val appFilePath: Path,
 
         enumObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp)
               ),
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
