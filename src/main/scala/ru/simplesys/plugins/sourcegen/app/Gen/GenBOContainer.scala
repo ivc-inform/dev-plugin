@@ -135,7 +135,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       "logger debug s\"Request for " + mode + ": ${newLine + requestData.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(ds)"""), serrializeToOneString = true),
+                                      ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(oraclePool)"""), serrializeToOneString = true),
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!! END DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
                                       newLine,
                                       ScalaMethod(name = "receiveBase", `type` = "Option[Actor.Receive]".tp, body = ScalaBody("None"), serrializeToOneString = true),
@@ -284,11 +284,11 @@ class GenBOContainer(val appFilePath: Path,
                                                     case true =>
                                                         getterType match {
                                                             case "Long" =>
-                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "Double" =>
-                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextDouble1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextDouble1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "BigDecimal" =>
-                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextBigDecimal1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextBigDecimal1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "String" =>
                                                                 parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "getGUID")
                                                             case x =>
