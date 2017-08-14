@@ -25,6 +25,7 @@ trait AbstractClassDefData {
     def isAutoTableMapping: Boolean
 
     def defaultSettingsData: IDefaultSettings
+    def useTablePrefix: Boolean
 }
 
 trait AbstractClassDef {
@@ -36,6 +37,7 @@ trait AbstractClassDef {
     def strictUCs: Seq[UniqueConstraintDef]
     def strictFKs: Seq[ForeignKeyConstraintDef]
     def className: String
+    def useTablePrefix: Boolean
 
     //---------------------------------------------------------------------------------
     protected def inheritedAttrDef(attrName: String)(resolver: SchemaDef): Option[AttrDef[_]] = None
@@ -46,11 +48,9 @@ trait AbstractClassDef {
         val attrMapping = temp._1
         val origAttrDef = temp._2
         val isMandatoryParent = foundFK.resolveUCConstraint.attrs.find(_.name === attrMapping.remoteName).get.isMandatory
+        val useDbPrefixParent = foundFK.resolveUCConstraint.attrs.find(_.name === attrMapping.remoteName).get.useDbPrefix
         val mandatory = if (foundFK.isMandatory) isMandatoryParent else false
-        //val (attrMapping, origAttrDef) = temp
-        //val (attrMapping, origAttrDef) = foundFK.attrMapping(attrName)(resolver)
-        val localAttr = origAttrDef.getProxy(selfRef, attrMapping, mandatory, false, false)
-        localAttr
+        origAttrDef.getProxy(selfRef, attrMapping, mandatory, false, false, useDbPrefixParent)
     }
 
     private val privateAttr = Memoize2 {
@@ -112,11 +112,7 @@ trait AbstractClassDef {
     def linkRefsToAllTables(implicit resolver: SchemaDef): Seq[LinkRefToTable] = Seq(linkRefToSpecificTable)
 
     def autoAttrColumnMapping(implicit resolver: SchemaDef): Seq[AttrToColumnMapping] = {
-        // here stub for custom mapping too
-        //strictAttrs.map(x => AttrToColumnMapping(selfRef, x.name, linkRefToSpecificTable, x.autoColumnName))
-        {
-            strictAttrs ++ strictFKs.flatMap(_.attrs)
-        }.map(x => AttrToColumnMapping(x.selfRef, LinkRefCol(linkRefToSpecificTable, x.autoColumnName)))
+        {strictAttrs ++ strictFKs.flatMap(_.attrs)}.map(x => AttrToColumnMapping(x.selfRef, LinkRefCol(linkRefToSpecificTable, x.autoColumnName)))
     }
 
     def discriminatorColumnWVals(implicit resolver: SchemaDef): Seq[LinkToColumnWValue] = discriminatorVals.map(_.columnWValue)

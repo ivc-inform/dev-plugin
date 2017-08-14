@@ -5,10 +5,7 @@ package meta
 import ru.simplesys.meta.types._
 import com.simplesys.common.equality.SimpleEquality._
 
-//class TableDefData
-
 trait TableDef {
-//  self: TableDefData =>
 
   def group: Locator
 
@@ -60,5 +57,6 @@ object TableDef {
   def apply(tableRef: LinkRefToTable,
             columns: Seq[ColumnDef[_]],
             ucs: Seq[UniqueTableConstraintDef],
-            fks: Seq[ForeignKeyTableConstraintDef])(implicit schemaDef: SchemaDef): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, schemaDef.useTablePrefix, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
+            fks: Seq[ForeignKeyTableConstraintDef],
+            useTablePrefix: Boolean): ITable = new GeneratedTableDef(tableRef.groupName, tableRef.objectName, useTablePrefix, columns, ucs, fks) with TableDefMetaGen with TableDefDBGen
 }

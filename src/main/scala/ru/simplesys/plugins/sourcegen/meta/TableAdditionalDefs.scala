@@ -17,6 +17,7 @@ trait ColumnDef[T] {
 
   def scalaName: String
   def dbName: String
+  def useDbPrefix: Boolean
   def dataType: DataType[T]
   def isMandatory: Boolean
   def scalaTypeAsString(implicit currentGroupName: Locator, resolver: SchemaDef): String = dataType.scalaTypeAsStringConditional(isMandatory)(currentGroupName, resolver)
@@ -28,22 +29,23 @@ trait ColumnDef[T] {
 case class GeneratedColumnDef[T](val tableRef: LinkRefToTable,
                                  val name: String,
                                  val dataType: DataType[T],
-                                 val isMandatory: Boolean
-                                )(implicit schemaDef: SchemaDef) extends ColumnDef[T] {
-  def dbName: String = (if (schemaDef.useDbPrefix) if (dataType.dbPrefix.toUpperCase === name.toUpperCase) name else (dataType.dbPrefix + name) else name).toUpperCase
+                                 val isMandatory: Boolean,
+                                 val useDbPrefix: Boolean
+                                ) extends ColumnDef[T] {
+  def dbName: String = (if (useDbPrefix) if (dataType.dbPrefix.toUpperCase === name.toUpperCase) name else (dataType.dbPrefix + name) else name).toUpperCase
   def scalaName: String = name
 }
 
 object ColumnDef {
-  def apply[T](tableRef: LinkRefToTable, name: String, dataType: DataType[T], isMandatory: Boolean)(implicit schemaDef: SchemaDef): ColumnDef[T] = {
-    GeneratedColumnDef(tableRef, name, dataType, isMandatory)
+  def apply[T](tableRef: LinkRefToTable, name: String, dataType: DataType[T], isMandatory: Boolean, useDbPrefix: Boolean)(implicit schemaDef: SchemaDef): ColumnDef[T] = {
+    GeneratedColumnDef(tableRef, name, dataType, isMandatory, useDbPrefix)
   }
 
-  def apply(tableRef: LinkRefToTable, name: String, attrs: Seq[AttrDef[_]], classesInTable: Set[LinkRefToAbstractClass])(implicit schemaDef: SchemaDef): ColumnDef[_] = {
+  def apply(tableRef: LinkRefToTable, name: String, attrs: Seq[AttrDef[_]], classesInTable: Set[LinkRefToAbstractClass], useDbPrefix: Boolean): ColumnDef[_] = {
     //println(attrs.map(_.currentOwner).toSet.toString() + " - " + classesInTable.toString())
     val dataType = attrs.head.attrType
     val isMandatory = attrs.forall(curr => curr.isMandatory) && (attrs.map(_.currentOwner).toSet === classesInTable)
-    GeneratedColumnDef(tableRef, name, dataType, isMandatory)
+    GeneratedColumnDef(tableRef, name, dataType, isMandatory, useDbPrefix)
   }
 }
 

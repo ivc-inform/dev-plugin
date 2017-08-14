@@ -21,14 +21,12 @@ class GenEnums(val appFilePath: Path,
                val pkgBOName: String,
                val quoted: Boolean,
                val stage: String,
-               val useDbPrefix: Boolean,
-               val useTablePrefix: Boolean,
                val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
 
     val sourceBOFiles: PathSet[Path] = appFilePath * "*.xml"
-    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
+    implicit val schema = SchemaDef(pkgBOName, sourceBOFiles.files)
 
     def create: File = ????
 
@@ -46,7 +44,7 @@ class GenEnums(val appFilePath: Path,
                 ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp, parametrType = ParametrVal, defaultValue = strEmpty)
             )
             parametrsImplicit = ScalaClassParametrs(
-                ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
+                ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicitVal)
             )
             extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
                 scalaClassGen = "ClassBO".cls
@@ -64,14 +62,14 @@ class GenEnums(val appFilePath: Path,
 
         enumObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp)
               ),
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
@@ -630,7 +628,7 @@ class GenEnums(val appFilePath: Path,
             packageName.pkg,
             clazz.group.pkg,
             "com.simplesys.jdbc.control._".imp,
-            "com.simplesys.bonecp.BoneCPDataSource".imp,
+            "com.simplesys.oracle.pool.OraclePoolDataSource".imp,
             "java.sql.Connection".imp,
             "com.simplesys.jdbc.control.SessionStructures._".imp,
             "com.simplesys.jdbc.control.ValidationEx".imp,
