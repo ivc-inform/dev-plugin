@@ -2,6 +2,8 @@ package ru.simplesys.plugins
 package sourcegen
 package meta
 
+import java.io.{FileInputStream, InputStreamReader}
+
 import com.simplesys.common.equality.SimpleEquality._
 import ru.simplesys.meta.types.{Locator, SchemaDefProto}
 import sbt.File
@@ -11,8 +13,6 @@ import scala.xml.{Elem, XML}
 
 //---------------------------------------------------------------------------------
 class SchemaDefData(val prefixPath: String,
-                    val useDbPrefix: Boolean,
-                    val useTablePrefix: Boolean,
                     val groups: Seq[IGroup],
                     val hierarchyClasses: Seq[IHierarchyClass],
                     val enumClasses: Seq[IEnumClass],
@@ -34,13 +34,9 @@ trait SchemaDef extends SchemaDefProto {
     def enumClasses: Seq[IEnumClass]
     def hierarchyClasses: Seq[IHierarchyClass]
     def classes: Seq[IClass]
-    val useDbPrefix: Boolean
-    val useTablePrefix: Boolean
 
     // custom mapping will be here!
-    protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap {
-        _.autoAttrColumnMapping(this)
-    }
+    protected lazy val mappingAttrColumn: Seq[AttrToColumnMapping] = classes.flatMap (_.autoAttrColumnMapping(this))
     protected lazy val mappingConstraints: Seq[ConstraintMapping] = classes.flatMap(x => x.ucs(this).map(_.autoMappingToConsImpl(this)) ++ x.fks(this).map(_.autoMappingToConsImpl(this)))
     protected lazy val nonMappedTableUCs: Seq[UniqueTableConstraintDef] = classes.flatMap(_.autoLowLevelTableUCs(this))
     protected lazy val nonMappedTableFKs: Seq[ForeignKeyTableConstraintDef] = classes.flatMap(_.autoLowLevelTableFKs(this))
@@ -63,15 +59,17 @@ trait SchemaDef extends SchemaDefProto {
 
 
     lazy val tables: Seq[ITable] = {
-        val allMappings = mappingAttrColumn
-        val tableMapping = allMappings.groupBy(_.columnLink.refTo)
-        val result = tableMapping.map {
+        
+        val result = mappingAttrColumn.groupBy(_.columnLink.refTo).map {
             case (tblRef, mapping) =>
                 val columns = mapping.groupBy(_.columnLink.name).map {
                     case (colName, currentTableMapping) =>
-                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef))(this)
+                        val attr = currentTableMapping.map(_.attr(this)).find(_.name == colName).get
+                        ColumnDef(tblRef, colName, currentTableMapping.map(_.attr(this)), linksClassForTables(tblRef), attr.useDbPrefix)
                 }.toSeq
-                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()))(this)
+
+                val iClass = resolveClass(LinkRefToClassOld(tblRef.groupName, tblRef.objectName))
+                TableDef(tblRef, columns, tableUCsMap.getOrElse(tblRef, Seq()), tableFKsMap.getOrElse(tblRef, Seq()), iClass.useTablePrefix)
         }.toSeq
         result
     }
@@ -83,7 +81,7 @@ trait SchemaDef extends SchemaDefProto {
         case c: IChildHierarchyClass => c
         case _ => throw new RuntimeException(s"class ${cl} is not ICHildHierarchyClass!")
     }
-    //    def resolveClass(cl: LinkRefToClassOld) = classesMap(cl)
+
     def resolveTable(tl: LinkRefToTable) = tablesMap(tl)
     def resolveGroup(gr: Locator) = groupsMap(gr)
 
@@ -104,7 +102,7 @@ trait SchemaDef extends SchemaDefProto {
 //---------------------------------------------------------------------------------
 
 object SchemaDef {
-    def apply(prefixPath: String, useDbPrefix: Boolean, useTablePrefix: Boolean, xmlNodes: Array[Elem]): ISchema = {
+    def apply(prefixPath: String, xmlNodes: Array[Elem]): ISchema = {
         val parseResults: Seq[(IGroup, Seq[IHierarchyClass], Seq[IEnumClass], Seq[ISimpleClass])] = {
             for (xmlPiece <- xmlNodes.toSeq) yield {
                 (xmlPiece \\ "group").map {
@@ -131,18 +129,11 @@ object SchemaDef {
             case (group, hierarchyClass, enumClass, simpleClass) => simpleClass
         }.flatten
 
-        val res = new SchemaDefData(prefixPath, useDbPrefix, useTablePrefix, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
-        //      res.classesMap.keys.foreach(println _)
-        res
+        new SchemaDefData(prefixPath, groups, hierarchyClasses, enumClasses, simpleClasses) with SchemaDef with SchemaDefMetaGen with SchemaDefDBGen
     }
 
-    def apply(prefixPath: String, useDbPrefix: Boolean, useTablePrefix: Boolean, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
-        val xmlPieces: Array[Elem] = files.map {
-            x =>
-                //println(x.getAbsolutePath)
-                //XML.loadFile(x)
-                XML.load(new java.io.InputStreamReader(new java.io.FileInputStream(x), XmlUtil.Encoding))
-        }(collection.breakOut)
-        apply(prefixPath, useDbPrefix, useTablePrefix, xmlPieces)
+    def apply(prefixPath: String, files: Seq[File]): SchemaDef with SchemaDefMetaGen with SchemaDefDBGen = {
+        val xmlPieces: Array[Elem] = files.map (x =>XML.load(new InputStreamReader(new FileInputStream(x), XmlUtil.Encoding)))(collection.breakOut)
+        apply(prefixPath,  xmlPieces)
     }
 }

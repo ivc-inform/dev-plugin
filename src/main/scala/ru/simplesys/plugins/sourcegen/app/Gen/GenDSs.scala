@@ -21,14 +21,12 @@ class GenDSs(val appFilePath: Path,
              val packageName: String,
              val pkgBOName: String,
              val quoted: Boolean,
-             val useDbPrefix: Boolean,
-             val useTablePrefix: Boolean,
              val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
 
     val sourceBOFiles: PathSet[Path] = appFilePath * "*.xml"
-    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
+    implicit val schema = SchemaDef(pkgBOName, sourceBOFiles.files)
 
     def create: File = ????
 
@@ -66,7 +64,7 @@ class GenDSs(val appFilePath: Path,
                 ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp, parametrType = ParametrVal, `override` = OverrideMofificator)
             )
             parametrsImplicit = ScalaClassParametrs(
-                ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
+                ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicitVal)
             )
             extensibleClass = ScalaClassGenericExtensible(new ScalaBaseClassDeclare {
                 scalaClassGen = "DataSet".cls
@@ -86,7 +84,7 @@ class GenDSs(val appFilePath: Path,
                     ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                    ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                    ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                     ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
                 ),
                 `type` = returnType,
@@ -132,7 +130,7 @@ class GenDSs(val appFilePath: Path,
                 ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                 ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
@@ -189,6 +187,10 @@ class GenDSs(val appFilePath: Path,
                                                                   ),
                                                                   serrializeToOneString = true
                                                               ), caseBody = ScalaBody(s"${productName}(${allColumnsP})")
+                                                            ),
+                                                            ScalaCaseLine(
+                                                                expression = "x".expr,
+                                                                caseBody = "throw new RuntimeException (s\"mached as : $x\")".body
                                                             )
                                                         )
                                                     )
@@ -261,7 +263,7 @@ class GenDSs(val appFilePath: Path,
 
         dsClass addMembers(
           ScalaMethod(name = "this()", parametrsImplicit = ScalaClassParametrs(
-              ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+              ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
           ), body = "this(SQLAlias(strEmpty))(dataSource)".body, serrializeToOneString = true),
           newLine,
           ScalaVariable(name = "quoted", serrializeToOneString = true, body = ScalaBody(quoted.toString)),
@@ -297,7 +299,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                  ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                  ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                   ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("FT#ReturnType")))),
@@ -325,7 +327,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "join", `type` = "JoinParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
-                  ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.Config.FetchSize"),
+                  ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
                   ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationExIterator".cls, ScalaGeneric("Iterator", ScalaGenerics("FT#ReturnType")))),
@@ -409,20 +411,20 @@ class GenDSs(val appFilePath: Path,
 
         dsObject addMembers(
           ScalaMethod(name = "apply",
-              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
+              parametrsImplicit = ScalaClassParametrs(ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)), serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
           ),
           ScalaMethod(name = "apply",
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp)
               ),
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}")),
           newLine,
           ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
           ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
-          )
+        )
 
         j += 1
         var columnTypes = ""
@@ -526,7 +528,7 @@ class GenDSs(val appFilePath: Path,
                         dsClass addMembers(
                           newLine,
                           ScalaComment(s"Class: ${fkClass.className}Bo_${fk.softNameForCompare}, group: ${fkClass.group}")
-                          )
+                        )
                         if (elements.length > 0) {
                             dsClass addMember
                               ScalaVariable(name = s"${fkClass.className.capitalize}_${fk.softNameForCompare}", serrializeToOneString = true, body = ScalaBody( s"""new ${if (isEnumClass(fkClass)) fkClass.className.enum else fkClass.className.bo}(alias = alias +"B${j}".als)"""))
@@ -570,7 +572,7 @@ class GenDSs(val appFilePath: Path,
           newLine,
           selectPOneMethod(ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric(s"${productName}"))), sb = selectPOneBody),
           ScalaEndComment("Fetch Product")
-          )
+        )
 
         if (!clazz.isAbstract)
             dsClass addMembers(
@@ -671,7 +673,7 @@ class GenDSs(val appFilePath: Path,
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
               ScalaEndComment("Delete"),
               newLine
-              )
+            )
 
         val module = ScalaModule(
             packageName.pkg,
@@ -681,7 +683,7 @@ class GenDSs(val appFilePath: Path,
             "com.simplesys.jdbc.control.ValidationEx".imp,
             "java.sql.Connection".imp,
             "org.joda.time.{LocalDateTime, DateTime}".imp,
-            "com.simplesys.bonecp.BoneCPDataSource".imp,
+            "com.simplesys.db.pool.PoolDataSource".imp,
             "com.simplesys.SQL._".imp,
             "com.simplesys.jdbc._".imp,
             "com.simplesys.SQL.Gen.{SQLAbsTable, SQLAlias}".imp,
@@ -699,7 +701,7 @@ class GenDSs(val appFilePath: Path,
         module ++= addImports.toArray.distinct
 
         dsCaseClass setParametrs dsCaseClassParameters
-        module ++=(
+        module ++= (
           newLine,
           dsCaseClass,
           newLine,

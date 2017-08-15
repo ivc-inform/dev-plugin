@@ -21,14 +21,12 @@ class GenTables(val appFilePath: Path,
                 val packageName: String,
                 val pkgBOName: String,
                 val quoted: Boolean,
-                val useDbPrefix: Boolean,
-                val useTablePrefix: Boolean,
                 val logger: Logger) extends GenScala1 with Log {
 
     val schemaPath: URI = "".xsdURI
 
     val sourceBOFiles: PathSet[Path] = appFilePath * "*.xml"
-    implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
+    implicit val schema = SchemaDef(pkgBOName, sourceBOFiles.files)
 
     def create: File = ????
 
@@ -65,7 +63,7 @@ class GenTables(val appFilePath: Path,
                 ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp, parametrType = ParametrVal, defaultValue = strEmpty)
             )
             parametrsImplicit = ScalaClassParametrs(
-                ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicitVal)
+                ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicitVal)
             )
             extensibleClass = ScalaClassGenericExtensible(
                 new ScalaBaseClassDeclare {
@@ -84,7 +82,7 @@ class GenTables(val appFilePath: Path,
               parametrsImplicit = ScalaClassParametrs(
                   ScalaClassParametr(
                       name = "dataSource",
-                      `type` = ScalaBoneCPDataSource,
+                      `type` = ScalaPoolDataSource,
                       parametrType = ParametrImplicit)
               ), serrializeToOneString = true,
               body = ScalaBody(s"new ${className}(alias = SQLAlias(strEmpty))")
@@ -94,7 +92,7 @@ class GenTables(val appFilePath: Path,
                   ScalaClassParametr(name = "alias", `type` = "SQLAlias".tp)
               ),
               parametrsImplicit = ScalaClassParametrs(
-                  ScalaClassParametr(name = "dataSource", `type` = ScalaBoneCPDataSource, parametrType = ParametrImplicit)
+                  ScalaClassParametr(name = "dataSource", `type` = ScalaPoolDataSource, parametrType = ParametrImplicit)
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
@@ -108,7 +106,7 @@ class GenTables(val appFilePath: Path,
           newLine,
           ScalaMethod(name = "databaseTablename", body = ScalaBody(table.tableDBName.dblQuoted), serrializeToOneString = true),
           newLine,
-          ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.SQLDialect".body),
+          ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.sqlDialect".body),
           newLine
         )
 
@@ -247,7 +245,7 @@ class GenTables(val appFilePath: Path,
             newLine,
             s"${table.group}.table".pkg,
             newLine,
-            "com.simplesys.bonecp.BoneCPDataSource".imp,
+            "com.simplesys.db.pool.PoolDataSource".imp,
             "com.simplesys.jdbc.control.{ValidationEx, Table}".imp,
             "com.simplesys.jdbc.control.table.Insert".imp,
             "org.joda.time.{LocalDateTime, DateTime}".imp,

@@ -5,6 +5,7 @@ import java.net.URI
 import com.simplesys.common.Strings._
 import com.simplesys.common._
 import com.simplesys.common.equality.SimpleEquality._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
@@ -16,7 +17,6 @@ import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
 
 class GenBOContainer(val appFilePath: Path,
                      val boFilePath: Path,
@@ -26,8 +26,6 @@ class GenBOContainer(val appFilePath: Path,
                      val packageName: String,
                      val pkgBOName: String,
                      val stage: String,
-                     val useDbPrefix: Boolean,
-                     val useTablePrefix: Boolean,
                      val logger: Logger) extends GenScala1 {
 
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
@@ -38,7 +36,7 @@ class GenBOContainer(val appFilePath: Path,
     def create: File = ????
 
     def createSeq: Seq[File] = {
-        implicit val schema = SchemaDef(pkgBOName, useDbPrefix, useTablePrefix, sourceBOFiles.files)
+        implicit val schema = SchemaDef(pkgBOName, sourceBOFiles.files)
 
         val resSeq = ArrayBuffer.empty[File]
         val servletes = ArrayBuffer.empty[String]
@@ -107,7 +105,7 @@ class GenBOContainer(val appFilePath: Path,
                                     case "Long" ⇒ "Double"
                                     case any ⇒ any
                                 }
-                                recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, body = ScalaBody(strEmpty), `type` = s"js.UndefOr[${_tp}]".tp)
+                                recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
                         }
 
                         for (mode <- operationTypes; _dataURL <- (dataSource \ (mode + "DataURL"))) {
@@ -137,7 +135,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       "logger debug s\"Request for " + mode + ": ${newLine + requestData.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(ds)"""), serrializeToOneString = true),
+                                      ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(oraclePool)"""), serrializeToOneString = true),
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!! END DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
                                       newLine,
                                       ScalaMethod(name = "receiveBase", `type` = "Option[Actor.Receive]".tp, body = ScalaBody("None"), serrializeToOneString = true),
@@ -153,10 +151,10 @@ class GenBOContainer(val appFilePath: Path,
                                           ),
                                           body = ScalaBody("blob.asString"),
                                           serrializeToOneString = true)
-                                      )
+                                    )
 
                                     val module = ScalaModule(
-                                        packageName.pkg,
+                                        s"$packageName.$groupName".pkg,
                                         newLine,
                                         "com.simplesys.app.SessionContextSupport".imp,
                                         "com.simplesys.isc.system.ServletActorDyn".imp,
@@ -286,13 +284,15 @@ class GenBOContainer(val appFilePath: Path,
                                                     case true =>
                                                         getterType match {
                                                             case "Long" =>
-                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                            case "Double" =>
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextDouble1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "BigDecimal" =>
-                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(ds).nextBigDecimal1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextBigDecimal1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "String" =>
                                                                 parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "getGUID")
                                                             case x =>
-                                                                throw new RuntimeException(s"GenBySeq must be BigDecimal or Long or String, but exist (${x})")
+                                                                throw new RuntimeException(s"GenBySeq must be BigDecimal or Long or String or Double, but exist (${x})")
                                                         }
                                                 }
                                 }
@@ -500,7 +500,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaIf(ScalaExpression("_transactionNum.toInt != 0"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndAdd_${_transactionNum.toInt}\"))"), serrializeToOneString = true),
                                       newLine,
                                       "selfStop()"
-                                      )
+                                    )
 
                                 case "Fetch" =>
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}DS".imp
@@ -512,7 +512,7 @@ class GenBOContainer(val appFilePath: Path,
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "RecordsDynList()".body, serrializeToOneString = true),
-                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.StartRow.toInt".body, serrializeToOneString = true),
+                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.StartRow.toInt + 1".body, serrializeToOneString = true),
                                       newLine,
                                       ScalaVariable(
                                           name = "select",
@@ -540,6 +540,10 @@ class GenBOContainer(val appFilePath: Path,
                                                                                 serrializeToOneString = true
                                                                             )
                                                                         )
+                                                                    ),
+                                                                    ScalaCaseLine(
+                                                                        expression = "x".expr,
+                                                                        caseBody = "new RuntimeException (s\"mached as : $x\")".body
                                                                     )
                                                                 )
                                                             ),
@@ -555,8 +559,8 @@ class GenBOContainer(val appFilePath: Path,
                                                           res addMembers(
                                                             "Status = RPCResponseDyn.statusSuccess",
                                                             "Data = _data",
-                                                            s"TotalRows = requestData.StartRow.toInt + (if (qty == list.length) qty + (4 * (requestData.EndRow.toInt - requestData.StartRow.toInt)) else list.length)"
-                                                            )
+                                                            s"TotalRows = requestData.StartRow.toInt + (if (qty == list.length) qty * 2 else list.length)"
+                                                          )
 
                                                           res
                                                       })
@@ -568,7 +572,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ))),
                                       newLine,
                                       "selfStop()"
-                                      )
+                                    )
 
                                 case "Update" =>
                                     def getUpdateSatement: ScalaVariable = {
@@ -689,7 +693,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ))),
                                       newLine,
                                       "selfStop()"
-                                      )
+                                    )
 
                                 case "Remove" =>
                                     def getPrimarykeyVariables: ScalaVariables = {
@@ -828,7 +832,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaIf(ScalaExpression("_transactionNum.toInt != 0"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndRemove_${_transactionNum.toInt}\"))"), serrializeToOneString = true),
                                       newLine,
                                       "selfStop()"
-                                      )
+                                    )
                             }
 
                             val recieveBody = ScalaCase(
@@ -850,7 +854,7 @@ class GenBOContainer(val appFilePath: Path,
                         }
 
                         val module = ScalaModule(
-                            packageName.pkg,
+                            s"$packageName.$groupName".pkg,
                             newLine,
                             "com.simplesys.annotation.RSTransfer".imp,
                             "com.simplesys.app.SessionContextSupport".imp,

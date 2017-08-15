@@ -249,7 +249,6 @@ class OverrideForeignKeyConstraintDefData(val currentOwner: LinkRefToChildClass,
 //    println(s"${currentOwner}.${softNameForCompare}")
     currentOwner.toClass.parentClassLink.toParentClass.fks.filter(_.softNameForCompare === this.softNameForCompare).head.isMandatory
   }
-  //def customDBName: Option[String]
 }
 
 
@@ -329,7 +328,6 @@ object ForeignKeyConstraintDef {
   def apply(originalOwner: LinkRefToAbstractClass, x: Node): ForeignKeyConstraintDef = {
     val givenName = (x \ "@name").textOption
     val fkType = ForeignKeyConstraintType((x \ "@linkType").text)
-//    println(s"${originalOwner}.${fkType}")
     val isMandatoryData = (x \ "@mandatory").text.toBoolean
 
     val linkRef = LinkRefToClassOld(originalOwner.groupName, x)
@@ -344,7 +342,6 @@ object ForeignKeyConstraintDef {
 object OverrideForeignKeyConstraintDef {
   def apply(originalOwner: LinkRefToChildClass, x: Node): ForeignKeyConstraintDef = {
     val givenName = (x \ "@name").textOption
-//    val fkType = ForeignKeyConstraintType((x \ "@linkType").text)
 
     val linkRef = LinkRefToClassOld(originalOwner.groupName, x)
     val attrMapping: Seq[AttrMapping] = (x \ "mapping").map(AttrMapping(_))
