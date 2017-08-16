@@ -35,7 +35,7 @@ publishMavenStyle := true
 
 libraryDependencies ++= {
 	//val ssysCoreVersion = "1.2.100"
-	val ssysCoreVersion = "1.3-SNAPSHOT"
+	val ssysCoreVersion = "1.4-SNAPSHOT"
 	val scalazVersion = "7.2.8"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
