@@ -46,12 +46,10 @@ libraryDependencies ++= {
         "com.simplesys.core" %% "scala-gen" % ssysCoreVersion,
         "org.scalaz" %% "scalaz-core" % scalazVersion,
         //"org.liquibase" % "liquibase-maven-plugin" % "3.5.1",
-
         "com.h2database" % "h2" % "1.4.192",
-        "org.postgresql" % "postgresql" % "9.2-1003-jdbc4" % "test",
-        "org.specs2" %% "specs2" % "2.4.2" % "test",
-        "org.mockito" % "mockito-all" % "1.9.5" % "test",
-        "org.scalatest" %% "scalatest" % "3.0.0" % "test"
+        "org.postgresql" % "postgresql" % "9.2-1003-jdbc4" % Test,
+        "org.mockito" % "mockito-all" % "1.9.5" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.0" % Test
     )
 }
 
