@@ -2,13 +2,13 @@ sbtPlugin := true
 
 name := "dev-plugin"
 
-enablePlugins(GitVersioning)
+//enablePlugins(GitVersioning)
 
 organization := "ru.simplesys"
 
-//version := "1.0.10-SNAPSHOT"
+version := "1.3.12-SNAPSHOT"
 
-scalaVersion := "2.10.6"
+scalaVersion := "2.12.3"
 
 scalacOptions := Seq(
     "-feature",
@@ -57,7 +57,7 @@ libraryDependencies ++= {
 
 logLevel := Level.Info
 
-git.baseVersion := "1.3.11"
+//git.baseVersion := "1.3.11"
 
 
 
