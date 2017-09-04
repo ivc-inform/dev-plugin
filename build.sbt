@@ -6,7 +6,7 @@ name := "dev-plugin"
 
 organization := "ru.simplesys"
 
-version := "1.3.12-SNAPSHOT"
+version := "1.3.13"
 
 scalaVersion := "2.12.3"
 
@@ -34,8 +34,8 @@ publishArtifact in(Compile, packageSrc) := true
 publishMavenStyle := true
 
 libraryDependencies ++= {
-	//val ssysCoreVersion = "1.2.100"
-	val ssysCoreVersion = "1.4-SNAPSHOT"
+	val ssysCoreVersion = "1.4.0.2"
+	//val ssysCoreVersion = "1.4-SNAPSHOT"
 	val scalazVersion = "7.2.8"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
