@@ -8,5 +8,3 @@ publishTo <<= version { (v: String) =>
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
-overridePublishSettings
-
