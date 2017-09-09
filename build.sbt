@@ -34,7 +34,7 @@ publishArtifact in(Compile, packageSrc) := true
 publishMavenStyle := true
 
 libraryDependencies ++= {
-	val ssysCoreVersion = "1.2.10"
+	val ssysCoreVersion = "1.2.100"
 	//val ssysCoreVersion = "1.2-SNAPSHOT"
 	val scalazVersion = "7.2.4"
     Seq(
