@@ -6,11 +6,11 @@ import com.simplesys.common.Strings.{newLine, _}
 import com.simplesys.common._
 import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
+import com.simplesys.io._
 import com.simplesys.scalaGen._
 import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
-import com.simplesys.io._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -24,11 +24,12 @@ class GenListGridFields(val appFilePath: Path,
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
     type CollectionElem = ArrayBuffer[(String, ScalaElement)]
     type CollectionElemObject = ArrayBuffer[ScalaObjectElement]
-    
+    type CollectionElemName = ArrayBuffer[String]
+
     val dateTimeFormat = "dd.MM.yyyy HH:mm:ss".dblQuoted
     val dateFormat = "dd.MM.yyyy".dblQuoted
 
-    private def makeCollectionISCElementsJS(parentElem: IscElem, listGridFieldsCollection: CollectionElem, formItemsCollection: CollectionElem, collectionElemObject: CollectionElemObject) = {
+    private def makeCollectionISCElementsJS(parentElem: IscElem, listGridFieldsCollection: CollectionElem, formItemsCollection: CollectionElem, collectionElemObject: CollectionElemObject, collectionElemName: CollectionElemName) = {
         for (element <- parentElem.child.filter(_.label != "#PCDATA")) {
             val fields: IscElem = element \ "Fields"
 
@@ -49,14 +50,17 @@ class GenListGridFields(val appFilePath: Path,
                         }
 
                         val listFridFieldObjectName = s"${nameBase}${fieldName}_NameStrong"
-                        val listFridFieldObject = new ScalaClassDeclare {
-                            scalaClassGen = listFridFieldObjectName.cls
-                            typeScalaClass = TypeScalaObject
-                            extensibleClass = "NameStrong".ext
-                            //annotation = ScalaAnnotation("ScalaJSDefined")
+                        if (collectionElemName.find( _ == listFridFieldObjectName).isEmpty) {
+                            collectionElemName += listFridFieldObjectName
+                            val listFridFieldObject = new ScalaClassDeclare {
+                                scalaClassGen = listFridFieldObjectName.cls
+                                typeScalaClass = TypeScalaObject
+                                extensibleClass = "NameStrong".ext
+                                //annotation = ScalaAnnotation("ScalaJSDefined")
+                            }
+                            listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                            collectionElemObject += listFridFieldObject
                         }
-                        listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
-                        collectionElemObject += listFridFieldObject
 
                         listFridField addMember ScalaExpression(s"nameStrong = ${listFridFieldObjectName}.opt")
 
@@ -212,7 +216,8 @@ class GenListGridFields(val appFilePath: Path,
 
         val lss = ArrayBuffer.empty[(String, ScalaElement)]
         val lsf = ArrayBuffer.empty[(String, ScalaElement)]
-        val lssNames = ArrayBuffer.empty[ScalaObjectElement]
+        val lssObjects = ArrayBuffer.empty[ScalaObjectElement]
+        val lssNames = ArrayBuffer.empty[String]
 
         generetedFiles foreach {
             file =>
@@ -220,7 +225,7 @@ class GenListGridFields(val appFilePath: Path,
 
                 root.label match {
                     case "DataSources" =>
-                        makeCollectionISCElementsJS(root, lss, lsf, lssNames)
+                        makeCollectionISCElementsJS(root, lss, lsf, lssObjects, lssNames)
 
                     case label =>
                         throw new RuntimeException(s"Unknown implemantation for root.label : ${label.dblQuoted}")
@@ -244,7 +249,7 @@ class GenListGridFields(val appFilePath: Path,
             newLine
         )
 
-        moduleDataSourcesJS ++= lssNames.toArray
+        moduleDataSourcesJS ++= lssObjects.toArray
         moduleDataSourcesJS += newLine
         moduleDataSourcesJS += listGridFields
         moduleDataSourcesJS += newLine
