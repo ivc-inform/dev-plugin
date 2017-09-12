@@ -100,12 +100,15 @@ class GenBOContainer(val appFilePath: Path,
                                 val name = (x: IscElem).getStringValue("Name")
                                 val tp: String = (x: IscElem).getStringValue("GetterType").replace("Opt", strEmpty)
                                 val required: Boolean = (x: IscElem).getBooleanValue("Required")
+                                val lookup: Boolean = (x: IscElem).getBooleanValue("Lookup")
 
-                                val _tp = tp match {
-                                    case "Long" ⇒ "Double"
-                                    case any ⇒ any
+                                if (!lookup) {
+                                    val _tp = tp match {
+                                        case "Long" ⇒ "Double"
+                                        case any ⇒ any
+                                    }
+                                    recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
                                 }
-                                recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
                         }
 
                         for (mode <- operationTypes; _dataURL <- (dataSource \ (mode + "DataURL"))) {
