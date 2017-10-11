@@ -36,7 +36,7 @@ publishMavenStyle := true
 libraryDependencies ++= {
 	val ssysCoreVersion = "1.4.0.2"
 	//val ssysCoreVersion = "1.4-SNAPSHOT"
-	val scalazVersion = "7.2.8"
+	val scalazVersion = "7.2.15"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
         "com.simplesys.core" %% "core-utils" % ssysCoreVersion,
@@ -49,7 +49,7 @@ libraryDependencies ++= {
         "com.h2database" % "h2" % "1.4.192",
         "org.postgresql" % "postgresql" % "9.2-1003-jdbc4" % Test,
         "org.mockito" % "mockito-all" % "1.9.5" % Test,
-        "org.scalatest" %% "scalatest" % "3.0.0" % Test
+        "org.scalatest" %% "scalatest" % "3.0.3" % Test
     )
 }
 
