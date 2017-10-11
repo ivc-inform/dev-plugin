@@ -293,7 +293,7 @@ trait ForeignKeyConstraintDef extends ConstraintDef {
   def selfRefByAttrs: LinkRefToClassForeignConstraintByAttrs = LinkRefToClassForeignConstraintByAttrs(currentOwner, attrNames.toSet)
 
   def resolveUCConstraint(implicit resolver: SchemaDef): UniqueConstraintDef = {
-//    println(s"from ${selfRefByName.toString} to ${referencedClassRef.toString}")
+    //println(s"from ${selfRefByName.toString} to ${referencedClassRef.toString}")
     referencedClassRef.toClass.findUCByAttrs(attrNameMapping.map(_.remoteName).toSet).get
   }
 
