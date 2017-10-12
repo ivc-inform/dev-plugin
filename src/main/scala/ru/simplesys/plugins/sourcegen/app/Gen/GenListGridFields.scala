@@ -260,7 +260,7 @@ class GenListGridFields(val appFilePath: Path,
 
         resDataSourcesJS <== {
             out =>
-                out(genMessageCreating(s"GenScalaApp (createSeq), stage: $stage"))
+                out(genMessageCreating(s"GenListGridFields, stage: $stage"))
                 out(newLine)
                 out(moduleDataSourcesJS.serrialize())
         }
