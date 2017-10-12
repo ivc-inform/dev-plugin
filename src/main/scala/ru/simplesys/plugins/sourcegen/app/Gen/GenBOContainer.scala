@@ -221,7 +221,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 val res = attr.attrType.scalaTypeAsString(clazz.group, schema)
                                                 if (res.indexOf(".") !== -1) {
                                                     addedImports += res.imp
-                                                    logger debug (s"Bad type: ${res.dblQuoted} tarnsform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
+                                                    logger debug (s"Bad type: ${res.dblQuoted} transform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
 
                                                     res.substring(res.lastIndexOf(".") + 1)
                                                 } else

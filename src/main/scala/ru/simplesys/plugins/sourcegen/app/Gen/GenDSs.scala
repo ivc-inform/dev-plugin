@@ -36,7 +36,6 @@ class GenDSs(val appFilePath: Path,
         val attrs: Array[AttrDef[_]] = clazz.attrsWithOutLob.toArray
         Sorting.quickSort(attrs)(AttrDefOrd)
 
-        val className = clazz.className.ds
         res += genDS(attrs, "", false, clazz)
 
 
@@ -548,8 +547,7 @@ class GenDSs(val appFilePath: Path,
         }
 
         //Sorting.quickSort(fks)(ForeignKeyConstraintDefOrd)
-
-
+        
         dsClass.getConstraints(classes, forLob)
 
         columnTypes = "TupleSS" + i + "[" + columnTypes.delLastChar + "]"
