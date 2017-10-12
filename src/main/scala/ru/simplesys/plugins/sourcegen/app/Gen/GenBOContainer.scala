@@ -231,11 +231,11 @@ class GenBOContainer(val appFilePath: Path,
                                             def columnType = s"${if (attr.isMandatory) _columnType else s"Array[${_columnType}]"}"
 
                                             if (i < maxArity) {
-                                                //if (!allColumns.exists(_.trim === fieldName)) {
+                                                if (!allColumns.exists(_.trim === fieldName)) {
                                                     res += ScalaClassParametr(name = fieldName, `type` = columnType.tp)
                                                     allColumns += fieldName.space
                                                     i += 1
-                                                //}
+                                                }
                                             }
                                     }
                                     res.toSeq
