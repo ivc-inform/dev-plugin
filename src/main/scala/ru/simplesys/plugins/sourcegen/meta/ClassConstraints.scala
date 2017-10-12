@@ -40,21 +40,17 @@ trait LinkRefToClassForeignConstraint extends LinkRefToClassConstraint {
 
 
 case class LinkRefToClassUniqueConstraintByName(val classRef: LinkRefToAbstractClass,
-                                                val constraintName: String
-                                                 ) extends LinkRefToClassUniqueConstraint with LinkRefToClassConstraintByName
+                                                val constraintName: String) extends LinkRefToClassUniqueConstraint with LinkRefToClassConstraintByName
 
 case class LinkRefToClassUniqueConstraintByAttrs(val classRef: LinkRefToAbstractClass,
-                                                val attrNames: Set[String]
-                                                 ) extends LinkRefToClassUniqueConstraint with LinkRefToClassConstraintByAttrs
+                                                val attrNames: Set[String]) extends LinkRefToClassUniqueConstraint with LinkRefToClassConstraintByAttrs
 
 
 case class LinkRefToClassForeignConstraintByName(val classRef: LinkRefToAbstractClass,
-                                                 val constraintName: String
-                                                  ) extends LinkRefToClassForeignConstraint with LinkRefToClassConstraintByName
+                                                 val constraintName: String) extends LinkRefToClassForeignConstraint with LinkRefToClassConstraintByName
 
 case class LinkRefToClassForeignConstraintByAttrs(val classRef: LinkRefToAbstractClass,
-                                                 val attrNames: Set[String]
-                                                  ) extends LinkRefToClassForeignConstraint with LinkRefToClassConstraintByAttrs
+                                                 val attrNames: Set[String]) extends LinkRefToClassForeignConstraint with LinkRefToClassConstraintByAttrs
 
 
 //---------------------------------------------------------------------------------
@@ -197,7 +193,7 @@ object UniqueConstraintDef {
 
 //---------------------------------------------------------------------------------
 
-case class AttrMapping(localName: String, remoteName: String, localCaption: Option[String], /*isMandatory: Option[Boolean],*/ isCalculated: Option[Boolean] = Some(false), formula: Option[String] = None)
+case class AttrMapping(localName: String, remoteName: String, localCaption: Option[String], isMandatory: Option[Boolean], isCalculated: Option[Boolean] = Some(false), formula: Option[String] = None)
 
 
 object AttrMapping {
@@ -205,10 +201,10 @@ object AttrMapping {
     val localName = (x \ "@attrNameLocal").text
     val remoteName = (x \ "@attrNameRemote").text
     val localCaption = (x \ "@caption").textOption
-//    val isMandatory = (x \ "@mandatory").textOption.map(_.toBoolean)
+    val isMandatory = (x \ "@mandatory").textOption.map(_.toBoolean)
     val isCalculated: Option[Boolean] = None//(x \ "@calculated").textOption.map(_.toBoolean)
     val formula: Option[String] = None
-    AttrMapping(localName, remoteName, localCaption,/* isMandatory, */isCalculated, formula)
+    AttrMapping(localName, remoteName, localCaption, isMandatory, isCalculated, formula)
   }
 }
 //---------------------------------------------------------------------------------
@@ -336,8 +332,6 @@ object ForeignKeyConstraintDef {
     new SimpleForeignKeyConstraintDefData(originalOwner, givenName, fkType, isMandatoryData, linkRef, attrMapping) with ForeignKeyConstraintDef
   }
 }
-
-
 
 object OverrideForeignKeyConstraintDef {
   def apply(originalOwner: LinkRefToChildClass, x: Node): ForeignKeyConstraintDef = {
