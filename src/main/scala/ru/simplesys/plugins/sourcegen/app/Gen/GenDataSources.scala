@@ -100,7 +100,7 @@ class GenDataSources(val appFilePath: Path,
 
         resDataSourcesJS <== {
             out =>
-                out(genMessageCreating(s"GenDataSources, stage: $stage"))
+                out(genMessageCreating(s"GenDataSources (createSeq), stage: $stage"))
                 out(newLine)
                 out(moduleDataSourcesJS.serrialize())
         }
