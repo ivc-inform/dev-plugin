@@ -15,6 +15,7 @@ trait AttrDef[T] {
     def currentOwner: LinkRefToAbstractClass
     def masterOwner: LinkRefToAbstractClass = currentOwner
     def name: String
+    def remoteName: Option[String]
     def complexName(implicit resolver: SchemaDef) = s"${currentOwner.toClass.group}_${currentOwner.toClass.className}_${name}"
     def caption: String
     def attrType: DataType[T]
@@ -68,7 +69,7 @@ trait AttrDef[T] {
             if (Name === this.name) None else Some(Name)
         }, {
             if (Caption === this.caption) None else Some(Caption)
-        }, {
+        }, None, {
             if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
         }, {
             if (IsCalculated === this.isCalculated) None else Some(IsCalculated)
@@ -91,6 +92,7 @@ trait AttrDef[T] {
                 ): AttrDef[T] = new ProxyAttrDef(this,
         CurrentOwner,
         Some(mappingSetting.localName),
+        Some(mappingSetting.remoteName),
         mappingSetting.localCaption,
         Some(isMandatory),
         mappingSetting.isCalculated,
@@ -105,6 +107,7 @@ trait AttrDef[T] {
 
 case class SimpleAttrDef[T](currentOwner: LinkRefToAbstractClass,
                             name: String,
+                            remoteName: Option[String],
                             caption: String,
                             attrType: DataType[T],
                             isMandatory: Boolean,
@@ -127,6 +130,7 @@ case class SimpleAttrDef[T](currentOwner: LinkRefToAbstractClass,
 
 case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
                           name: String,
+                          remoteName: Option[String],
                           caption: String,
                           attrType: ComplexDataType[T],
                           isMandatory: Boolean,
@@ -168,7 +172,7 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
                          ): AttrDef[T] = new EnumProxyAttrDef(this,
         CurrentOwner, {
             if (Name === this.name) None else Some(Name)
-        }, {
+        }, None, {
             if (Caption === this.caption) None else Some(Caption)
         }, {
             if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
@@ -194,6 +198,7 @@ case class EnumAttrDef[T](currentOwner: LinkRefToAbstractClass,
         CurrentOwner,
         Some(mappingSetting.localName),
         mappingSetting.localCaption,
+        Some(mappingSetting.remoteName),
         Some(isMandatory),
         mappingSetting.isCalculated,
         mappingSetting.formula,
@@ -217,6 +222,7 @@ object EnumAttrDef {
 class ProxyAttrDef[T](val proxy: AttrDef[T],
                       val currentOwner: LinkRefToAbstractClass,
                       val proxyName: Option[String],
+                      val proxyRemoteName: Option[String],
                       val proxyCaption: Option[String],
                       val proxyIsMandatory: Option[Boolean],
                       val proxyIsCalculated: Option[Boolean],
@@ -230,6 +236,7 @@ class ProxyAttrDef[T](val proxy: AttrDef[T],
 
     override def masterOwner: LinkRefToAbstractClass = proxy.masterOwner
     def name = proxyName getOrElse proxy.name
+    override def remoteName = proxyRemoteName orElse proxy.remoteName
     def caption = proxyCaption getOrElse proxy.caption
     def attrType = proxy.attrType
     def isMandatory = proxyIsMandatory getOrElse proxy.isMandatory
@@ -246,6 +253,7 @@ class ProxyAttrDef[T](val proxy: AttrDef[T],
 class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
                           currentOwner: LinkRefToAbstractClass,
                           proxyName: Option[String],
+                          proxyRemoteName: Option[String],
                           proxyCaption: Option[String],
                           proxyIsMandatory: Option[Boolean],
                           proxyIsCalculated: Option[Boolean],
@@ -253,7 +261,7 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
                           proxyIsHidden: Option[Boolean],
                           proxyIsGenBySeq: Option[Boolean],
                           proxyUseDbPrefix: Option[Boolean]
-                         ) extends ProxyAttrDef[T](proxy, currentOwner, proxyName, proxyCaption, proxyIsMandatory, proxyIsCalculated, proxyFormula, proxyIsHidden, proxyIsGenBySeq, proxyUseDbPrefix) with EnumProvider {
+                         ) extends ProxyAttrDef[T](proxy, currentOwner, proxyName, proxyRemoteName, proxyCaption, proxyIsMandatory, proxyIsCalculated, proxyFormula, proxyIsHidden, proxyIsGenBySeq, proxyUseDbPrefix) with EnumProvider {
 
     override def group: Locator = proxy.group
 
@@ -285,7 +293,7 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
                          ): AttrDef[T] = new EnumProxyAttrDef(this,
         CurrentOwner, {
             if (Name === this.name) None else Some(Name)
-        }, {
+        }, None, {
             if (Caption === this.caption) None else Some(Caption)
         }, {
             if (IsMandatory === this.isMandatory) None else Some(IsMandatory)
@@ -311,6 +319,7 @@ class EnumProxyAttrDef[T](proxy: AttrDef[T] with EnumProvider,
         CurrentOwner,
         Some(mappingSetting.localName),
         mappingSetting.localCaption,
+        Some(mappingSetting.remoteName),
         Some(isMandatory),
         mappingSetting.isCalculated,
         mappingSetting.formula,
@@ -341,18 +350,18 @@ object AttrDef {
         if (isSimpleEnum) {
             val enumValues = (x \ "value").map(SimpleEnumValue(_))
             val newDataType = new ComplexDataType(currentOwner.groupName, None, currentOwner.objectName + name.capitalize, dataType)
-            EnumAttrDef(currentOwner, name, caption, newDataType, isMandatory, isHidden, isGenBySeq, useDbPrefix, enumValues)
+            EnumAttrDef(currentOwner, name, None, caption, newDataType, isMandatory, isHidden, isGenBySeq, useDbPrefix, enumValues)
         } else {
             forPKAttrs match {
                 case Some((pkAttrNames, typeName)) => {
                     if (pkAttrNames.exists(_ === name)) {
                         val newDataType = new ComplexDataType(currentOwner.groupName, None, typeName, dataType)
-                        SimpleAttrDef(currentOwner, name, caption, newDataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
+                        SimpleAttrDef(currentOwner, name,None, caption, newDataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
                     } else
-                        SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
+                        SimpleAttrDef(currentOwner, name, None,caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
                 }
                 case None =>
-                    SimpleAttrDef(currentOwner, name, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
+                    SimpleAttrDef(currentOwner, name, None, caption, dataType, isMandatory, isCalculated, formula, isHidden, isGenBySeq, useDbPrefix)
             }
 
         }
