@@ -15,7 +15,6 @@ import ru.simplesys.plugins.sourcegen.app.{AttrDefOrd, ForeignKeyConstraintDefOr
 import ru.simplesys.plugins.sourcegen.meta._
 import sbt.{File, Logger}
 
-import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
 
@@ -231,23 +230,12 @@ class GenBOContainer(val appFilePath: Path,
 
                                             def columnType = s"${if (attr.isMandatory) _columnType else s"Array[${_columnType}]"}"
 
-                                            def getFieldName(fieldName: String): String = {
-                                                var cnt = 1
-                                                var _fieldName = fieldName
-
-                                                while (allColumns.exists(_.trim == _fieldName)) {
-                                                    _fieldName += cnt
-                                                    cnt += 1
-                                                }
-                                                _fieldName
-                                            }
-
                                             if (i < maxArity) {
-                                                //if (!allColumns.exists(_.trim === fieldName)) {
-                                                res += ScalaClassParametr(name = getFieldName(fieldName), `type` = columnType.tp)
-                                                allColumns += fieldName.space
-                                                i += 1
-                                                //}
+                                                if (!allColumns.exists(_.trim === fieldName)) {
+                                                    res += ScalaClassParametr(name = fieldName, `type` = columnType.tp)
+                                                    allColumns += fieldName.space
+                                                    i += 1
+                                                }
                                             }
                                     }
                                     res.toSeq
@@ -324,58 +312,45 @@ class GenBOContainer(val appFilePath: Path,
                             }
 
                             def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(name = "RecordDyn",
-                                parametrs = {
-                                    val buffer = ArrayBuffer.empty[ScalaClassParametr]
-                                    val bufferName = ArrayBuffer.empty[String]
+                                parametrs =
+                                  ScalaClassParametrs(
+                                      (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
+                                          x =>
+                                              val name = (x: IscElem).getStringValue("Name")
+                                              val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
+                                              val lookup = (x: IscElem).getBooleanValue("Lookup")
+                                              val getterType: String = (x: IscElem).getStringValue("GetterType")
+                                              val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
+                                              def blobWrapper(str: String): String = {
+                                                  if (getterType == "Blob")
+                                                      s"wrapperBlobGetter($str)"
+                                                  else
+                                                      str
+                                              }
 
-                                    (_dataSource \ "Fields" \ "DataSourceFieldDyn") foreach {
-                                        x =>
-                                            val name = (x: IscElem).getStringValue("Name")
-                                            val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
-                                            val lookup = (x: IscElem).getBooleanValue("Lookup")
-                                            val getterType: String = (x: IscElem).getStringValue("GetterType")
-                                            val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
-
-                                            def blobWrapper(str: String): String = {
-                                                if (getterType == "Blob")
-                                                    s"wrapperBlobGetter($str)"
-                                                else
-                                                    str
-                                            }
-
-                                            def getFieldName(fieldName: String): String = {
-                                                var cnt = 1
-                                                var _fieldName = fieldName
-
-                                                while (bufferName.exists(_.trim == _fieldName)) {
-                                                    _fieldName += cnt
-                                                    cnt += 1
-                                                }
-                                                _fieldName
-                                            }
-
-                                            val defaultValue = getFieldName(if (itemName == strEmpty)
-                                                blobWrapper(_boName)
-                                            else if (!lookup)
-                                                blobWrapper({
-                                                    if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
-                                                } + boName)
-                                            else
-                                                blobWrapper(s"data.get${getterType}(${name.dblQuoted})"))
-
-                                            bufferName append defaultValue
-
-                                            buffer.append(
-                                                ScalaClassParametr(
-                                                    name = name.dblQuoted,
-                                                    `type` = ScalaImplicitType,
-                                                    defaultValue = defaultValue,
-                                                    sign = ScalaSignArrowRight
-                                                ))
-                                    }
-
-                                    ScalaClassParametrs(buffer.to[collection.immutable.Seq]: _*)
-                                }
+                                              if (itemName == strEmpty)
+                                                  ScalaClassParametr(
+                                                      name = name.dblQuoted,
+                                                      `type` = ScalaImplicitType,
+                                                      defaultValue = blobWrapper(_boName),
+                                                      sign = ScalaSignArrowRight
+                                                  )
+                                              else if (!lookup)
+                                                  ScalaClassParametr(
+                                                      name = name.dblQuoted,
+                                                      `type` = ScalaImplicitType,
+                                                      defaultValue = blobWrapper({
+                                                          if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
+                                                      } + boName), sign = ScalaSignArrowRight)
+                                              else
+                                                  ScalaClassParametr(
+                                                      name = name.dblQuoted,
+                                                      `type` = ScalaImplicitType,
+                                                      defaultValue = blobWrapper(s"data.get${getterType}(${name.dblQuoted})"),
+                                                      sign = ScalaSignArrowRight
+                                                  )
+                                      }: _*
+                                  )
                             )
 
                             case class PkData(getterType: String, pk: String)
