@@ -8,7 +8,7 @@ organization := "ru.simplesys"
 
 version := "1.3.14-SNAPSHOT"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 
 scalacOptions := Seq(
     "-feature",
