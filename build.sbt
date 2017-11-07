@@ -34,8 +34,8 @@ publishArtifact in(Compile, packageSrc) := true
 publishMavenStyle := true
 
 libraryDependencies ++= {
-	val ssysCoreVersion = "1.4.0.2"
-	//val ssysCoreVersion = "1.4-SNAPSHOT"
+	//val ssysCoreVersion = "1.4.0.2"
+	val ssysCoreVersion = "1.4-SNAPSHOT"
 	val scalazVersion = "7.2.15"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
