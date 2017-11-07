@@ -40,9 +40,38 @@ class GenDataSources(val appFilePath: Path,
                                         case cls: SeqScalaClassJSON ⇒
                                             val a = new SeqScalaClassJSON(cls.getOpt, cls.getItems.map {
                                                 case item: ScalaClassJSON ⇒
-                                                    item.properties
+                                                    var name: Option[String] = None
+                                                    var lookup: Option[Boolean] = None
+                                                    var foreignField: Option[String] = None
+
+                                                    item.properties.getItems.foreach {
+                                                        case ScalaClassJSONProperty(key, value) ⇒
+                                                            value match {
+                                                                case ScalaClassJSONPropertyString(value) if key == "name" ⇒
+                                                                    name = Some(value)
+                                                                case ScalaClassJSONPropertyString(value) if key == "foreignField" ⇒
+                                                                    foreignField = Some(value)
+                                                                case ScalaClassJSONPropertyBoolean(value) if key == "lookup" ⇒
+                                                                    lookup = Some(value)
+                                                                case _ ⇒
+                                                            }
+                                                    }
+
+                                                    item.properties = ScalaClassJSONProperties(item.properties.getItems.map {
+                                                        case ScalaClassJSONProperty(key, value) ⇒
+                                                            value match {
+                                                                case ScalaClassJSONPropertyString(value) if key == "name" ⇒
+                                                                    if (name.isDefined && lookup.isDefined && foreignField.isDefined)
+                                                                        ScalaClassJSONProperty(key, ScalaClassJSONPropertyString(s"${name.get}_${foreignField.get.capitalize}"))
+                                                                    else
+                                                                        ScalaClassJSONProperty(key, ScalaClassJSONPropertyString(value))
+                                                                case _ ⇒
+                                                                    ScalaClassJSONProperty(key, value)
+                                                            }
+                                                    }: _*)
+
                                                     item
-                                            }:_*)
+                                            }: _*)
                                             ScalaClassJSONProperty(key, a)
                                         case _ ⇒
                                             ScalaClassJSONProperty(key, value)
