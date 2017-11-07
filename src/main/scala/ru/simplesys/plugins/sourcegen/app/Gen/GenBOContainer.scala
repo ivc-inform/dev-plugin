@@ -211,11 +211,13 @@ class GenBOContainer(val appFilePath: Path,
 
                                 Sorting.quickSort(attrs)(AttrDefOrd)
 
-                                def getParams(attrs: Seq[AttrDef[_]], clazz: IClass): Seq[ScalaClassParametr] = {
+                                def getParams(_fkName: String, attrs: Seq[AttrDef[_]], clazz: IClass): Seq[ScalaClassParametr] = {
                                     val res = ArrayBuffer.empty[ScalaClassParametr]
                                     attrs foreach {
                                         attr =>
-                                            val fieldName = s"${attr.name}${clazz.className.capitalize}"
+                                            val fieldName = s"${attr.name}${clazz.className.capitalize}" + {
+                                                if (_fkName.isEmpty) strEmpty else s"_${_fkName}"
+                                            }
 
                                             val _columnType = {
                                                 val res = attr.attrType.scalaTypeAsString(clazz.group, schema)
@@ -231,18 +233,18 @@ class GenBOContainer(val appFilePath: Path,
                                             def columnType = s"${if (attr.isMandatory) _columnType else s"Array[${_columnType}]"}"
 
                                             if (i < maxArity) {
-                                                if (!allColumns.exists(_.trim === fieldName)) {
-                                                    res += ScalaClassParametr(name = fieldName, `type` = columnType.tp)
-                                                    allColumns += fieldName.space
-                                                    i += 1
-                                                }
+                                                //if (!allColumns.exists(_.trim === fieldName)) {
+                                                res += ScalaClassParametr(name = fieldName, `type` = columnType.tp)
+                                                allColumns += fieldName.space
+                                                i += 1
+                                                //}
                                             }
                                     }
                                     res.toSeq
                                 }
 
                                 val params = ScalaClassParametrs()
-                                params ++= (getParams(attrs, clazz): _*)
+                                params ++= (getParams(strEmpty, attrs, clazz): _*)
 
                                 if (!forLob) {
                                     val fks = clazz.fks.toArray
@@ -255,11 +257,11 @@ class GenBOContainer(val appFilePath: Path,
 
                                                 val attrs1: Array[AttrDef[_]] = fkClass.pk.attrs.toArray
                                                 Sorting.quickSort(attrs1)(AttrDefOrd)
-                                                params ++= (getParams(attrs1, fkClass): _*)
+                                                params ++= (getParams(fk.softNameForCompare, attrs1, fkClass): _*)
 
                                                 val attrs2: Array[AttrDef[_]] = fkClass.defaultSettings.showAttrsResult.toArray
                                                 Sorting.quickSort(attrs2)(AttrDefOrd)
-                                                params ++= (getParams(attrs2, fkClass): _*)
+                                                params ++= (getParams(fk.softNameForCompare, attrs2, fkClass): _*)
                                             }
                                     }
                                 }
@@ -317,10 +319,12 @@ class GenBOContainer(val appFilePath: Path,
                                       (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
                                           x =>
                                               val name = (x: IscElem).getStringValue("Name")
+                                              val foreignKey = (x: IscElem).getStringValue("ForeignField")
                                               val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
                                               val lookup = (x: IscElem).getBooleanValue("Lookup")
                                               val getterType: String = (x: IscElem).getStringValue("GetterType")
                                               val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
+
                                               def blobWrapper(str: String): String = {
                                                   if (getterType == "Blob")
                                                       s"wrapperBlobGetter($str)"
@@ -328,13 +332,22 @@ class GenBOContainer(val appFilePath: Path,
                                                       str
                                               }
 
-                                              if (itemName == strEmpty)
-                                                  ScalaClassParametr(
-                                                      name = name.dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper(_boName),
-                                                      sign = ScalaSignArrowRight
-                                                  )
+                                              if (itemName == strEmpty) {
+                                                  if (!lookup)
+                                                      ScalaClassParametr(
+                                                          name = name.dblQuoted,
+                                                          `type` = ScalaImplicitType,
+                                                          defaultValue = blobWrapper(_boName),
+                                                          sign = ScalaSignArrowRight
+                                                      )
+                                                  else
+                                                      ScalaClassParametr(
+                                                          name = name.dblQuoted,
+                                                          `type` = ScalaImplicitType,
+                                                          defaultValue = blobWrapper(s"${_boName}_${foreignKey.capitalize}"),
+                                                          sign = ScalaSignArrowRight
+                                                      )
+                                              }
                                               else if (!lookup)
                                                   ScalaClassParametr(
                                                       name = name.dblQuoted,
