@@ -31,6 +31,10 @@ class SeqScalaClassJSON(opt: String, classes: ScalaClassJSON*) extends ScalaProp
         this
     }
 
+    def getItems = _classes.toSeq
+
+    def getOpt = opt
+    
     def serrialize(indent: Int = 0) = {
         val res = (_classes map (newLine + spaces(indent + com.simplesys.scalaGen.indentSize) + _.serrialize(indent + com.simplesys.scalaGen.indentSize).trim)).mkString(",")
         if (!res.isEmpty)

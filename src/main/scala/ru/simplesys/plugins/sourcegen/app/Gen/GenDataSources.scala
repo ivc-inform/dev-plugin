@@ -6,13 +6,14 @@ import com.simplesys.common.Strings.{newLine, _}
 import com.simplesys.common._
 import com.simplesys.genSources._
 import com.simplesys.io._
-import com.simplesys.scalaGen._
+import com.simplesys.scalaGen.{ScalaClassesJSON, _}
 import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import com.simplesys.file.{Path, PathSet}
+import ru.simplesys.plugins.sourcegen.app.SeqScalaClassJSON
 
 class GenDataSources(val appFilePath: Path,
                      val schemaPath: URI,
@@ -33,7 +34,22 @@ class GenDataSources(val appFilePath: Path,
                     scalaPropertyElement match {
                         case ScalaClassJSONPropertyClassJSON(value) =>
                             value.wrappadOperator = "RestDataSourceSS.create"
-                            value addProperties makeCodeJS(_element)
+                            val properties: ScalaClassJSONProperties = ScalaClassJSONProperties(makeCodeJS(_element).getItems.map {
+                                case ScalaClassJSONProperty(key, value) if key == "fields" ⇒
+                                    value match {
+                                        case cls: SeqScalaClassJSON ⇒
+                                            val a = new SeqScalaClassJSON(cls.getOpt, cls.getItems.map {
+                                                case item: ScalaClassJSON ⇒
+                                                    item.properties
+                                                    item
+                                            }:_*)
+                                            ScalaClassJSONProperty(key, a)
+                                        case _ ⇒
+                                            ScalaClassJSONProperty(key, value)
+                                    }
+                                case x ⇒ x
+                            }: _*)
+                            value addProperties properties
                             val id: IscElem = _element \ "Identifier"
 
                             (collectionElem exists { case (name, _) => name == id.value }) match {
