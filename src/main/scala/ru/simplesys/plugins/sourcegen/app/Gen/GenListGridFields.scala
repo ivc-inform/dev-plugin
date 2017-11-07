@@ -43,14 +43,17 @@ class GenListGridFields(val appFilePath: Path,
                     for (elementField <- fields.child) {
                         val _elementField: IscElem = elementField
                         val fieldName = (elementField \ "Name").text
+                        val lookup = _elementField.getBooleanValue("Lookup")                                                                       
+                        val foreignKey = _elementField.getStringValue("ForeignField")
 
                         val listFridField = new ScalaClassDeclare {
                             scalaClassGen = "ListGridFieldProps".cls
                             typeScalaClass = AnonimousScalaClass
                         }
 
-                        val listFridFieldObjectName = s"${nameBase}${fieldName}_NameStrong"
-                        if (collectionElemName.find( _ == listFridFieldObjectName).isEmpty) {
+                        val listFridFieldObjectName = if (!lookup) s"${nameBase}${fieldName}_NameStrong" else s"${nameBase}${fieldName}_${foreignKey.capitalize}_NameStrong"
+
+                        if (collectionElemName.find(_ == listFridFieldObjectName).isEmpty) {
                             collectionElemName += listFridFieldObjectName
                             val listFridFieldObject = new ScalaClassDeclare {
                                 scalaClassGen = listFridFieldObjectName.cls
@@ -58,7 +61,10 @@ class GenListGridFields(val appFilePath: Path,
                                 extensibleClass = "NameStrong".ext
                                 //annotation = ScalaAnnotation("ScalaJSDefined")
                             }
-                            listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                            if (!lookup)
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                            else
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
                             collectionElemObject += listFridFieldObject
                         }
 
