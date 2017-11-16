@@ -897,6 +897,7 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.json.{JsonObject, JsonString}".imp,
                             "scalaz.{Failure, Success}".imp,
                             "com.simplesys.isc.system.misc.Number".imp,
+                            "com.simplesys.common.array._".imp,
                             "com.simplesys.messages.Message".imp,
                             //"scala.scalajs.js.annotation.ScalaJSDefined".imp,
                             "scala.scalajs.js".imp
