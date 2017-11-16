@@ -290,6 +290,8 @@ class GenBOContainer(val appFilePath: Path,
                                                         getterType match {
                                                             case "Long" =>
                                                                 parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextLong1(dataSet.fromBO.fromTable.databaseTablename)")
+                                                            case "LongOpt" =>
+                                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Some(Sequences(oraclePool).nextLong1(dataSet.fromBO.fromTable.databaseTablename))")
                                                             case "Double" =>
                                                                 parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "Sequences(oraclePool).nextDouble1(dataSet.fromBO.fromTable.databaseTablename)")
                                                             case "BigDecimal" =>

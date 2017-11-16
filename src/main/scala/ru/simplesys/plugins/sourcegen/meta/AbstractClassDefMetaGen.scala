@@ -55,7 +55,8 @@ trait AbstractClassDefMetaGen {
         val refUCCons = x.resolveUCConstraint
         val classNameUC = refUCCons.classRefNameRelative(group)
         val evalList = if (!x.isMandatory) {
-            if (x.attrNames.size === 1) s"${x.attrNames.head}.map(${classNameUC}(_))"
+            if (x.attrNames.size === 1)
+                s"${x.attrNames.head}.map(item => ${classNameUC}(item))"
             else {
                 val forNames = x.attrNames.map(a => x.attrMapping(a)).filter { case (mapp, refAttr) => refAttr.isMandatory }.map { case (mapp, refAttr) => mapp.localName }
                 s"for (${forNames.map(a => s"for${a.capitalize} <- ${a}").mkString("; ")}) yield ${classNameUC}(${x.attrNames.map(a => if (forNames.exists(_ === a)) s"for${a.capitalize}" else a).mkString(", ")})"
@@ -100,7 +101,11 @@ trait AbstractClassDefMetaGen {
                     val refAttr = temp._2
                     if (currFK.isMandatory) s"${currFK.constrAttrName}.${refAttr.name}"
                     else {
-                        if (refAttr.isMandatory) s"Some(${currFK.constrAttrName}).map(_.${refAttr.name})" else s"${currFK.constrAttrName}.flatMap(_.${refAttr.name})"
+                        if (refAttr.isMandatory)
+                            s"Some(${currFK.constrAttrName}).map(_.${refAttr.name})"
+                        else
+                            s"${currFK.constrAttrName}.${refAttr.name}" //Изменено когда первичный ключ опционален !!!!! (((((
+                            //s"${currFK.constrAttrName}.flatMap(_.${refAttr.name})"
                     }
                 }"
                 case x => s"${x} = ${x}"
@@ -170,7 +175,7 @@ trait AbstractClassDefMetaGen {
 
         val classDef =
             s"""|case class ${className.capitalize} (
-                |${attrDefs.mkString(",".newLine)}) extends Product {
+                |${attrDefs.mkString(",".newLine)}) extends Product with Implicits{
                 |${calculatedAttrDefs.mkString(newLine)}
                 |${ucAttrs.mkString(newLine)}
                 |${genFKRefAttrs.mkString(newLine)}
