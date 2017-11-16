@@ -124,7 +124,7 @@ class GenMainPage(val appFilePath: Path,
                 out(genMessageCreating("GenMainPage"))
                 out(newLine)
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 }

@@ -679,7 +679,7 @@ class GenBOServlet(val appFilePath: Path,
                                     out(genMessageCreating(s"GenBOServlet, stage: $stage"))
                                     out(newLine)
                                     out(newLine)
-                                    out(module.serrialize())
+                                    out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
                             }
 
                             resSeq += res

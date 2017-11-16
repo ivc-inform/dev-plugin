@@ -658,7 +658,7 @@ class GenEnums(val appFilePath: Path,
                 out(genMessageCreating(s"GenEnums, stage: $stage"))
                 out(newLine)
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 

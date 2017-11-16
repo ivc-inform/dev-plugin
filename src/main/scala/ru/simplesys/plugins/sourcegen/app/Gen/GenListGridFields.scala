@@ -268,7 +268,7 @@ class GenListGridFields(val appFilePath: Path,
             out =>
                 out(genMessageCreating(s"GenListGridFields (createSeq), stage: $stage"))
                 out(newLine)
-                out(moduleDataSourcesJS.serrialize())
+                out(org.scalafmt.Scalafmt.format(moduleDataSourcesJS.serrialize()).get)
         }
 
         resSeq += resDataSourcesJS
