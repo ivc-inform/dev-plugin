@@ -357,9 +357,9 @@ class GenBOContainer(val appFilePath: Path,
                                                       } + boName), sign = ScalaSignArrowRight)
                                               else
                                                   ScalaClassParametr(
-                                                      name = name.dblQuoted,
+                                                      name = s"${name}_${foreignKey.capitalize}".dblQuoted,
                                                       `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper(s"data.get${getterType}(${name.dblQuoted})"),
+                                                      defaultValue = blobWrapper(s"data.get${getterType}(${s"${name}_${foreignKey.capitalize}".dblQuoted})"),
                                                       sign = ScalaSignArrowRight
                                                   )
                                       }: _*
