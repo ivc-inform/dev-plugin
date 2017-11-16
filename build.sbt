@@ -37,6 +37,7 @@ libraryDependencies ++= {
 	//val ssysCoreVersion = "1.4.0.2"
 	val ssysCoreVersion = "1.4-SNAPSHOT"
 	val scalazVersion = "7.2.15"
+	val scalaFmtVersion = "1.3.0"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
         "com.simplesys.core" %% "core-utils" % ssysCoreVersion,
@@ -47,9 +48,11 @@ libraryDependencies ++= {
         "org.scalaz" %% "scalaz-core" % scalazVersion,
         //"org.liquibase" % "liquibase-maven-plugin" % "3.5.1",
         "com.h2database" % "h2" % "1.4.192",
+        "com.geirsson" %% "scalafmt-core" % scalaFmtVersion,
+        "com.geirsson" %% "scalafmt-cli" % scalaFmtVersion,
         "org.postgresql" % "postgresql" % "9.2-1003-jdbc4" % Test,
         "org.mockito" % "mockito-all" % "1.9.5" % Test,
-        "org.scalatest" %% "scalatest" % "3.0.3" % Test
+        "org.scalatest" %% "scalatest" % "3.0.4" % Test
     )
 }
 

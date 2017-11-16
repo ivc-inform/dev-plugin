@@ -913,7 +913,7 @@ class GenBOContainer(val appFilePath: Path,
                                 out(genMessageCreating(s"GenBOContainer, stage: $stage"))
                                 out(newLine)
                                 out(newLine)
-                                out(module.serrialize())
+                                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
                         }
 
                         resSeq += res
