@@ -598,7 +598,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "values", `type` = (columnTypes1 + "*").tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaMethod(
                   name = "insertPWithoutCommit",
                   serrializeToOneString = true,
@@ -607,7 +607,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}*".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("insert"),
               newLine,
               ScalaComment("update"),
@@ -639,7 +639,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = columnTypes1.tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaMethod(
                   name = "updatePWithoutCommit",
                   serrializeToOneString = true,
@@ -649,7 +649,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}".tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("update"),
               newLine,
               ScalaComment("delete"),
@@ -669,7 +669,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("Delete"),
               newLine
             )
