@@ -127,16 +127,13 @@ class GenBOContainer(val appFilePath: Path,
                                         scalaClassGen = traitName.cls
                                         typeScalaClass = TypeScalaTrait
                                         extensibleClass = "SessionContextSupport".ext
-                                        withTraits = ScalaWithTraits("ServletActorDyn".trt)
+                                        withTraits = ScalaWithTraits("ServletActor".trt)
                                     }
 
 
                                     traitDeclate addMembers(
                                       newLine,
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!!!! DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
-                                      ScalaVariable(name = "requestData", body = ScalaBody("new DSRequestDyn(request)"), serrializeToOneString = true),
-                                      newLine,
-                                      "logger debug s\"Request for " + mode + ": ${newLine + requestData.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(oraclePool)"""), serrializeToOneString = true),
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!! END DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
