@@ -200,7 +200,7 @@ class GenTables(val appFilePath: Path,
               ))),
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int"))))
+                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int"))))
         )
 
 
@@ -235,7 +235,7 @@ class GenTables(val appFilePath: Path,
                   ))),
                   parametrs = ScalaClassParametrs(
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               newLine,
               ScalaEndComment("P Methods")
             )
