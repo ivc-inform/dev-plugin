@@ -6,7 +6,7 @@ name := "dev-plugin"
 
 organization := "ru.simplesys"
 
-version := "1.3.14-SNAPSHOT"
+version := "1.3.15-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
@@ -35,7 +35,7 @@ publishMavenStyle := true
 
 libraryDependencies ++= {
 	//val ssysCoreVersion = "1.4.0.2"
-	val ssysCoreVersion = "1.4-SNAPSHOT"
+	val ssysCoreVersion = "1.5-SNAPSHOT"
 	val scalazVersion = "7.2.15"
 	val scalaFmtVersion = "1.3.0"
     Seq(
