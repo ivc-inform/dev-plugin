@@ -24,12 +24,10 @@ trait SchemaDefMetaGen {
         val importsClasses =
           """
             |
-            |import org.joda.time.{DateTime, LocalDateTime}
             |import ru.simplesys.meta.types.{MetaType, Domain}
             |import ru.simplesys.meta._
             |import ru.simplesys.coreutil.{SealedEnumRuntime, SealedCaseClassEnum}
             |import com.simplesys.jdbc._
-            |import com.simplesys.json.JsonString
             |import com.simplesys.corelibrary.domain._
             |import com.simplesys.common.array._
             |import com.simplesys.jdbc.control.clob._
