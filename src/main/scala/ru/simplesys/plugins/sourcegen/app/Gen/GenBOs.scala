@@ -879,7 +879,6 @@ class GenBOs(val appFilePath: Path,
             "com.simplesys.SQL._".imp,
             "com.simplesys.common.Strings._".imp,
             "collection.SeqView".imp,
-            "com.simplesys.json.JsonElement".imp,
             "com.simplesys.jdbc.control.clob._".imp,
             "com.simplesys.tuple._".imp,
             "com.simplesys.jdbc.control.table.JoinsTable._".imp)
