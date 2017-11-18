@@ -389,8 +389,8 @@ class GenDSs(val appFilePath: Path,
                           ScalaClassParametr(name = "columns", `type` = ScalaImplicitType, defaultValue =
                             ScalaBody(ScalaCase(
                                 expression = "_columns".expr,
-                                ScalaCaseLine(expression = "null".expr, caseBody = "allColumns.fields.toSet intersect columns.toSet".body, serrializeToOneString = true),
-                                ScalaCaseLine(expression = "_".expr, caseBody = "_columns.fields.toSet intersect columns.toSet".body, serrializeToOneString = true)
+                                ScalaCaseLine(expression = "null".expr, caseBody = "allColumns.fields.toSet.toList intersect columns.toSet.toList".body, serrializeToOneString = true),
+                                ScalaCaseLine(expression = "_".expr, caseBody = "_columns.fields.toSet.toList intersect columns.toSet.toList".body, serrializeToOneString = true)
                             ))
                           )
                       )
