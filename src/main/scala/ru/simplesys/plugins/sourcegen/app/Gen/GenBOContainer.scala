@@ -494,7 +494,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(
                                           name = "insert",
-                                          `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
+                                          `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", ScalaGenerics("Int")))),
                                           body = ScalaBody(insertBody),
                                           serrializeToOneString = true
                                       ),
@@ -682,7 +682,7 @@ class GenBOContainer(val appFilePath: Path,
 
                                         ScalaVariable(
                                             name = "update",
-                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
+                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", ScalaGenerics("Int")))),
                                             body = ScalaBody(updateBody), serrializeToOneString = true
                                         )
                                     }
@@ -812,7 +812,7 @@ class GenBOContainer(val appFilePath: Path,
 
                                         ScalaVariable(
                                             name = "delete",
-                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("Int")))),
+                                            `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", ScalaGenerics("Int")))),
                                             body = ScalaBody(deleteBody),
                                             serrializeToOneString = true
                                         )
