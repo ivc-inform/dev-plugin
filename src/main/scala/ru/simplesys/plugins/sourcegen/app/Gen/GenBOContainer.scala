@@ -392,7 +392,7 @@ class GenBOContainer(val appFilePath: Path,
 
                                 res addMember (
                                   ScalaVariable(
-                                      name = "sata",
+                                      name = "data",
                                       body = body,
                                       variableType = AssignVariable))
 
