@@ -385,7 +385,7 @@ class GenBOContainer(val appFilePath: Path,
 
                             def getDSResponse(body: ScalaBody): ScalaBody = {
                                 val res = new ScalaClassDeclare {
-                                    scalaClassGen = "DSResponseDyn".cls
+                                    scalaClassGen = "DSResponse".cls
                                     typeScalaClass = AnonimousScalaClass
                                 }
                                 res addMember ("Status = RPCResponseDyn.statusSuccess")
@@ -571,7 +571,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       "logger debug s\"_data: ${newLine + _data.toPrettyString}\"",
                                                       newLine, {
                                                           val res = new ScalaClassDeclare {
-                                                              scalaClassGen = "DSResponseDyn".cls
+                                                              scalaClassGen = "DSResponse".cls
                                                               typeScalaClass = AnonimousScalaClass
                                                           }
                                                           res addMembers(
@@ -878,7 +878,8 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.app.SessionContextSupport".imp,
                             "com.simplesys.jdbc.control.clob._".imp,
                             "java.time.LocalDateTime".imp,
-                            "java.time.LocalDateTime".imp,
+                            "com.simplesys.isc.dataBinging.DSResponse".imp,
+                            "com.simplesys.circe.Circe._".imp,
                             "scala.collection.mutable.ArrayBuffer".imp,
                             "com.simplesys.app.seq.Sequences".imp,
                             "com.simplesys.common.Strings._".imp,
