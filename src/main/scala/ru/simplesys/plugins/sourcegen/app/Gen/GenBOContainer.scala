@@ -315,7 +315,7 @@ class GenBOContainer(val appFilePath: Path,
                                 )
                             }
 
-                            def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(name = "RecordDyn",
+                            def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(name = "Seq",
                                 parametrs =
                                   ScalaClassParametrs(
                                       (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
