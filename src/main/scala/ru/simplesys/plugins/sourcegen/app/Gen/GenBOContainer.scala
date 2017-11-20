@@ -388,11 +388,11 @@ class GenBOContainer(val appFilePath: Path,
                                     scalaClassGen = "DSResponse".cls
                                     typeScalaClass = AnonimousScalaClass
                                 }
-                                res addMember ("Status = RPCResponseDyn.statusSuccess")
+                                res addMember ("status = RPCResponseDyn.statusSuccess")
 
                                 res addMember (
                                   ScalaVariable(
-                                      name = "Data",
+                                      name = "sata",
                                       body = body,
                                       variableType = AssignVariable))
 
@@ -575,9 +575,9 @@ class GenBOContainer(val appFilePath: Path,
                                                               typeScalaClass = AnonimousScalaClass
                                                           }
                                                           res addMembers(
-                                                            "Status = RPCResponseDyn.statusSuccess",
-                                                            "Data = _data",
-                                                            s"TotalRows = requestData.StartRow.toInt + (if (qty == list.length) qty * 2 else list.length)"
+                                                            "status = RPCResponseDyn.statusSuccess",
+                                                            "data = _data",
+                                                            s"totalRows = requestData.StartRow.toInt + (if (qty == list.length) qty * 2 else list.length)"
                                                           )
 
                                                           res
