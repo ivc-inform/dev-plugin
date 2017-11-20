@@ -552,7 +552,7 @@ class GenBOs(val appFilePath: Path,
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
             body = selectBody(nameBodyMethod))
@@ -566,7 +566,7 @@ class GenBOs(val appFilePath: Path,
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
             body = selectBody2(nameBodyMethod))
@@ -590,7 +590,7 @@ class GenBOs(val appFilePath: Path,
                     ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                    ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                    ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
                 ),
                 `type` = returnType,
                 body = sb

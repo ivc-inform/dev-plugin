@@ -84,7 +84,7 @@ class GenDSs(val appFilePath: Path,
                     ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                    ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                    ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
                 ),
                 `type` = returnType,
                 body = sb
@@ -130,7 +130,7 @@ class GenDSs(val appFilePath: Path,
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
             body = selectBody2(nameBodyMethod))
@@ -299,7 +299,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                  ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                  ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("FT#ReturnType")))),
               body = ScalaBody(
@@ -327,7 +327,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                  ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                  ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationExIterator".cls, ScalaGeneric("Iterator", ScalaGenerics("FT#ReturnType")))),
               body = ScalaBody(
