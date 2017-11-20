@@ -404,7 +404,7 @@ class GenBOContainer(val appFilePath: Path,
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}".imp
 
                                     val insertBody = ScalaCase(
-                                        expression = "requestData.Transaction.TransactionNum".expr,
+                                        expression = "requestData.transaction.transactionNum".expr,
                                         ScalaCaseLine(
                                             expression = "null".expr,
                                             caseBody = ScalaBody(
