@@ -530,7 +530,7 @@ class GenBOContainer(val appFilePath: Path,
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "RecordsDynList()".body, serrializeToOneString = true),
-                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.StartRow.toInt + 1".body, serrializeToOneString = true),
+                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.startRow.getOrElse(0) + 1".body, serrializeToOneString = true),
                                       newLine,
                                       ScalaVariable(
                                           name = "select",
@@ -577,7 +577,7 @@ class GenBOContainer(val appFilePath: Path,
                                                           res addMembers(
                                                             "status = RPCResponse.statusSuccess",
                                                             "data = _data",
-                                                            s"totalRows = requestData.StartRow.toInt + (if (qty == list.length) qty * 2 else list.length)"
+                                                            s"totalRows = requestData.startRow.getOrElse(0) + (if (qty == list.length) qty * 2 else list.length)"
                                                           )
 
                                                           res
