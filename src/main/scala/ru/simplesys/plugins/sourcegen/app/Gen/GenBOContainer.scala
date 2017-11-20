@@ -388,7 +388,7 @@ class GenBOContainer(val appFilePath: Path,
                                     scalaClassGen = "DSResponse".cls
                                     typeScalaClass = AnonimousScalaClass
                                 }
-                                res addMember ("status = RPCResponseDyn.statusSuccess")
+                                res addMember ("status = RPCResponse.statusSuccess")
 
                                 res addMember (
                                   ScalaVariable(
@@ -575,7 +575,7 @@ class GenBOContainer(val appFilePath: Path,
                                                               typeScalaClass = AnonimousScalaClass
                                                           }
                                                           res addMembers(
-                                                            "status = RPCResponseDyn.statusSuccess",
+                                                            "status = RPCResponse.statusSuccess",
                                                             "data = _data",
                                                             s"totalRows = requestData.StartRow.toInt + (if (qty == list.length) qty * 2 else list.length)"
                                                           )
