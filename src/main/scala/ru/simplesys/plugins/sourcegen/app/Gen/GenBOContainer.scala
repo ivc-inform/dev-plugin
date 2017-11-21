@@ -663,7 +663,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                     ScalaBody(
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
+                                                                            body = "operation.getJsonObjectOpt(\"oldValues\") append operation.getJsonObjectOpt(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
