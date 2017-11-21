@@ -299,7 +299,7 @@ class GenBOContainer(val appFilePath: Path,
                                                             case "String" =>
                                                                 parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = "getGUID")
                                                             case x =>
-                                                                throw new RuntimeException(s"GenBySeq must be BigDecimal or Long or String or Double, but exist (${x})")
+                                                                throw new RuntimeException(s"GenBySeq must be BigDecimal or Long or String or Double, but exist ($x)")
                                                         }
                                                 }
                                 }
@@ -506,7 +506,7 @@ class GenBOContainer(val appFilePath: Path,
                                               defaultValue = ScalaCase(expression = "insert result".expr,
                                                   ScalaCaseLine(expression = "Success(res)".expr,
                                                       caseBody = ScalaBody(
-                                                          "res foreach (x => logger debug (s\"Inserted: ${x} line(s).\"))",
+                                                          "res foreach (x => logger debug (s\"Inserted: $x line(s).\"))",
                                                           "arr(listResponse: _*)".body
                                                       )
                                                   ),
@@ -706,7 +706,7 @@ class GenBOContainer(val appFilePath: Path,
                                           defaultValue = ScalaCase(expression = "update result".expr,
                                               ScalaCaseLine(expression = "Success(res)".expr,
                                                   caseBody = ScalaBody(
-                                                      "res foreach (x => logger debug (s\"Updated: ${x} line(s).\"))",
+                                                      "res foreach (x => logger debug (s\"Updated: $x line(s).\"))",
                                                       "arr(listResponse: _*)".body
                                                   )
                                               ),
@@ -836,7 +836,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   expression = "delete result".expr,
                                                   ScalaCaseLine(expression = "Success(res)".expr,
                                                       caseBody = ScalaBody(
-                                                          "res foreach (x => logger debug (s\"Deleted: ${x} line(s).\"))",
+                                                          "res foreach (x => logger debug (s\"Deleted: $x line(s).\"))",
                                                           "arr(listResponse: _*)".body
                                                       )
                                                   ),
