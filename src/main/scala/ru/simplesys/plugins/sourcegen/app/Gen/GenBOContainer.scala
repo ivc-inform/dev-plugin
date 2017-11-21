@@ -542,7 +542,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(
                                           name = "select",
                                           body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.StartRow, endRow = requestData.EndRow, sortBy = requestData.SortBy, data = data, textMatchStyle = requestData.TextMatchStyle.toString))"),
+                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy.getOrElse(Json.Null), data = data, textMatchStyle = requestData.textMatchStyle.toString))"),
                                           serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(
