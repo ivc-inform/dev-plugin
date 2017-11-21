@@ -507,7 +507,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(
                                           ScalaClassParametr(
-                                              name = "array",
+                                              name = "out",
                                               `type` = ScalaImplicitType,
                                               defaultValue = ScalaCase(expression = "insert result".expr,
                                                   ScalaCaseLine(expression = "Success(res)".expr,
@@ -703,7 +703,7 @@ class GenBOContainer(val appFilePath: Path,
                                       getUpdateSatement,
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
-                                          name = "array",
+                                          name = "out",
                                           `type` = ScalaImplicitType,
                                           defaultValue = ScalaCase(expression = "update result".expr,
                                               ScalaCaseLine(expression = "Success(res)".expr,
@@ -839,7 +839,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaApplyObject(
                                           name = "Out",
                                           parametrs = ScalaClassParametrs(ScalaClassParametr(
-                                              name = "array",
+                                              name = "out",
                                               `type` = ScalaImplicitType,
                                               defaultValue = ScalaCase(
                                                   expression = "delete result".expr,
