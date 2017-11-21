@@ -446,42 +446,35 @@ class GenBOContainer(val appFilePath: Path,
                                                         newLine,
                                                         ScalaVariable(name = "values",
                                                             `type` = s"Seq[${boName.capitalize}]".tp,
-                                                            body = ScalaBody(ScalaControlStruct(
-                                                                name = "requestData.transaction.getOrElse(Transaction()).operations.map",
-                                                                body = ScalaControlBody(
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: Json".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObject(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = s"${boName}Data".unCapitalize,
-                                                                                body = ScalaBody(boData(true))),
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            newLine,
-                                                                            ScalaExpression("SendMessage(Message(channels = s\"ListElements_Add_$transactionNum\"))"),
-                                                                            newLine,
-                                                                            s"${boName.unCapitalize}Data"
-                                                                        )
-                                                                    ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
+                                                            body = ScalaBody(
+                                                                ScalaControlStruct(
+                                                                    name = "requestData.transaction.getOrElse(Transaction()).operations.map",
+                                                                    body = ScalaControlBody(
+                                                                        expression = "operation".expr,
+                                                                        ScalaVariable(
+                                                                            name = "data",
+                                                                            body = "operation.getJsonObject(\"data\")".body,
+                                                                            serrializeToOneString = true
+                                                                        ),
+                                                                        "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
+                                                                        newLine,
+                                                                        ScalaVariable(
+                                                                            name = s"${boName}Data".unCapitalize,
+                                                                            body = ScalaBody(boData(true))),
+                                                                        newLine,
+                                                                        ScalaVariable(
+                                                                            name = "listResponse",
+                                                                            variableType = AssignVariable,
+                                                                            sign = "append",
+                                                                            body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
+                                                                            serrializeToOneString = true
+                                                                        ),
+                                                                        newLine,
+                                                                        ScalaExpression("SendMessage(Message(channels = s\"ListElements_Add_$transactionNum\"))"),
+                                                                        newLine,
+                                                                        s"${boName.unCapitalize}Data"
                                                                     )
-                                                                )
-                                                            ),
+                                                                ),
                                                                 "dataSet.insertPWithoutCommit(connection = connection, values: _*)"
                                                             )
                                                         )
@@ -664,33 +657,24 @@ class GenBOContainer(val appFilePath: Path,
                                                             ScalaControlStruct(
                                                                 name = "requestData.transaction.getOrElse(Transaction()).transactionNum.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
-                                                                    expression = NoneScalaExpression,
-                                                                    suffix = ".toList",
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: Json".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            ScalaVariable(name = s"${boName.unCapitalize}Data", body = ScalaBody(boData(false)), serrializeToOneString = false),
-                                                                            newLine,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
-                                                                                serrializeToOneString = true),
-                                                                            getBody("dataSet.updatePWithoutCommit(connection = connection,") + ")"
-                                                                        )
+                                                                    expression = "operation".expr,
+                                                                    suffix = ".toArray",
+                                                                    ScalaVariable(
+                                                                        name = "data",
+                                                                        body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
+                                                                        serrializeToOneString = true
                                                                     ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
-                                                                    )
+                                                                    "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
+                                                                    newLine,
+                                                                    ScalaVariable(name = s"${boName.unCapitalize}Data", body = ScalaBody(boData(false)), serrializeToOneString = false),
+                                                                    newLine,
+                                                                    ScalaVariable(
+                                                                        name = "listResponse",
+                                                                        variableType = AssignVariable,
+                                                                        sign = "append",
+                                                                        body = getDSResponse(ScalaBody(recordDyn(s"${boName}Data".unCapitalize))),
+                                                                        serrializeToOneString = true),
+                                                                    getBody("dataSet.updatePWithoutCommit(connection = connection,") + ")"
                                                                 )
                                                             )
                                                         )
@@ -791,12 +775,12 @@ class GenBOContainer(val appFilePath: Path,
                                                             ScalaExpression("_transactionNum = Some(transactionNum)"),
                                                             newLine,
                                                             ScalaControlStruct(
-                                                                name = "requestData.transaction.getOrElse(Transaction()).transactionNum.flatMap",
+                                                                name = "requestData.transaction.getOrElse(Transaction()).operations.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
                                                                     expression = NoneScalaExpression,
-                                                                    suffix = ".toList",
+                                                                    suffix = ".toArray",
                                                                     ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
+                                                                        expression = "operation: Json".expr,
                                                                         caseBody = ScalaBody(
                                                                             ScalaVariable(
                                                                                 name = "data",
@@ -866,7 +850,7 @@ class GenBOContainer(val appFilePath: Path,
                                               )
                                           ))),
                                       newLine,
-                                      ScalaIf(ScalaExpression("_transactionNum.toInt != 0"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndRemove_${_transactionNum.toInt}\"))"), serrializeToOneString = true),
+                                      ScalaIf(ScalaExpression("_transactionNum.isDefined"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndRemove_${_transactionNum.get}\"))"), serrializeToOneString = true),
                                       newLine,
                                       "selfStop()"
                                     )
