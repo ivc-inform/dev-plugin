@@ -724,7 +724,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("DSResponseFailureExDyn(update).asJson")
+                                                  caseBody = ScalaBody("DSResponseFailureEx(update).asJson")
                                               )
                                           )
                                       ))),
@@ -776,7 +776,7 @@ class GenBOContainer(val appFilePath: Path,
                                                         name = "listResponse",
                                                         variableType = AssignVariable,
                                                         sign = "append",
-                                                        body = getDSResponse(ScalaBody("JsonObject()")),
+                                                        body = getDSResponse(ScalaBody("JsonObject.empty")),
                                                         serrializeToOneString = true),
                                                     getBody("dataSet.delete(where = Where(dataSet") + ")"
                                                 )
@@ -861,7 +861,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureExDyn(delete).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(delete).asJson")
                                                   )
                                               )
                                           ))),
