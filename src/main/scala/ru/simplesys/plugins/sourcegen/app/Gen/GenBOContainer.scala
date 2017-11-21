@@ -576,7 +576,7 @@ class GenBOContainer(val appFilePath: Path,
                                                               serrializeToOneString = true
                                                           ),
                                                           newLine,
-                                                          "logger debug s\"_data: ${newLine + arr(_data).toPrettyString}\"",
+                                                          "logger debug s\"_data: ${newLine + arr(_data:_*).toPrettyString}\"",
                                                           newLine, {
                                                               val res = ScalaApplyObject(
                                                                   name = "DSResponse",
@@ -589,7 +589,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                       ScalaClassParametr(
                                                                           name = "data",
                                                                           `type` = ScalaImplicitType,
-                                                                          defaultValue = "_data"
+                                                                          defaultValue = "arr(_data:_*)"
                                                                       ),
                                                                       ScalaClassParametr(
                                                                           name = "totalRows",
@@ -630,9 +630,9 @@ class GenBOContainer(val appFilePath: Path,
                                         }
 
                                         val updateBody = ScalaCase(
-                                            expression = "requestData.Transaction.TransactionNum".expr,
+                                            expression = "requestData.transaction.getOrElse(Transaction()).transactionNum".expr,
                                             ScalaCaseLine(
-                                                expression = "null".expr,
+                                                expression = "None".expr,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
@@ -662,12 +662,12 @@ class GenBOContainer(val appFilePath: Path,
                                                         body = ScalaControlBody(
                                                             expression = "connection".expr,
                                                             ScalaControlStruct(
-                                                                name = "requestData.Transaction.Operations.flatMap",
+                                                                name = "requestData.transaction.getOrElse(Transaction()).transactionNum.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
                                                                     expression = NoneScalaExpression,
                                                                     suffix = ".toList",
                                                                     ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
+                                                                        expression = "operation: Json".expr,
                                                                         caseBody = ScalaBody(
                                                                             ScalaVariable(
                                                                                 name = "data",
@@ -720,7 +720,7 @@ class GenBOContainer(val appFilePath: Path,
                                               ScalaCaseLine(expression = "Success(res)".expr,
                                                   caseBody = ScalaBody(
                                                       "res foreach (x => logger debug (s\"Updated: ${x} line(s).\"))",
-                                                      "listResponse".body
+                                                      "arr(listResponse: _*)".body
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
@@ -760,9 +760,9 @@ class GenBOContainer(val appFilePath: Path,
                                         }
 
                                         val deleteBody = ScalaCase(
-                                            expression = "requestData.Transaction.TransactionNum".expr,
+                                            expression = "requestData.transaction.getOrElse(Transaction()).transactionNum".expr,
                                             ScalaCaseLine(
-                                                expression = "null".expr,
+                                                expression = "None".expr,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
@@ -776,19 +776,19 @@ class GenBOContainer(val appFilePath: Path,
                                                         name = "listResponse",
                                                         variableType = AssignVariable,
                                                         sign = "append",
-                                                        body = getDSResponse(ScalaBody("JsonObject.empty")),
+                                                        body = getDSResponse(ScalaBody("arr()")),
                                                         serrializeToOneString = true),
                                                     getBody("dataSet.delete(where = Where(dataSet") + ")"
                                                 )
                                             ),
                                             ScalaCaseLine(
-                                                expression = "transactionNum".expr,
+                                                expression = "Some(transactionNum)".expr,
                                                 caseBody = ScalaBody(
                                                     ScalaControlStruct(
                                                         name = "transaction(dataSet.dataSource)",
                                                         body = ScalaControlBody(
                                                             expression = "connection".expr,
-                                                            ScalaExpression("_transactionNum = transactionNum"),
+                                                            ScalaExpression("_transactionNum = Some(transactionNum)"),
                                                             newLine,
                                                             ScalaControlStruct(
                                                                 name = "requestData.Transaction.Operations.flatMap",
@@ -810,7 +810,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                                 name = "listResponse",
                                                                                 variableType = AssignVariable,
                                                                                 sign = "append",
-                                                                                body = getDSResponse(ScalaBody("JsonObject()")),
+                                                                                body = getDSResponse(ScalaBody("arr()")),
                                                                                 serrializeToOneString = true),
                                                                             ScalaExpression("SendMessage(Message(channels = s\"ListElements_Remove_$transactionNum\"))"),
                                                                             newLine,
@@ -840,7 +840,7 @@ class GenBOContainer(val appFilePath: Path,
                                     getDataBody ++= (
                                       "import com.simplesys.messages.ActorConfig._",
                                       newLine,
-                                      ScalaVariable(name = "_transactionNum", variableType = VariableVar, serrializeToOneString = true, body = s"""Number("0")""".body),
+                                      ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
@@ -857,7 +857,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   ScalaCaseLine(expression = "Success(res)".expr,
                                                       caseBody = ScalaBody(
                                                           "res foreach (x => logger debug (s\"Deleted: ${x} line(s).\"))",
-                                                          "listResponse".body
+                                                          "arr(listResponse: _*)".body
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
