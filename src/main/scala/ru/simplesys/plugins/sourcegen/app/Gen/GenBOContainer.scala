@@ -436,7 +436,7 @@ class GenBOContainer(val appFilePath: Path,
                                             )
                                         ),
                                         ScalaCaseLine(
-                                            expression = "transactionNum".expr,
+                                            expression = "Some(transactionNum)".expr,
                                             caseBody = ScalaBody(
                                                 ScalaControlStruct(
                                                     name = "transaction(dataSet.dataSource)",
@@ -450,11 +450,11 @@ class GenBOContainer(val appFilePath: Path,
                                                                 name = "requestData.transaction.getOrElse(Transaction()).operations.map",
                                                                 body = ScalaControlBody(
                                                                     ScalaCaseLine(
-                                                                        expression = "operation: JsonObject".expr,
+                                                                        expression = "operation: Json".expr,
                                                                         caseBody = ScalaBody(
                                                                             ScalaVariable(
                                                                                 name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"data\")".body,
+                                                                                body = "operation.getJsonObject(\"data\")".body,
                                                                                 serrializeToOneString = true
                                                                             ),
                                                                             "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
