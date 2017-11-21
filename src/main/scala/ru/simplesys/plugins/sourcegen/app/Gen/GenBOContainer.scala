@@ -517,7 +517,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureExDyn(insert).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(insert).asJson")
                                                   )
                                               )
                                           ))),
@@ -537,7 +537,7 @@ class GenBOContainer(val appFilePath: Path,
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "ArrayBuffer.empty[Json]".body, serrializeToOneString = true),
-                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.startRow.getOrElse(0) + 1".body, serrializeToOneString = true),
+                                      ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.endRow.getOrElse(1) - requestData.startRow.getOrElse(0) + 1".body, serrializeToOneString = true),
                                       newLine,
                                       ScalaVariable(
                                           name = "select",
@@ -592,7 +592,7 @@ class GenBOContainer(val appFilePath: Path,
                                                           })
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("new DSResponseFailureExDyn(select)")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(select).asJson")
                                                   )
                                               )
                                           ))),
@@ -713,12 +713,12 @@ class GenBOContainer(val appFilePath: Path,
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(update))")
+                                                  caseBody = ScalaBody("DSResponseFailureExDyn(update).asJson")
                                               )
                                           )
                                       ))),
                                       newLine,
-                                      "selfStop()"
+                                      "selfStop()"                   
                                     )
 
                                 case "Remove" =>
@@ -850,7 +850,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(delete))")
+                                                      caseBody = ScalaBody("DSResponseFailureExDyn(delete).asJson")
                                                   )
                                               )
                                           ))),
@@ -897,7 +897,7 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.circe.Circe._".imp,
                             "io.circe.syntax._".imp,
                             "io.circe.generic.auto._".imp,
-                            "com.simplesys.jdbc.control.ValidationEx".imp,
+                            "com.simplesys.jdbc.control.{DsRequest, ValidationEx}".imp,
                             "com.simplesys.jdbc.control.classBO.Where".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
                             "com.simplesys.servlet.isc.GetData".imp,
