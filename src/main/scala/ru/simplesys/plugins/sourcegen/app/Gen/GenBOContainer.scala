@@ -453,7 +453,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                         expression = "operation".expr,
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "new CirceOpt1(operation).getJsonObject(\"data\")".body,
+                                                                            body = "operation.getJsonObject(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         newLine,
@@ -630,7 +630,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = "requestData.oldValues append requestData.data".body,
+                                                        body = "requestData.oldValues ++ requestData.data".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
@@ -663,7 +663,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                     ScalaBody(
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "new CirceOpt1(operation).getJsonObjectOpt(\"oldValues\") append new CirceOpt1(operation).getJsonObjectOpt(\"data\")".body,
+                                                                            body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
@@ -785,7 +785,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                     ScalaBody(
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "new CirceOpt1(operation).getJsonObjectOpt(\"data\")".body,
+                                                                            body = "operation.getJsonObjectOpt(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
