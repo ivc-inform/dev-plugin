@@ -791,7 +791,7 @@ class GenBOContainer(val appFilePath: Path,
                                                             ScalaExpression("_transactionNum = Some(transactionNum)"),
                                                             newLine,
                                                             ScalaControlStruct(
-                                                                name = "requestData.Transaction.Operations.flatMap",
+                                                                name = "requestData.transaction.getOrElse(Transaction()).transactionNum.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
                                                                     expression = NoneScalaExpression,
                                                                     suffix = ".toList",
