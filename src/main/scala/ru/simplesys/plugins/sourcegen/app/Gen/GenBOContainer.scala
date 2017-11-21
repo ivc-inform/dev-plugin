@@ -655,7 +655,7 @@ class GenBOContainer(val appFilePath: Path,
                                                         body = ScalaControlBody(
                                                             expression = "connection".expr,
                                                             ScalaControlStruct(
-                                                                name = "requestData.transaction.getOrElse(Transaction()).transactionNum.flatMap",
+                                                                name = "requestData.transaction.getOrElse(Transaction()).operations.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
                                                                     expression = "operation".expr,
                                                                     suffix = ".toArray",
@@ -779,7 +779,7 @@ class GenBOContainer(val appFilePath: Path,
                                                             ScalaControlStruct(
                                                                 name = "requestData.transaction.getOrElse(Transaction()).operations.flatMap",
                                                                 body = ScalaControlBodyWithSuffix(
-                                                                    expression = NoneScalaExpression,
+                                                                    expression = "operation".expr,
                                                                     suffix = ".toArray",
                                                                     ScalaCaseLine(
                                                                         expression = "operation: Json".expr,
@@ -802,10 +802,6 @@ class GenBOContainer(val appFilePath: Path,
                                                                             newLine,
                                                                             getBody("dataSet.deleteWithoutCommit(connection = connection, where = Where(dataSet") + ")"
                                                                         )
-                                                                    ),
-                                                                    ScalaCaseLine(
-                                                                        expression = "x".expr,
-                                                                        caseBody = "throw new RuntimeException(s\"Bad branch: $x\")".body
                                                                     )
                                                                 )
                                                             )
