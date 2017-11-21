@@ -576,18 +576,29 @@ class GenBOContainer(val appFilePath: Path,
                                                               serrializeToOneString = true
                                                           ),
                                                           newLine,
-                                                          "logger debug s\"_data: ${newLine + _data.toPrettyString}\"",
+                                                          "logger debug s\"_data: ${newLine + arr(_data).toPrettyString}\"",
                                                           newLine, {
-                                                              val res = new ScalaClassDeclare {
-                                                                  scalaClassGen = "DSResponse".cls
-                                                                  typeScalaClass = AnonimousScalaClass
-                                                              }
-                                                              res addMembers(
-                                                                "status = RPCResponse.statusSuccess",
-                                                                "data = _data",
-                                                                s"totalRows = requestData.startRow.getOrElse(0) + (if (qty == list.length) qty * 2 else list.length)"
+                                                              val res = ScalaApplyObject(
+                                                                  name = "DSResponse",
+                                                                  parametrs = ScalaClassParametrs(
+                                                                      ScalaClassParametr(
+                                                                          name = "status",
+                                                                          `type` = ScalaImplicitType,
+                                                                          defaultValue = "RPCResponse.statusSuccess"
+                                                                      ),
+                                                                      ScalaClassParametr(
+                                                                          name = "data",
+                                                                          `type` = ScalaImplicitType,
+                                                                          defaultValue = "_data"
+                                                                      ),
+                                                                      ScalaClassParametr(
+                                                                          name = "totalRows",
+                                                                          `type` = ScalaImplicitType,
+                                                                          defaultValue = "Some(requestData.startRow.getOrElse(0) + (if (qty == list.length) qty * 2 else list.length))"
+                                                                      )
+                                                                  ),
+                                                                  suffix = ".asJson"
                                                               )
-
                                                               res
                                                           })
                                                   ),
@@ -718,7 +729,7 @@ class GenBOContainer(val appFilePath: Path,
                                           )
                                       ))),
                                       newLine,
-                                      "selfStop()"                   
+                                      "selfStop()"
                                     )
 
                                 case "Remove" =>
