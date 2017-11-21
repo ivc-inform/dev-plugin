@@ -315,57 +315,58 @@ class GenBOContainer(val appFilePath: Path,
                                 )
                             }
 
-                            def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(name = "Seq",
-                                parametrs =
-                                  ScalaClassParametrs(
-                                      (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
-                                          x =>
-                                              val name = (x: IscElem).getStringValue("Name")
-                                              val foreignKey = (x: IscElem).getStringValue("ForeignField")
-                                              val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
-                                              val lookup = (x: IscElem).getBooleanValue("Lookup")
-                                              val getterType: String = (x: IscElem).getStringValue("GetterType")
-                                              val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
+                            def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(
+                                name = "fromJsonObject(JsonObject.fromIterable(Seq",
+                                parametrs = ScalaClassParametrs(
+                                    (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
+                                        x =>
+                                            val name = (x: IscElem).getStringValue("Name")
+                                            val foreignKey = (x: IscElem).getStringValue("ForeignField")
+                                            val jObjectFieldName = (x: IscElem).getStringValue("JObjectFieldName")
+                                            val lookup = (x: IscElem).getBooleanValue("Lookup")
+                                            val getterType: String = (x: IscElem).getStringValue("GetterType")
+                                            val _boName = if (!forLob) jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize else jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + fullClassName.capitalize
 
-                                              def blobWrapper(str: String): String = {
-                                                  if (getterType == "Blob")
-                                                      s"wrapperBlobGetter($str)"
-                                                  else
-                                                      str
-                                              }
+                                            def blobWrapper(str: String): String = {
+                                                if (getterType == "Blob")
+                                                    s"wrapperBlobGetter($str)"
+                                                else
+                                                    str
+                                            }
 
-                                              if (itemName == strEmpty) {
-                                                  if (!lookup)
-                                                      ScalaClassParametr(
-                                                          name = name.dblQuoted,
-                                                          `type` = ScalaImplicitType,
-                                                          defaultValue = blobWrapper(_boName),
-                                                          sign = ScalaSignArrowRight
-                                                      )
-                                                  else
-                                                      ScalaClassParametr(
-                                                          name = s"${name}_${foreignKey.capitalize}".dblQuoted,
-                                                          `type` = ScalaImplicitType,
-                                                          defaultValue = blobWrapper(s"${_boName}_${foreignKey.capitalize}"),
-                                                          sign = ScalaSignArrowRight
-                                                      )
-                                              }
-                                              else if (!lookup)
-                                                  ScalaClassParametr(
-                                                      name = name.dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper({
-                                                          if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
-                                                      } + boName), sign = ScalaSignArrowRight)
-                                              else
-                                                  ScalaClassParametr(
-                                                      name = s"${name}_${foreignKey.capitalize}".dblQuoted,
-                                                      `type` = ScalaImplicitType,
-                                                      defaultValue = blobWrapper(s"data.get${getterType}(${s"${name}_${foreignKey.capitalize}".dblQuoted})"),
-                                                      sign = ScalaSignArrowRight
-                                                  )
-                                      }: _*
-                                  )
+                                            if (itemName == strEmpty) {
+                                                if (!lookup)
+                                                    ScalaClassParametr(
+                                                        name = name.dblQuoted,
+                                                        `type` = ScalaImplicitType,
+                                                        defaultValue = blobWrapper(_boName),
+                                                        sign = ScalaSignArrowRight
+                                                    )
+                                                else
+                                                    ScalaClassParametr(
+                                                        name = s"${name}_${foreignKey.capitalize}".dblQuoted,
+                                                        `type` = ScalaImplicitType,
+                                                        defaultValue = blobWrapper(s"${_boName}_${foreignKey.capitalize}"),
+                                                        sign = ScalaSignArrowRight
+                                                    )
+                                            }
+                                            else if (!lookup)
+                                                ScalaClassParametr(
+                                                    name = name.dblQuoted,
+                                                    `type` = ScalaImplicitType,
+                                                    defaultValue = blobWrapper({
+                                                        if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
+                                                    } + boName), sign = ScalaSignArrowRight)
+                                            else
+                                                ScalaClassParametr(
+                                                    name = s"${name}_${foreignKey.capitalize}".dblQuoted,
+                                                    `type` = ScalaImplicitType,
+                                                    defaultValue = blobWrapper(s"data.get${getterType}(${s"${name}_${foreignKey.capitalize}".dblQuoted})"),
+                                                    sign = ScalaSignArrowRight
+                                                )
+                                    }: _*
+                                ),
+                                suffix = "))"
                             )
 
                             case class PkData(getterType: String, pk: String)
@@ -404,9 +405,9 @@ class GenBOContainer(val appFilePath: Path,
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}".imp
 
                                     val insertBody = ScalaCase(
-                                        expression = "requestData.transaction.transactionNum".expr,
+                                        expression = "requestData.transaction.getOrElse(Transaction()).transactionNum".expr,
                                         ScalaCaseLine(
-                                            expression = "null".expr,
+                                            expression = "None".expr,
                                             caseBody = ScalaBody(
                                                 ScalaVariable(
                                                     name = "data",
@@ -488,7 +489,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       newLine,
-                                      ScalaVariable(name = "_transactionNum", variableType = VariableVar, serrializeToOneString = true, body = s"""Number("0")""".body),
+                                      ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
@@ -529,13 +530,13 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.data".body),
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "_data", body = "RecordsDynList()".body, serrializeToOneString = true),
+                                      ScalaVariable(name = "_data", body = "ArrayBuffer.empty[Json]".body, serrializeToOneString = true),
                                       ScalaVariable(name = "qty", `type` = ScalaInt, body = "requestData.EndRow.toInt - requestData.startRow.getOrElse(0) + 1".body, serrializeToOneString = true),
                                       newLine,
                                       ScalaVariable(
                                           name = "select",
                                           body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DSRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.StartRow, endRow = requestData.EndRow, sortBy = requestData.SortBy, data = data, textMatchStyle = requestData.TextMatchStyle.toString))"),
+                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.StartRow, endRow = requestData.EndRow, sortBy = requestData.SortBy, data = data, textMatchStyle = requestData.TextMatchStyle.toString))"),
                                           serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(ScalaClassParametr(
@@ -875,10 +876,11 @@ class GenBOContainer(val appFilePath: Path,
                             s"$packageName.$groupName".pkg,
                             newLine,
                             "com.simplesys.annotation.RSTransfer".imp,
+                            "com.simplesys.servlet.ServletContext".imp,
                             "com.simplesys.app.SessionContextSupport".imp,
                             "com.simplesys.jdbc.control.clob._".imp,
                             "java.time.LocalDateTime".imp,
-                            "com.simplesys.isc.dataBinging.{DSResponse, RPCResponse}".imp,
+                            "com.simplesys.isc.dataBinging.{DSResponse, RPCResponse, Transaction}".imp,
                             "com.simplesys.circe.Circe._".imp,
                             "scala.collection.mutable.ArrayBuffer".imp,
                             "com.simplesys.app.seq.Sequences".imp,
@@ -886,13 +888,15 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.jdbc._".imp,
                             "com.simplesys.common._".imp,
                             "com.simplesys.circe.Circe._".imp,
+                            "io.circe.syntax._".imp,
+                            "io.circe.generic.auto._".imp,
                             "com.simplesys.jdbc.control.ValidationEx".imp,
                             "com.simplesys.jdbc.control.classBO.Where".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
                             "com.simplesys.servlet.isc.GetData".imp,
                             "com.simplesys.jdbc.control.SessionStructures._".imp,
                             "com.simplesys.tuple._".imp,
-                            "io.circe.Json".imp,
+                            "io.circe.{Json, JsonObject}".imp,
                             "io.circe.Json._".imp,
                             "com.simplesys.servlet.isc.GetData".imp,
                             "scalaz.{Failure, Success}".imp,
