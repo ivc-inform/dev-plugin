@@ -456,6 +456,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                             body = "operation.getJsonObject(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
+                                                                        newLine,
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
                                                                         newLine,
                                                                         ScalaVariable(
@@ -629,7 +630,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = "requestData.oldValues ++ requestData.data".body,
+                                                        body = "requestData.oldValues append requestData.data".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
@@ -781,27 +782,24 @@ class GenBOContainer(val appFilePath: Path,
                                                                 body = ScalaControlBodyWithSuffix(
                                                                     expression = "operation".expr,
                                                                     suffix = ".toArray",
-                                                                    ScalaCaseLine(
-                                                                        expression = "operation: Json".expr,
-                                                                        caseBody = ScalaBody(
-                                                                            ScalaVariable(
-                                                                                name = "data",
-                                                                                body = "operation.getJsonObjectOpt(\"data\")".body,
-                                                                                serrializeToOneString = true
-                                                                            ),
-                                                                            "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
-                                                                            newLine,
-                                                                            getPrimarykeyVariables,
-                                                                            ScalaVariable(
-                                                                                name = "listResponse",
-                                                                                variableType = AssignVariable,
-                                                                                sign = "append",
-                                                                                body = getDSResponse(ScalaBody("arr()")),
-                                                                                serrializeToOneString = true),
-                                                                            ScalaExpression("SendMessage(Message(channels = s\"ListElements_Remove_$transactionNum\"))"),
-                                                                            newLine,
-                                                                            getBody("dataSet.deleteWithoutCommit(connection = connection, where = Where(dataSet") + ")"
-                                                                        )
+                                                                    ScalaBody(
+                                                                        ScalaVariable(
+                                                                            name = "data",
+                                                                            body = "operation.getJsonObjectOpt(\"data\")".body,
+                                                                            serrializeToOneString = true
+                                                                        ),
+                                                                        "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
+                                                                        newLine,
+                                                                        getPrimarykeyVariables,
+                                                                        ScalaVariable(
+                                                                            name = "listResponse",
+                                                                            variableType = AssignVariable,
+                                                                            sign = "append",
+                                                                            body = getDSResponse(ScalaBody("arr()")),
+                                                                            serrializeToOneString = true),
+                                                                        ScalaExpression("SendMessage(Message(channels = s\"ListElements_Remove_$transactionNum\"))"),
+                                                                        newLine,
+                                                                        getBody("dataSet.deleteWithoutCommit(connection = connection, where = Where(dataSet") + ")"
                                                                     )
                                                                 )
                                                             )
