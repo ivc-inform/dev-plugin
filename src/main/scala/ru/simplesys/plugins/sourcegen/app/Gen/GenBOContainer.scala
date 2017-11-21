@@ -513,16 +513,16 @@ class GenBOContainer(val appFilePath: Path,
                                                   ScalaCaseLine(expression = "Success(res)".expr,
                                                       caseBody = ScalaBody(
                                                           "res foreach (x => logger debug (s\"Inserted: ${x} line(s).\"))",
-                                                          "listResponse".body
+                                                          "arr(listResponse: _*)".body
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("ArrayDyn(new DSResponseFailureExDyn(insert))")
+                                                      caseBody = ScalaBody("DSResponseFailureExDyn(insert).asJson")
                                                   )
                                               )
                                           ))),
                                       newLine,
-                                      ScalaIf(ScalaExpression("_transactionNum.toInt != 0"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndAdd_${_transactionNum.toInt}\"))"), serrializeToOneString = true),
+                                      ScalaIf(ScalaExpression("_transactionNum.isDefined"), ScalaBody("SendMessage(Message(channels = s\"ListElements_EndAdd_${_transactionNum.get}\"))"), serrializeToOneString = true),
                                       newLine,
                                       "selfStop()"
                                     )
@@ -887,7 +887,7 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.app.SessionContextSupport".imp,
                             "com.simplesys.jdbc.control.clob._".imp,
                             "java.time.LocalDateTime".imp,
-                            "com.simplesys.isc.dataBinging.{DSResponse, RPCResponse, Transaction}".imp,
+                            "com.simplesys.isc.dataBinging.{DSResponse, RPCResponse, Transaction, DSResponseFailureEx}".imp,
                             "com.simplesys.circe.Circe._".imp,
                             "scala.collection.mutable.ArrayBuffer".imp,
                             "com.simplesys.app.seq.Sequences".imp,
