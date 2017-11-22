@@ -524,6 +524,7 @@ class GenBOContainer(val appFilePath: Path,
                                 case "Fetch" =>
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}DS".imp
 
+                                    val textMatchStyle = "exact".dblQuoted
                                     getDataBody ++= (
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
@@ -536,7 +537,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(
                                           name = "select",
                                           body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy, data = data, textMatchStyle = requestData.textMatchStyle.get))"),
+                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy, data = data, textMatchStyle = requestData.textMatchStyle.getOrElse($textMatchStyle)))"),
                                           serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(
