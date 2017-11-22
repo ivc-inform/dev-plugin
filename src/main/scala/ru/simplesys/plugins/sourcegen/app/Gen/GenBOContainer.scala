@@ -31,7 +31,7 @@ class GenBOContainer(val appFilePath: Path,
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
     val sourceBOFiles: PathSet[Path] = boFilePath * "*.xml"
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
-    val dataTag = "data"
+    val dataTag = "data".dblQuoted
 
 
     def create: File = ????
