@@ -399,7 +399,8 @@ class GenBOContainer(val appFilePath: Path,
                                             `type` = ScalaImplicitType,
                                             defaultValue = body
                                         )
-                                    )
+                                    ),
+                                    suffix = ".asJson"
                                 )
 
                                 ScalaBody(res)
@@ -486,7 +487,7 @@ class GenBOContainer(val appFilePath: Path,
                                     getDataBody ++= (
                                       "import com.simplesys.messages.ActorConfig._",
                                       newLine,
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[DSResponseBase]".body),
+                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       newLine,
                                       ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
@@ -511,7 +512,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(insert.printException.get.message, insert.printException.get.stackTrace)")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(insert.printException.get.message, insert.printException.get.stackTrace).asJson")
                                                   )
                                               )
                                           ))),
@@ -696,7 +697,7 @@ class GenBOContainer(val appFilePath: Path,
                                     getDataBody ++= (
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[DSResponseBase]".body),
+                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       newLine,
                                       getUpdateSatement,
                                       newLine,
@@ -711,7 +712,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("DSResponseFailureEx(update.printException.get.message, update.printException.get.stackTrace)")
+                                                  caseBody = ScalaBody("DSResponseFailureEx(update.printException.get.message, update.printException.get.stackTrace).asJson")
                                               )
                                           )
                                       ))),
@@ -824,7 +825,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[DSResponseBase]".body),
+                                      ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       getDeleteSatement,
                                       newLine,
                                       ScalaApplyObject(
@@ -841,7 +842,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(delete.printException.get.message, delete.printException.get.stackTrace)")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(delete.printException.get.message, delete.printException.get.stackTrace).asJson")
                                                   )
                                               )
                                           ))),
@@ -877,7 +878,6 @@ class GenBOContainer(val appFilePath: Path,
                             newLine,
                             "de.heikoseeberger.akkahttpcirce.CirceEnum._".imp,
                             "com.simplesys.annotation.RSTransfer".imp,
-                            "com.simplesys.isc.dataBinging.{DSResponse, DSResponseBase, DSResponseFailureEx}".imp,
                             "com.simplesys.servlet.ServletContext".imp,
                             "com.simplesys.app.SessionContextSupport".imp,
                             "com.simplesys.jdbc.control.clob._".imp,
