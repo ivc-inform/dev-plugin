@@ -874,6 +874,7 @@ class GenBOContainer(val appFilePath: Path,
                         val module = ScalaModule(
                             s"$packageName.$groupName".pkg,
                             newLine,
+                            "de.heikoseeberger.akkahttpcirce.CirceEnum._".imp,
                             "com.simplesys.annotation.RSTransfer".imp,
                             "com.simplesys.servlet.ServletContext".imp,
                             "com.simplesys.app.SessionContextSupport".imp,
