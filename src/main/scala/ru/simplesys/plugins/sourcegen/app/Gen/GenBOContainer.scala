@@ -399,8 +399,7 @@ class GenBOContainer(val appFilePath: Path,
                                             `type` = ScalaImplicitType,
                                             defaultValue = body
                                         )
-                                    ),
-                                    suffix = ".asJson"
+                                    )
                                 )
 
                                 ScalaBody(res)
@@ -512,7 +511,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(insert.printException.get.message, insert.printException.get.stackTrace).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(insert.printException.get.message, insert.printException.get.stackTrace)")
                                                   )
                                               )
                                           ))),
@@ -592,14 +591,13 @@ class GenBOContainer(val appFilePath: Path,
                                                                           `type` = ScalaImplicitType,
                                                                           defaultValue = "Some(requestData.startRow.getOrElse(0) + (if (qty == list.length) qty * 2 else list.length))"
                                                                       )
-                                                                  ),
-                                                                  suffix = ".asJson"
+                                                                  )
                                                               )
                                                               res
                                                           })
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(select.printException.get.message, select.printException.get.stackTrace).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(select.printException.get.message, select.printException.get.stackTrace)")
                                                   )
                                               )
                                           ))),
@@ -713,7 +711,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("DSResponseFailureEx(update.printException.get.message, update.printException.get.stackTrace).asJson")
+                                                  caseBody = ScalaBody("DSResponseFailureEx(update.printException.get.message, update.printException.get.stackTrace)")
                                               )
                                           )
                                       ))),
@@ -843,7 +841,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(delete.printException.get.message, delete.printException.get.stackTrace).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(delete.printException.get.message, delete.printException.get.stackTrace)")
                                                   )
                                               )
                                           ))),
