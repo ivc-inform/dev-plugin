@@ -874,6 +874,7 @@ class GenBOContainer(val appFilePath: Path,
                         val module = ScalaModule(
                             s"$packageName.$groupName".pkg,
                             newLine,
+                            "// import de.heikoseeberger.akkahttpcirce.CirceEnum._ Необходим для правильного отображения Enum типа case object from sealed trait; в общем случае это имеет вид {\"name\":{}}",
                             "de.heikoseeberger.akkahttpcirce.CirceEnum._".imp,
                             "com.simplesys.annotation.RSTransfer".imp,
                             "com.simplesys.servlet.ServletContext".imp,
@@ -903,7 +904,7 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.isc.system.misc.Number".imp,
                             "com.simplesys.common.array._".imp,
                             "com.simplesys.messages.Message".imp,
-                            "scala.scalajs.js".imp
+                            "scala.scalajs.js".imp,
                         )
 
                         module ++= addedImports
