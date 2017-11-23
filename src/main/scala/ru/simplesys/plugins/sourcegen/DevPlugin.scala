@@ -6,7 +6,7 @@ package sourcegen
 import com.simplesys.file.{Path, PathSet}
 import sbt.{`package` ⇒ _, _}
 import sbt.Keys._
-import sbt.classpath.ClasspathUtilities
+import sbt.internal.inc.classpath.ClasspathUtilities
 import liquibase.Liquibase
 import liquibase.database.Database
 import liquibase.integration.commandline.CommandLineUtils
@@ -16,8 +16,11 @@ import net.sf.saxon.lib.FeatureKeys
 import ru.simplesys.meta.types.DataTypes
 import ru.simplesys.plugins.sourcegen.meta.SchemaDef
 import ru.simplesys.plugins.sourcegen.app.Gen.GenDSs
+import sbt.internal.io.Source
 
 object DevPlugin extends AutoPlugin {
+    def fileSeq2SourceSec(files: Seq[File]): Seq[Source] = files.map(file ⇒ new Source(file, NothingFilter, NothingFilter))
+
     override lazy val projectSettings: Seq[Setting[_]] = devPluginGeneratorSettings
 
     val indentSpaces = 4
@@ -133,8 +136,8 @@ object DevPlugin extends AutoPlugin {
         //---------------------------------------------------------------------------------
         liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
         liquibaseCreate := {
-                val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
-                liquibase update liquibaseContext.value
+            val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
+            liquibase update liquibaseContext.value
         },
         generateScalaCode := {
 
@@ -286,8 +289,8 @@ object DevPlugin extends AutoPlugin {
         },
 
         generateUpgradeChangelog := {
-                implicit val logger = streams.value.log
-                LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
+            implicit val logger = streams.value.log
+            LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
         },
 
         generateJavaScript := {
@@ -296,26 +299,26 @@ object DevPlugin extends AutoPlugin {
 
         generateAllButUpgrade := {
 
-                import meta.SchemaDef
+            import meta.SchemaDef
 
-                implicit val logger = streams.value.log
-                val schema = SchemaDef( startPackageBOName.value, sourceSchemaBOFiles.value)
-                schema.generateScalaCode(outputScalaCodeBODir.value,  startPackageBOName.value)
+            implicit val logger = streams.value.log
+            val schema = SchemaDef(startPackageBOName.value, sourceSchemaBOFiles.value)
+            schema.generateScalaCode(outputScalaCodeBODir.value, startPackageBOName.value)
 
         },
 
         generateOnPackage := {
-                implicit val logger = streams.value.log
-                LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
-                Seq.empty[File]
+            implicit val logger = streams.value.log
+            LiquibaseUpgradeGen.generateUpgradeChangelog(outputUpgradeChangelogDir.value, liquibaseCreateChangelog.value, liquibaseUpgradeChangelog.value, baseDirectory.value)
+            Seq.empty[File]
         },
 
         //todo На кой мы апдейтим managedClasspath?
         managedClasspath := {
             Classpaths.managedJars(DevConfig, classpathTypes.value, update.value)
         }
-    )) ++ Seq[Setting[_]](watchSources ++=  ((sourceSchemaDir in DevConfig).value ** "*.xml").get,
-        //todo А это зачем мы апдейтим?
+    )) ++ Seq[Setting[_]](
+        watchSources ++= fileSeq2SourceSec(((sourceSchemaDir in DevConfig).value ** "*.xml").get),
         ivyConfigurations += DevConfig
     )
 }

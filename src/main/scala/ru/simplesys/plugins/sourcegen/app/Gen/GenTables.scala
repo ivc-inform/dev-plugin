@@ -181,7 +181,7 @@ class GenTables(val appFilePath: Path,
                   ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqValues))))
               ))),
               parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)),
-              serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+              serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
           newLine,
           ScalaMethod(name = "batch4Insert",
               body = ScalaBody(ScalaApplyObject(name = "batch4Insert", parametrs = ScalaClassParametrs(
@@ -200,7 +200,7 @@ class GenTables(val appFilePath: Path,
               ))),
               parametrs = ScalaClassParametrs(
                   ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int"))))
+                  ScalaClassParametr(name = "values", `type` = (columnTypes + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int"))))
         )
 
 
@@ -216,7 +216,7 @@ class GenTables(val appFilePath: Path,
                       ScalaClassParametr(name = "", `type` = ScalaImplicitType, defaultValue = ScalaBody(ScalaControlStruct(name = "values map", body = ScalaControlBody(expression = "value".expr, seqPValues))))
                   ))),
                   parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)),
-                  serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               newLine,
               ScalaMethod(name = "batch4PInsert",
                   body = ScalaBody(ScalaApplyObject(name = "batch4Insert", parametrs = ScalaClassParametrs(
@@ -235,7 +235,7 @@ class GenTables(val appFilePath: Path,
                   ))),
                   parametrs = ScalaClassParametrs(
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
-                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                      ScalaClassParametr(name = "values", `type` = (className4P + "*").tp)), serrializeToOneString = true, `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               newLine,
               ScalaEndComment("P Methods")
             )
@@ -248,7 +248,7 @@ class GenTables(val appFilePath: Path,
             "com.simplesys.db.pool.PoolDataSource".imp,
             "com.simplesys.jdbc.control.{ValidationEx, Table}".imp,
             "com.simplesys.jdbc.control.table.Insert".imp,
-            "org.joda.time.{LocalDateTime, DateTime}".imp,
+            "java.time.LocalDateTime".imp,
             "java.sql.{Connection, PreparedStatement}".imp,
             "com.simplesys.sql.SQLDialect".imp,
             "com.simplesys.SQL.Gen.SQLAlias".imp,
@@ -270,7 +270,7 @@ class GenTables(val appFilePath: Path,
                 out(genMessageCreating("GenTables"))
                 out(newLine)
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 

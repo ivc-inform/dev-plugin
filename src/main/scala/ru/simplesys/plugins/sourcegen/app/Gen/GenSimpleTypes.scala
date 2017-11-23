@@ -70,7 +70,7 @@ class GenSimpleTypes(val appFilePath: Path,
             out =>
                 out(genMessageCreating(s"GenSimpleTypes, stage: $stage"))
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 }

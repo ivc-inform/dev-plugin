@@ -24,11 +24,12 @@ class GenListGridFields(val appFilePath: Path,
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
     type CollectionElem = ArrayBuffer[(String, ScalaElement)]
     type CollectionElemObject = ArrayBuffer[ScalaObjectElement]
-    
+    type CollectionElemName = ArrayBuffer[String]
+
     val dateTimeFormat = "dd.MM.yyyy HH:mm:ss".dblQuoted
     val dateFormat = "dd.MM.yyyy".dblQuoted
 
-    private def makeCollectionISCElementsJS(parentElem: IscElem, listGridFieldsCollection: CollectionElem, formItemsCollection: CollectionElem, collectionElemObject: CollectionElemObject) = {
+    private def makeCollectionISCElementsJS(parentElem: IscElem, listGridFieldsCollection: CollectionElem, formItemsCollection: CollectionElem, collectionElemObject: CollectionElemObject, collectionElemName: CollectionElemName) = {
         for (element <- parentElem.child.filter(_.label != "#PCDATA")) {
             val fields: IscElem = element \ "Fields"
 
@@ -42,21 +43,30 @@ class GenListGridFields(val appFilePath: Path,
                     for (elementField <- fields.child) {
                         val _elementField: IscElem = elementField
                         val fieldName = (elementField \ "Name").text
+                        val lookup = _elementField.getBooleanValue("Lookup")                                                                       
+                        val foreignKey = _elementField.getStringValue("ForeignField")
 
                         val listFridField = new ScalaClassDeclare {
                             scalaClassGen = "ListGridFieldProps".cls
                             typeScalaClass = AnonimousScalaClass
                         }
 
-                        val listFridFieldObjectName = s"${nameBase}${fieldName}_NameStrong"
-                        val listFridFieldObject = new ScalaClassDeclare {
-                            scalaClassGen = listFridFieldObjectName.cls
-                            typeScalaClass = TypeScalaObject
-                            extensibleClass = "NameStrong".ext
-                            //annotation = ScalaAnnotation("ScalaJSDefined")
+                        val listFridFieldObjectName = if (!lookup) s"${nameBase}${fieldName}_NameStrong" else s"${nameBase}${fieldName}_${foreignKey.capitalize}_NameStrong"
+
+                        if (collectionElemName.find(_ == listFridFieldObjectName).isEmpty) {
+                            collectionElemName += listFridFieldObjectName
+                            val listFridFieldObject = new ScalaClassDeclare {
+                                scalaClassGen = listFridFieldObjectName.cls
+                                typeScalaClass = TypeScalaObject
+                                extensibleClass = "NameStrong".ext
+                                //annotation = ScalaAnnotation("ScalaJSDefined")
+                            }
+                            if (!lookup)
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                            else
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
+                            collectionElemObject += listFridFieldObject
                         }
-                        listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
-                        collectionElemObject += listFridFieldObject
 
                         listFridField addMember ScalaExpression(s"nameStrong = ${listFridFieldObjectName}.opt")
 
@@ -212,7 +222,8 @@ class GenListGridFields(val appFilePath: Path,
 
         val lss = ArrayBuffer.empty[(String, ScalaElement)]
         val lsf = ArrayBuffer.empty[(String, ScalaElement)]
-        val lssNames = ArrayBuffer.empty[ScalaObjectElement]
+        val lssObjects = ArrayBuffer.empty[ScalaObjectElement]
+        val lssNames = ArrayBuffer.empty[String]
 
         generetedFiles foreach {
             file =>
@@ -220,7 +231,7 @@ class GenListGridFields(val appFilePath: Path,
 
                 root.label match {
                     case "DataSources" =>
-                        makeCollectionISCElementsJS(root, lss, lsf, lssNames)
+                        makeCollectionISCElementsJS(root, lss, lsf, lssObjects, lssNames)
 
                     case label =>
                         throw new RuntimeException(s"Unknown implemantation for root.label : ${label.dblQuoted}")
@@ -244,7 +255,7 @@ class GenListGridFields(val appFilePath: Path,
             newLine
         )
 
-        moduleDataSourcesJS ++= lssNames.toArray
+        moduleDataSourcesJS ++= lssObjects.toArray
         moduleDataSourcesJS += newLine
         moduleDataSourcesJS += listGridFields
         moduleDataSourcesJS += newLine
@@ -255,9 +266,9 @@ class GenListGridFields(val appFilePath: Path,
 
         resDataSourcesJS <== {
             out =>
-                out(genMessageCreating(s"GenScalaApp (createSeq), stage: $stage"))
+                out(genMessageCreating(s"GenListGridFields (createSeq), stage: $stage"))
                 out(newLine)
-                out(moduleDataSourcesJS.serrialize())
+                out(org.scalafmt.Scalafmt.format(moduleDataSourcesJS.serrialize()).get)
         }
 
         resSeq += resDataSourcesJS

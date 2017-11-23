@@ -635,9 +635,6 @@ class GenBOServlet(val appFilePath: Path,
                             newLine,
                             "com.simplesys.jdbc.control.clob._".imp,
                             "com.simplesys.servlet.http.{HttpServletResponse, HttpServletRequest}".imp,
-                            "com.simplesys.isc.dataBinging.{DSResponseFailureExDyn, DSResponseFailureDyn, DSRequestDyn, DSResponseDyn}".imp,
-                            "com.simplesys.isc.dataBinging.RPC.RPCResponseDyn".imp,
-                            "com.simplesys.isc.dataBinging.dataSource.RecordDyn".imp,
                             "com.simplesys.app.SessionContext".imp,
                             "javax.servlet.annotation.WebServlet".imp,
                             "com.simplesys.isc.templates.logJSActor".imp,
@@ -677,7 +674,7 @@ class GenBOServlet(val appFilePath: Path,
                                     out(genMessageCreating(s"GenBOServlet, stage: $stage"))
                                     out(newLine)
                                     out(newLine)
-                                    out(module.serrialize())
+                                    out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
                             }
 
                             resSeq += res

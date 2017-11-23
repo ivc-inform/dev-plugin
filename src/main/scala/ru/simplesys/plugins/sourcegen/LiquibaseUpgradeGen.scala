@@ -1,13 +1,16 @@
 package ru.simplesys.plugins
 package sourcegen
 
-import sbt._
-import scala.xml.{InputSource, Null, UnprefixedAttribute, XML}
-import liquibase.integration.commandline.CommandLineUtils
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import liquibase.Liquibase
-import liquibase.resource.FileSystemResourceAccessor
 import liquibase.diff.output.DiffOutputControl
-import java.io.{FileOutputStream, FileInputStream}
+import liquibase.integration.commandline.CommandLineUtils
+import liquibase.resource.FileSystemResourceAccessor
+import sbt._
+
+import scala.xml.{Null, UnprefixedAttribute, XML}
 
 object LiquibaseUpgradeGen {
   import XmlUtil._
@@ -55,7 +58,7 @@ object LiquibaseUpgradeGen {
         save(newEmptyUpgradeChangeLog, upgradeChLog)
 
         val username = sys.env.get("USER").getOrElse(sys.env("USERNAME"))
-        val datetime = org.joda.time.DateTime.now().toString("YYYY.MM.dd-HH_mm_ss")
+        val datetime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY.MM.dd-HH_mm_ss"))
 
         val initial = upgradeDir / ("db.initial-" + datetime + "-" + username + ".xml")
         initial.delete()
@@ -84,7 +87,7 @@ object LiquibaseUpgradeGen {
           liquiUpgrade.update("")
 
           val username = sys.env.get("USER").getOrElse(sys.env("USERNAME"))
-          val datetime = org.joda.time.DateTime.now().toString("YYYY.MM.dd-HH_mm_ss")
+          val datetime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY.MM.dd-HH_mm_ss"))
 
           val upgrade = upgradeDir / ("db.upgrade-" + datetime + "-" + username + ".xml")
 

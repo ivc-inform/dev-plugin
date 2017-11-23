@@ -596,7 +596,7 @@ class GenEnums(val appFilePath: Path,
               ScalaMethod(
                   name = "insert",
                   body = ScalaBody(insertBody),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               newLine,
               ScalaMethod(
                   name = "insertWithoutCommit",
@@ -611,7 +611,7 @@ class GenEnums(val appFilePath: Path,
               ScalaMethod(
                   name = "delete",
                   body = ScalaBody(deleteBody),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               newLine,
               ScalaMethod(
                   name = "deleteWithoutCommit",
@@ -633,7 +633,7 @@ class GenEnums(val appFilePath: Path,
             "com.simplesys.jdbc.control.SessionStructures._".imp,
             "com.simplesys.jdbc.control.ValidationEx".imp,
             "com.simplesys.jdbc.control.classBO.{Where, Set}".imp,
-            "org.joda.time.{LocalDateTime, DateTime}".imp,
+            "java.time.LocalDateTime".imp,
             "com.simplesys.jdbc.control.table.{From, Insert, InnerJoin}".imp,
             "scalaz.{Failure, Success}".imp,
             s"ru.simplesys.defs.bo.${clazz.group}.table._".imp,
@@ -658,7 +658,7 @@ class GenEnums(val appFilePath: Path,
                 out(genMessageCreating(s"GenEnums, stage: $stage"))
                 out(newLine)
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 

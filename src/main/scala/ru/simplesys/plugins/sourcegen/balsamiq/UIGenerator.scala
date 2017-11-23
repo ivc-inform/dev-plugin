@@ -18,7 +18,7 @@ trait UIGenerator {
     log.info("entered generateMockupUI")
     IO.delete(outUIDir)
     outUIDir.mkdirs()
-    val controls: Map[String, Option[IUIControl]] = mockups.map(x => (x.fileName, x.toUIControl(CanvasProps(widthPCT = 100.some, heightPCT = 100.some))(this)))(collection.breakOut)
+    val controls: Map[String, Option[IUIControl]] = mockups.map(x => (x.fileName, x.toUIControl(CanvasProps(widthPCT = Some(100), heightPCT = Some(100)))(this)))(collection.breakOut)
     controls.flatten {case (fn, optUI) =>
       optUI.map {ui =>
         val newFN = if (fn.toLowerCase.endsWith(".bmml")) {

@@ -32,19 +32,14 @@ trait AbstractClassDefMetaGen {
     def genUCRefs(implicit resolver: SchemaDef): Seq[String] = {
         val ucRef = strictUCs.map { x =>
             val ucAttrs = x.attrs.map { x =>
-                s"""val ${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
+                s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
             val ucAttrsParams = x.attrs.map { x =>
                 s"""${x.name}: ${x.scalaTypeAsString(group, resolver)}"""
             }.mkString(", ")
 
-            s"""|class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]
-                |
-            |object ${x.classRefName} {
-                |  def apply(${ucAttrsParams}): ${x.classRefName} = new ${x.classRefName}(${x.attrNames.mkString(", ")})
-                |}
-                |""".stripMargin
+            s"""|case class ${x.classRefName}(${ucAttrs}) extends BOReference[${className.capitalize}]""".newLine.stripMargin
         }
 
         ucRef
@@ -60,7 +55,8 @@ trait AbstractClassDefMetaGen {
         val refUCCons = x.resolveUCConstraint
         val classNameUC = refUCCons.classRefNameRelative(group)
         val evalList = if (!x.isMandatory) {
-            if (x.attrNames.size === 1) s"${x.attrNames.head}.map(${classNameUC}(_))"
+            if (x.attrNames.size === 1)
+                s"${x.attrNames.head}.map(item => ${classNameUC}(item))"
             else {
                 val forNames = x.attrNames.map(a => x.attrMapping(a)).filter { case (mapp, refAttr) => refAttr.isMandatory }.map { case (mapp, refAttr) => mapp.localName }
                 s"for (${forNames.map(a => s"for${a.capitalize} <- ${a}").mkString("; ")}) yield ${classNameUC}(${x.attrNames.map(a => if (forNames.exists(_ === a)) s"for${a.capitalize}" else a).mkString(", ")})"
@@ -105,7 +101,11 @@ trait AbstractClassDefMetaGen {
                     val refAttr = temp._2
                     if (currFK.isMandatory) s"${currFK.constrAttrName}.${refAttr.name}"
                     else {
-                        if (refAttr.isMandatory) s"Some(${currFK.constrAttrName}).map(_.${refAttr.name})" else s"${currFK.constrAttrName}.flatMap(_.${refAttr.name})"
+                        if (refAttr.isMandatory)
+                            s"Some(${currFK.constrAttrName}).map(_.${refAttr.name})"
+                        else
+                            s"${currFK.constrAttrName}.${refAttr.name}" //Изменено когда первичный ключ опционален !!!!! (((((
+                            //s"${currFK.constrAttrName}.flatMap(_.${refAttr.name})"
                     }
                 }"
                 case x => s"${x} = ${x}"
@@ -152,7 +152,7 @@ trait AbstractClassDefMetaGen {
                   attr.attrType != DomainBlob
         )
 
-        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  val ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
+        val attrDefs = attrs.withFilter(!_.isCalculated).map(x => s"  ${x.name}: ${x.scalaTypeAsString(group, resolver)}")
 
         val calculatedAttrDefs = attrs.withFilter(_.isCalculated).map(x => s"  def ${x.name}: ${x.scalaTypeAsString(group, resolver)} = ${x.formula.get}")
 
@@ -174,8 +174,8 @@ trait AbstractClassDefMetaGen {
 
 
         val classDef =
-            s"""|class ${className.capitalize} (
-                |${attrDefs.mkString(",".newLine)}) extends Product {
+            s"""|case class ${className.capitalize} (
+                |${attrDefs.mkString(",".newLine)}) extends Product with Implicits{
                 |${calculatedAttrDefs.mkString(newLine)}
                 |${ucAttrs.mkString(newLine)}
                 |${genFKRefAttrs.mkString(newLine)}
@@ -195,13 +195,11 @@ trait AbstractClassDefMetaGen {
 
         val (paramList, paramImpl) = genParamListAndImplWithOutLob
 
-
         val objDef =
             s"""|object ${className.capitalize} {
-                |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}(${param4ObjDefs.mkString(",".space)})
-                |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
-                |}
-                |""".stripMargin
+            |   def apply(${paramList}) = new ${className.capitalize}(${paramImpl})
+            |}
+            |""".stripMargin
         out append newLine
         out append objDef
         out append fill("end from AbstractClassDefMetaGen (genClassDefsWithOutLob)").newLine
@@ -237,7 +235,7 @@ trait AbstractClassDefMetaGen {
 
 
                     val classDef =
-                        s"""|class ${className.capitalize}${attr.name.capitalize} (
+                        s"""|case class ${className.capitalize}${attr.name.capitalize} (
                             |${attrDefs.mkString(",".newLine)}) extends Product {
                             |
                             |${productCanEquals}
@@ -258,7 +256,6 @@ trait AbstractClassDefMetaGen {
 
                     val objDef =
                         s"""|object ${className.capitalize}${attr.name.capitalize} {
-                            |   def apply(${attr4ObjDefs.mkString(",".space)}) = new ${className.capitalize}${attr.name.capitalize}(${param4ObjDefs.mkString(",".space)})
                             |   def apply(${paramList}) = new ${className.capitalize}${attr.name.capitalize}(${paramImpl})
                             |}
                             |""".stripMargin
@@ -275,13 +272,13 @@ trait AbstractClassDefMetaGen {
         val metaDef =
             s"""|object ${classMetaName} {
                 |
-                      |  def insert() = {}
+                |  def insert() = {}
                 |  def insertAll() = {}
                 |  def delete() = {}
                 |  def deleteAll() = {}
                 |  def selectByID() = {}
                 |
-                      |}""".stripMargin
+                |}""".stripMargin
 
         out append metaDef
 

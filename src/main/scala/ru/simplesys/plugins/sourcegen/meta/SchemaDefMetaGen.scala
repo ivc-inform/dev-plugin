@@ -23,13 +23,11 @@ trait SchemaDefMetaGen {
 
         val importsClasses =
           """
-            |
-            |import org.joda.time.{DateTime, LocalDateTime}
+            |import java.time.LocalDateTime
             |import ru.simplesys.meta.types.{MetaType, Domain}
             |import ru.simplesys.meta._
             |import ru.simplesys.coreutil.{SealedEnumRuntime, SealedCaseClassEnum}
             |import com.simplesys.jdbc._
-            |import com.simplesys.json.JsonString
             |import com.simplesys.corelibrary.domain._
             |import com.simplesys.common.array._
             |import com.simplesys.jdbc.control.clob._
@@ -68,30 +66,6 @@ trait SchemaDefMetaGen {
               | """.stripMargin
 
         out append importsTables
-        /*
-
-            val localEnumClasses = enumClasses.filter(_.group === group.selfRef)
-            val implicitMappersJOOQ = localEnumClasses.map(x => s"  implicit class ${x.objJOOQMapperName}(dt: DataType[${x.keyMemberType.simpleScalaType}]  ) {def ${x.funcJOOQMapperName} = dt.asConvertedDataType(${x.className})}")
-
-
-            val localClasses = classes.filter(cl => cl.group === group.selfRef)
-            //val localClassesWSimpleEnums = localClasses.exists(_.strictAttrs.exists)
-            val implicitMappersForSimpleEnumsJOOQ = localClasses.flatMap(x => x.strictAttrs.collect{case x: EnumAttrDef[_] => x}.map(attr =>
-              s"  implicit class ${attr.objJOOQMapperName} (dt: DataType[${attr.keyMemberType.simpleScalaType}]) {def ${attr.funcJOOQMapperName} = dt.asConvertedDataType(${attr.objName})}"
-            ))
-
-
-
-            val mapperObjectJOOQ = s"""|object mappersJOOQ {
-                                       |${implicitMappersJOOQ.mkString("\n")}
-                                       |${implicitMappersForSimpleEnumsJOOQ.mkString("\n")}
-                                       |}
-                                       |
-                                       |""".stripMargin
-
-            out append mapperObjectJOOQ
-
-        */
 
         val localTables = tables.filter(_.group === group.selfRef)
         val tablesDefString = localTables.map(_.genTableObjectJOOQ(this)).filterNot(_.length === 0).mkString(newLine.newLine)

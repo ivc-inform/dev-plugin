@@ -36,7 +36,6 @@ class GenDSs(val appFilePath: Path,
         val attrs: Array[AttrDef[_]] = clazz.attrsWithOutLob.toArray
         Sorting.quickSort(attrs)(AttrDefOrd)
 
-        val className = clazz.className.ds
         res += genDS(attrs, "", false, clazz)
 
 
@@ -85,7 +84,7 @@ class GenDSs(val appFilePath: Path,
                     ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                     ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                    ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                    ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
                 ),
                 `type` = returnType,
                 body = sb
@@ -131,7 +130,7 @@ class GenDSs(val appFilePath: Path,
                 ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                 ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
             ),
             `type` = returnType,
             body = selectBody2(nameBodyMethod))
@@ -300,7 +299,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                  ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                  ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", ScalaGenerics("FT#ReturnType")))),
               body = ScalaBody(
@@ -328,7 +327,7 @@ class GenDSs(val appFilePath: Path,
                   ScalaClassParametr(name = "where", `type` = "WhereParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "orderBy", `type` = "OrderByParam".tp, defaultValue = "null"),
                   ScalaClassParametr(name = "fetchSize", `type` = ScalaInt, defaultValue = "dataSource.settings.fetchSize"),
-                  ScalaClassParametr(name = "dsRequest", `type` = "DSRequest".tp, defaultValue = "null")
+                  ScalaClassParametr(name = "dsRequest", `type` = "DsRequest".tp, defaultValue = "null")
               ),
               `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationExIterator".cls, ScalaGeneric("Iterator", ScalaGenerics("FT#ReturnType")))),
               body = ScalaBody(
@@ -390,8 +389,8 @@ class GenDSs(val appFilePath: Path,
                           ScalaClassParametr(name = "columns", `type` = ScalaImplicitType, defaultValue =
                             ScalaBody(ScalaCase(
                                 expression = "_columns".expr,
-                                ScalaCaseLine(expression = "null".expr, caseBody = "allColumns.fields.toSet intersect columns.toSet".body, serrializeToOneString = true),
-                                ScalaCaseLine(expression = "_".expr, caseBody = "_columns.fields.toSet intersect columns.toSet".body, serrializeToOneString = true)
+                                ScalaCaseLine(expression = "null".expr, caseBody = "allColumns.fields.toSet.toList intersect columns.toSet.toList".body, serrializeToOneString = true),
+                                ScalaCaseLine(expression = "_".expr, caseBody = "_columns.fields.toSet.toList intersect columns.toSet.toList".body, serrializeToOneString = true)
                             ))
                           )
                       )
@@ -548,8 +547,7 @@ class GenDSs(val appFilePath: Path,
         }
 
         //Sorting.quickSort(fks)(ForeignKeyConstraintDefOrd)
-
-
+        
         dsClass.getConstraints(classes, forLob)
 
         columnTypes = "TupleSS" + i + "[" + columnTypes.delLastChar + "]"
@@ -583,13 +581,13 @@ class GenDSs(val appFilePath: Path,
                   body = s"${clazz.className.capitalize}.insert(values: _*)".body,
                   serrializeToOneString = true,
                   parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = (columnTypes1 + "*").tp)),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               ScalaMethod(
                   name = "insertP",
                   body = s"${clazz.className.capitalize}.insertP(values: _*)".body,
                   serrializeToOneString = true,
                   parametrs = ScalaClassParametrs(ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}*".tp)),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               newLine,
               ScalaMethod(
                   name = "insertWithoutCommit",
@@ -599,7 +597,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "values", `type` = (columnTypes1 + "*").tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaMethod(
                   name = "insertPWithoutCommit",
                   serrializeToOneString = true,
@@ -608,7 +606,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}*".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("insert"),
               newLine,
               ScalaComment("update"),
@@ -620,7 +618,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = columnTypes1.tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               ScalaMethod(
                   name = "updateP",
                   serrializeToOneString = true,
@@ -629,7 +627,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}".tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               newLine,
               ScalaMethod(
                   name = "updateWithoutCommit",
@@ -640,7 +638,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = columnTypes1.tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaMethod(
                   name = "updatePWithoutCommit",
                   serrializeToOneString = true,
@@ -650,7 +648,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "values", `type` = s"${clazz.className.capitalize}${attrName.capitalize}".tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("update"),
               newLine,
               ScalaComment("delete"),
@@ -661,7 +659,7 @@ class GenDSs(val appFilePath: Path,
                   parametrs = ScalaClassParametrs(
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("List", "Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("Array", "Int")))),
               ScalaMethod(
                   name = "deleteWithoutCommit",
                   serrializeToOneString = true,
@@ -670,7 +668,7 @@ class GenDSs(val appFilePath: Path,
                       ScalaClassParametr(name = "connection", `type` = "Connection".tp),
                       ScalaClassParametr(name = "where", `type` = "WhereParam".tp)
                   ),
-                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("List".cls, ScalaGeneric("Int")))),
+                  `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("Delete"),
               newLine
             )
@@ -682,7 +680,7 @@ class GenDSs(val appFilePath: Path,
             "com.simplesys.jdbc.control.dataSet.DataSet".imp,
             "com.simplesys.jdbc.control.ValidationEx".imp,
             "java.sql.Connection".imp,
-            "org.joda.time.{LocalDateTime, DateTime}".imp,
+            "java.time.LocalDateTime".imp,
             "com.simplesys.db.pool.PoolDataSource".imp,
             "com.simplesys.SQL._".imp,
             "com.simplesys.jdbc._".imp,
@@ -717,7 +715,7 @@ class GenDSs(val appFilePath: Path,
                 out(genMessageCreating("GenDSs"))
                 out(newLine)
                 out(newLine)
-                out(module.serrialize())
+                out(org.scalafmt.Scalafmt.format(module.serrialize()).get)
         }
     }
 

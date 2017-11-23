@@ -2,13 +2,16 @@ package ru.simplesys.plugins
 package sourcegen
 package meta
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import sbt._
 
 trait SchemaDefDBGen {
   self: SchemaDef =>
 
   def genCreateScripts(implicit log: Logger) = {
-    val baseChangeSetID = org.joda.time.DateTime.now().toString("YYYY.MM.dd")
+    val baseChangeSetID = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY.MM.dd"))
     <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
