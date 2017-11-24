@@ -492,7 +492,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(
                                           name = "insert",
@@ -528,7 +528,7 @@ class GenBOContainer(val appFilePath: Path,
 
                                     val textMatchStyle = "exact".dblQuoted
                                     getDataBody ++= (
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.data.getOrElse(Json.Null)".body),
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
@@ -539,7 +539,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(
                                           name = "select",
                                           body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy, data = data, textMatchStyle = requestData.textMatchStyle.getOrElse($textMatchStyle)))"),
+                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy.getOrElse(Vector.empty), data = data, textMatchStyle = requestData.textMatchStyle.getOrElse($textMatchStyle)))"),
                                           serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(
@@ -696,7 +696,7 @@ class GenBOContainer(val appFilePath: Path,
                                     }
 
                                     getDataBody ++= (
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       newLine,
@@ -824,7 +824,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       getDeleteSatement,
