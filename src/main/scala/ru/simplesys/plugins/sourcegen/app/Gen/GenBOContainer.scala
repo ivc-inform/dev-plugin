@@ -31,9 +31,7 @@ class GenBOContainer(val appFilePath: Path,
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
     val sourceBOFiles: PathSet[Path] = boFilePath * "*.xml"
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
-    val dataTag = "data".dblQuoted
-
-
+    
     def create: File = ????
 
     def createSeq: Seq[File] = {
@@ -420,7 +418,7 @@ class GenBOContainer(val appFilePath: Path,
                                             caseBody = ScalaBody(
                                                 ScalaVariable(
                                                     name = "data",
-                                                    body = s"requestData.request.getJsonObject($dataTag)".body,
+                                                    body = s"requestData.data.getOrElse(Json.Null)".body,
                                                     serrializeToOneString = true
                                                 ),
                                                 newLine,
@@ -532,7 +530,7 @@ class GenBOContainer(val appFilePath: Path,
                                     getDataBody ++= (
                                       "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.request.getJsonObject($dataTag)".body),
+                                      ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.data.getOrElse(Json.Null)".body),
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "ArrayBuffer.empty[Json]".body, serrializeToOneString = true),
@@ -634,7 +632,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = s"requestData.oldValues ++ requestData.request.getJsonObject($dataTag)".body,
+                                                        body = s"requestData.oldValues ++ requestData.data.getOrElse(Json.Null)".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
@@ -757,7 +755,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = s"requestData.request.getJsonObject($dataTag)".body,
+                                                        body = s"requestData.data.getOrElse(Json.Null)".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
