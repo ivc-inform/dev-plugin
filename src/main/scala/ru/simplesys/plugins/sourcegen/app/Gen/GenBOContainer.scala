@@ -632,7 +632,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = s"requestData.oldValues ++ requestData.data.getOrElse(Json.Null)".body,
+                                                        body = s"requestData.oldValues ++ requestData.data".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
