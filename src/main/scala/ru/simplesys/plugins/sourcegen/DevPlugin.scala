@@ -44,11 +44,11 @@ object DevPlugin extends AutoPlugin {
     //val isGenerateBOCode = settingKey[Boolean]("Should we generate BO files")
     //val isGenerateJSCode = settingKey[Boolean]("Should we generate Scala->JS files")
 
-    val liquibaseUrl = settingKey[String]("The url for liquibase")
-    val liquibaseUsername = settingKey[String]("Username.")
-    val liquibasePassword = settingKey[String]("Password")
-    val liquibaseDriver = settingKey[String]("DB Driver")
-    val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
+//    val liquibaseUrl = settingKey[String]("The url for liquibase")
+//    val liquibaseUsername = settingKey[String]("Username.")
+//    val liquibasePassword = settingKey[String]("Password")
+//    val liquibaseDriver = settingKey[String]("DB Driver")
+//    val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
 
     val quoted = settingKey[Boolean]("Use quotes for generating and using tables, columns, constraints")
 
@@ -66,10 +66,10 @@ object DevPlugin extends AutoPlugin {
 
     val sourceMockupUIFiles = settingKey[Seq[File]]("These are xml files with BO descriptions. Defaults to sourceSchemaDir/bo/**.xml. Shouldn't be changed!")
 
-    val liquibaseChangelog = settingKey[File]("This is your liquibase changelog file to run. Defaults to outputUpgradeChangelogDir/db.changelog-upgrade.xml. Shouldn't be changed!")
-    val liquibaseContext = settingKey[String]("ChangeSet contexts to execute")
-    lazy val liquibaseDatabase = taskKey[Database]("Liquibase database object")
-    lazy val liquibase = taskKey[Liquibase]("Liquibase object")
+//    val liquibaseChangelog = settingKey[File]("This is your liquibase changelog file to run. Defaults to outputUpgradeChangelogDir/db.changelog-upgrade.xml. Shouldn't be changed!")
+//    val liquibaseContext = settingKey[String]("ChangeSet contexts to execute")
+//    lazy val liquibaseDatabase = taskKey[Database]("Liquibase database object")
+//    lazy val liquibase = taskKey[Liquibase]("Liquibase object")
 
     val generateOnPackage = taskKey[Seq[File]]("internal task to run before packaging")
     //val generateOnCompile = taskKey[Seq[File]]("internal task to run from sourceGenerators (i.e. before compile)")
@@ -121,24 +121,24 @@ object DevPlugin extends AutoPlugin {
         startPackageAppName := startPackageName.value + ".app",
         liquibaseCreateChangelog := outputCreateChangelogDir.value / "db.changelog-create.xml",
         liquibaseUpgradeChangelog := outputUpgradeChangelogDir.value / "db.changelog-upgrade.xml",
-        liquibaseChangelog := liquibaseUpgradeChangelog.value,
-        liquibaseContext := "",
-        liquibaseDefaultSchemaName := None,
+//        liquibaseChangelog := liquibaseUpgradeChangelog.value,
+//        liquibaseContext := "",
+//        liquibaseDefaultSchemaName := None,
         //---------------------------------------------------------------------------------
 
         // Internal structures initialization
         //---------------------------------------------------------------------------------
-        liquibaseDatabase := CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader((fullClasspath in Runtime).value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null),
-        liquibase := new Liquibase(liquibaseChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value),
+//        liquibaseDatabase := CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader((fullClasspath in Runtime).value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null),
+//        liquibase := new Liquibase(liquibaseChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value),
         //---------------------------------------------------------------------------------
 
         // Tasks implementations
         //---------------------------------------------------------------------------------
-        liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
-        liquibaseCreate := {
-            val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
-            liquibase update liquibaseContext.value
-        },
+//        liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
+//        liquibaseCreate := {
+//            val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
+//            liquibase update liquibaseContext.value
+//        },
         generateScalaCode := {
 
             import meta.SchemaDef
