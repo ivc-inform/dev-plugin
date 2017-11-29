@@ -90,7 +90,6 @@ class GenBOContainer(val appFilePath: Path,
                         val recordTrait = new ScalaClassDeclare {
                             scalaClassGen = (s"${boName.capitalize}DataRecord").cls
                             typeScalaClass = TypeScalaTrait
-                            //annotation = ScalaAnnotation("ScalaJSDefined")
                             extensibleClass = "js.Object".ext
                         }
 
