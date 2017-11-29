@@ -87,28 +87,6 @@ class GenBOContainer(val appFilePath: Path,
                             typeScalaClass = TypeScalaObject
                         }
 
-                        val recordTrait = new ScalaClassDeclare {
-                            scalaClassGen = (s"${boName.capitalize}DataRecord").cls
-                            typeScalaClass = TypeScalaTrait
-                            extensibleClass = "js.Object".ext
-                        }
-
-                        (_dataSource \ "Fields" \ "DataSourceFieldDyn") foreach {
-                            x =>
-                                val name = (x: IscElem).getStringValue("Name")
-                                val tp: String = (x: IscElem).getStringValue("GetterType").replace("Opt", strEmpty)
-                                val required: Boolean = (x: IscElem).getBooleanValue("Required")
-                                val lookup: Boolean = (x: IscElem).getBooleanValue("Lookup")
-
-                                if (!lookup) {
-                                    val _tp = tp match {
-                                        case "Long" ⇒ "Double"
-                                        case any ⇒ any
-                                    }
-                                    recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
-                                }
-                        }
-
                         for (mode <- operationTypes; _dataURL <- (dataSource \ (mode + "DataURL"))) {
                             val url = s"logic/$fullName/$mode"
                             val urlVar = ScalaVariable(name = s"${fullName}_$mode", serrializeToOneString = true, body = url.dblQuoted.body)
@@ -909,7 +887,6 @@ class GenBOContainer(val appFilePath: Path,
                         )
 
                         module ++= addedImports
-                        module += recordTrait
                         module += mainObject
 
                         module ++= (classServletes: _*)

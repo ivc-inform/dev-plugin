@@ -41,7 +41,7 @@ class GenBODataRecord(val appFilePath: Path,
 
         generetedFiles foreach {
             file =>
-                val traitsRecords = ArrayBuffer.empty[ScalaClassDeclare]
+                val traitsRecords = ArrayBuffer.empty[ScalaObjectElement]
 
                 val root: IscElem = loadFile(file.toFile, schemaPath)
                 val dataSources: IscElem = root
@@ -50,8 +50,6 @@ class GenBODataRecord(val appFilePath: Path,
 
                     val dataSource: IscElem = _dataSource
                     val dataSourceIdentifier = (dataSource \ "Identifier").text.replace("_DS", "")
-                    val fullClassName = (dataSource \ "fullClassName").text
-                    val lobName = (dataSource \ "lobName").text
 
                     if (dataSourceIdentifier.isEmpty)
                         throw new RuntimeException("Не определен Identifier для DataSource.")
@@ -83,6 +81,7 @@ class GenBODataRecord(val appFilePath: Path,
                         }
 
                         traitsRecords append recordTrait
+                        traitsRecords append newLine
 
                     }
                 }
