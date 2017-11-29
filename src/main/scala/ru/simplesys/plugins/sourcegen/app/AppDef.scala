@@ -73,6 +73,17 @@ object AppDef {
             logger info (s"Done #757.")
         //</editor-fold>
 
+        logger info (s"Begin #761.1.")
+        res ++= new GenListGridFields1(
+            appFilePath = tmp,
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = scalaOut,
+            packageName = pkgAppName + ".gen.scala",
+            stage = "#761.1",
+            logger = logger).createSeq
+
+        logger info (s"Done #761.1.")
+
         //<editor-fold desc="#765">
         logger info (s"Begin #765.")
 

@@ -59,7 +59,6 @@ class GenListGridFields(val appFilePath: Path,
                                 scalaClassGen = listFridFieldObjectName.cls
                                 typeScalaClass = TypeScalaObject
                                 extensibleClass = "NameStrong".ext
-                                //annotation = ScalaAnnotation("ScalaJSDefined")
                             }
                             if (!lookup)
                                 listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))

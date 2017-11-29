@@ -93,8 +93,8 @@ object AppDefJS {
             packageName = pkgAppName + ".gen.scala",
             stage = "#761",
             logger = logger).createSeq
-
         logger info (s"Done #761.")
+
         logger info (s"Begin #761.1.")
         res ++= new GenListGridFields(
             appFilePath = tmp,
