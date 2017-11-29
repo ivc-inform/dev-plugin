@@ -4,19 +4,14 @@ package sourcegen
 //import sbt.{`package` => _, _}
 
 import com.simplesys.file.{Path, PathSet}
-import sbt.{`package` ⇒ _, _}
-import sbt.Keys._
-import sbt.internal.inc.classpath.ClasspathUtilities
-import liquibase.Liquibase
-import liquibase.database.Database
-import liquibase.integration.commandline.CommandLineUtils
-import liquibase.resource.FileSystemResourceAccessor
-import ru.simplesys.plugins.sourcegen.app.AppDef
 import net.sf.saxon.lib.FeatureKeys
 import ru.simplesys.meta.types.DataTypes
-import ru.simplesys.plugins.sourcegen.meta.SchemaDef
+import ru.simplesys.plugins.sourcegen.app.{AppDef, AppDefJS}
 import ru.simplesys.plugins.sourcegen.app.Gen.GenDSs
+import ru.simplesys.plugins.sourcegen.meta.SchemaDef
+import sbt.Keys._
 import sbt.internal.io.Source
+import sbt.{`package` ⇒ _, _}
 
 object DevPlugin extends AutoPlugin {
     def fileSeq2SourceSec(files: Seq[File]): Seq[Source] = files.map(file ⇒ new Source(file, NothingFilter, NothingFilter))
@@ -41,15 +36,6 @@ object DevPlugin extends AutoPlugin {
     val startPackageName = settingKey[String]("Package name for generation's starting point")
     val contextPath = settingKey[String]("Context WebApp")
     val maxArity = settingKey[Int]("maxArity: How max arity TuplesSS")
-    //val isGenerateBOCode = settingKey[Boolean]("Should we generate BO files")
-    //val isGenerateJSCode = settingKey[Boolean]("Should we generate Scala->JS files")
-
-//    val liquibaseUrl = settingKey[String]("The url for liquibase")
-//    val liquibaseUsername = settingKey[String]("Username.")
-//    val liquibasePassword = settingKey[String]("Password")
-//    val liquibaseDriver = settingKey[String]("DB Driver")
-//    val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
-
     val quoted = settingKey[Boolean]("Use quotes for generating and using tables, columns, constraints")
 
     //---------------------------------------------------------------------------------
@@ -65,22 +51,15 @@ object DevPlugin extends AutoPlugin {
     val startPackageAppName = settingKey[String]("Package name for WebApp generation's starting point. Defaults to startPackageName.app. Shouldn't be changed!")
 
     val sourceMockupUIFiles = settingKey[Seq[File]]("These are xml files with BO descriptions. Defaults to sourceSchemaDir/bo/**.xml. Shouldn't be changed!")
-
-//    val liquibaseChangelog = settingKey[File]("This is your liquibase changelog file to run. Defaults to outputUpgradeChangelogDir/db.changelog-upgrade.xml. Shouldn't be changed!")
-//    val liquibaseContext = settingKey[String]("ChangeSet contexts to execute")
-//    lazy val liquibaseDatabase = taskKey[Database]("Liquibase database object")
-//    lazy val liquibase = taskKey[Liquibase]("Liquibase object")
-
     val generateOnPackage = taskKey[Seq[File]]("internal task to run before packaging")
-    //val generateOnCompile = taskKey[Seq[File]]("internal task to run from sourceGenerators (i.e. before compile)")
     //---------------------------------------------------------------------------------
 
     val generateScalaCode = taskKey[Seq[File]]("Generate scala sources from schema files")
+    val generateScalaJSCode = taskKey[Seq[File]]("Generate scala.js sources from schema files")
     val generateBoScalaCode = taskKey[Seq[File]]("Generate scala sources tables & classes from schema files")
     val N877 = taskKey[Unit]("Issue #877")
     val generateMockupUI = taskKey[Unit]("generate UI from Balsamiq mockups")
     val logMetamodel = taskKey[Unit]("Incpection BO MetaModel")
-    //val logedBos = settingKey[Seq[String]]("Bo of Metamodel")
 
     val generateCreateChangelog = taskKey[Seq[File]]("Generate liquibase changelog for creation DB objects from schema files")
     val generateUpgradeChangelog = taskKey[Unit]("Generate liquibase changelog for upgrade DB objects from schema files and previous upgrade scripts")
@@ -121,28 +100,10 @@ object DevPlugin extends AutoPlugin {
         startPackageAppName := startPackageName.value + ".app",
         liquibaseCreateChangelog := outputCreateChangelogDir.value / "db.changelog-create.xml",
         liquibaseUpgradeChangelog := outputUpgradeChangelogDir.value / "db.changelog-upgrade.xml",
-//        liquibaseChangelog := liquibaseUpgradeChangelog.value,
-//        liquibaseContext := "",
-//        liquibaseDefaultSchemaName := None,
-        //---------------------------------------------------------------------------------
-
-        // Internal structures initialization
-        //---------------------------------------------------------------------------------
-//        liquibaseDatabase := CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader((fullClasspath in Runtime).value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null),
-//        liquibase := new Liquibase(liquibaseChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value),
-        //---------------------------------------------------------------------------------
-
-        // Tasks implementations
-        //---------------------------------------------------------------------------------
-//        liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
-//        liquibaseCreate := {
-//            val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
-//            liquibase update liquibaseContext.value
-//        },
         generateScalaCode := {
 
-            import meta.SchemaDef
             import com.simplesys.file.ImplicitConversions._
+            import meta.SchemaDef
 
             implicit val logger = streams.value.log
             implicit val schema = SchemaDef(startPackageBOName.value, sourceSchemaBOFiles.value)
@@ -174,11 +135,44 @@ object DevPlugin extends AutoPlugin {
 
         },
 
+        generateScalaJSCode := {
+            import com.simplesys.file.ImplicitConversions._
+            import meta.SchemaDef
+
+            implicit val logger = streams.value.log
+            implicit val schema = SchemaDef(startPackageBOName.value, sourceSchemaBOFiles.value)
+
+            tmpResourcesDir.value.mkdirs()
+
+            val cl2Save = Thread.currentThread.getContextClassLoader
+            val cl2Set = this.getClass.getClassLoader
+
+            try {
+                Thread.currentThread setContextClassLoader cl2Set
+                AppDefJS.generateScalaCode(
+                    baseDirectory = baseDirectory.value,
+                    tmp = tmpResourcesDir.value,
+                    sourceBoDir = sourceBoDir.value,
+                    sourceAppDir = sourceAppDir.value,
+                    outScalaAppDir = outputScalaCodeAppDir.value,
+                    sourceMain = sourceMainDir.value,
+                    pkgAppName = startPackageAppName.value,
+                    pkgBOName = startPackageBOName.value,
+                    contextPath = contextPath.value,
+                    maxArity = maxArity.value
+                )
+            }
+            finally {
+                Thread.currentThread setContextClassLoader cl2Save
+            }
+
+        },
+
         generateBoScalaCode := {
 
-            import meta.SchemaDef
-            import ru.simplesys.plugins.sourcegen.app.Gen.{GenTables, GenBOs, GenEnums}
             import com.simplesys.file.ImplicitConversions._
+            import meta.SchemaDef
+            import ru.simplesys.plugins.sourcegen.app.Gen.{GenBOs, GenEnums, GenTables}
 
             implicit val logger = streams.value.log
             implicit val schema = SchemaDef(startPackageBOName.value, sourceSchemaBOFiles.value)
@@ -231,9 +225,9 @@ object DevPlugin extends AutoPlugin {
         N877 := {
 
             import com.simplesys.file.ImplicitConversions._
-            import com.simplesys.saxon._
-            import com.simplesys.saxon.XsltTransformer._
             import com.simplesys.io._
+            import com.simplesys.saxon.XsltTransformer._
+            import com.simplesys.saxon._
 
             val logger = streams.value.log
             val _tmp: Path = tmpResourcesDir.value
@@ -241,7 +235,7 @@ object DevPlugin extends AutoPlugin {
 
             val xslPath: Path = _sourceAppDir / "xsl"
             val macroPath: Path = _sourceAppDir / "macroBo"
-            var sourceBOFiles: PathSet[Path] = sourceBoDir.value * "*.xml"
+            val sourceBOFiles: PathSet[Path] = sourceBoDir.value * "*.xml"
 
             val schema = SchemaDef(startPackageBOName.value, sourceBOFiles.files)
 

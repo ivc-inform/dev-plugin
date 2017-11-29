@@ -1,8 +1,7 @@
 package ru.simplesys.plugins.sourcegen.app
 
-import java.io.File
-
 import com.simplesys.file.{Path, PathSet}
+import com.simplesys.io._
 import com.simplesys.saxon.XsltTransformer._
 import com.simplesys.saxon._
 import net.sf.saxon.lib.FeatureKeys
@@ -11,11 +10,10 @@ import ru.simplesys.plugins.sourcegen.XmlUtil
 import ru.simplesys.plugins.sourcegen.app.Gen._
 import ru.simplesys.plugins.sourcegen.meta.SchemaDef
 import sbt.{File, Logger}
-import com.simplesys.io._
 
 import scala.collection.mutable.ArrayBuffer
 
-object AppDef {
+object AppDefJS {
     def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
         if (contextPath.isEmpty)
             throw new RuntimeException(s"ContextPath must be not Empty.")
@@ -53,6 +51,17 @@ object AppDef {
             throw new RuntimeException("Execution terminated, due to an error(s) !!!")
         else
             logger info (s"Done #932#2.")
+
+        logger info (s"Begin #932#3.")
+        res += new GenSimpleTypes(
+            appFilePath = tmp / "SimpleTypes.xml",
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
+            packageName = pkgAppName + ".scala",
+            stage = "#932#3",
+            logger = logger).create
+        logger info (s"Done #932#3.")
+
         logger info (s"Done #756.")
         //</editor-fold>
 
@@ -73,24 +82,33 @@ object AppDef {
             logger info (s"Done #757.")
         //</editor-fold>
 
-        //<editor-fold desc="#765">
-        logger info (s"Begin #765.")
+        //<editor-fold desc="#760">
+        //<editor-fold desc="#761">
 
-        res ++= new GenBOContainer(
+        logger info (s"Begin #761.")
+        res ++= new GenDataSources(
             appFilePath = tmp,
-            boFilePath = sourceBoDir,
-            schemaPath = "schemaApp.xsd".xsdURI,
-            sourceMain = sourceMain,
-            outFilePath = outScalaAppDir,
-            packageName = pkgAppName + ".scala.container",
-            pkgBOName,
-            stage = "#765",
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = scalaOut,
+            packageName = pkgAppName + ".gen.scala",
+            stage = "#761",
             logger = logger).createSeq
 
-        logger info (s"Done #765.")
+        logger info (s"Done #761.")
+        logger info (s"Begin #761.1.")
+        res ++= new GenListGridFields(
+            appFilePath = tmp,
+            schemaPath = "schemaISC.xsd".xsdURI,
+            outFilePath = scalaOut,
+            packageName = pkgAppName + ".gen.scala",
+            stage = "#761.1",
+            logger = logger).createSeq
+
+        logger info (s"Done #761.1.")
+        //</editor-fold>
         //</editor-fold>
 
-        logger info (s"Source generation done.")
+        logger info (s"Source Scala.js generation done.")
         res
     }
 }
