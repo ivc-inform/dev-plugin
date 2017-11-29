@@ -31,9 +31,7 @@ class GenBOContainer(val appFilePath: Path,
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
     val sourceBOFiles: PathSet[Path] = boFilePath * "*.xml"
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
-    val dataTag = "data".dblQuoted
-
-
+    
     def create: File = ????
 
     def createSeq: Seq[File] = {
@@ -137,7 +135,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!!!! DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
                                       ScalaVariable(name = "requestData", body = ScalaBody("new DSRequest(request.JSONData)"), serrializeToOneString = true),
                                       newLine,
-                                      "logger debug s\"Request for " + mode + ": ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"Request for " + mode + ": ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "dataSet", body = ScalaBody( s"""${boName.capitalize}DS(oraclePool)"""), serrializeToOneString = true),
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!! END DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
@@ -161,6 +159,9 @@ class GenBOContainer(val appFilePath: Path,
                                         s"$packageName.$groupName".pkg,
                                         newLine,
                                         "com.simplesys.app.SessionContextSupport".imp,
+                                        "io.circe.generic.auto._".imp,
+                                        "io.circe.syntax._".imp,
+                                        "com.simplesys.circe.Circe._".imp,
                                         "com.simplesys.servlet.isc.ServletActor".imp,
                                         "com.simplesys.common.Strings._".imp,
                                         "com.simplesys.jdbc.control.clob._".imp,
@@ -417,7 +418,7 @@ class GenBOContainer(val appFilePath: Path,
                                             caseBody = ScalaBody(
                                                 ScalaVariable(
                                                     name = "data",
-                                                    body = s"requestData.request.getJsonObject($dataTag)".body,
+                                                    body = s"requestData.data.getOrElse(Json.Null)".body,
                                                     serrializeToOneString = true
                                                 ),
                                                 newLine,
@@ -491,7 +492,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(
                                           name = "insert",
@@ -527,9 +528,9 @@ class GenBOContainer(val appFilePath: Path,
 
                                     val textMatchStyle = "exact".dblQuoted
                                     getDataBody ++= (
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
-                                      ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.request.getJsonObject($dataTag)".body),
+                                      ScalaVariable(name = "data", serrializeToOneString = true, body = s"requestData.data.getOrElse(Json.Null)".body),
                                       "logger debug s\"data: ${newLine + data.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "_data", body = "ArrayBuffer.empty[Json]".body, serrializeToOneString = true),
@@ -538,7 +539,7 @@ class GenBOContainer(val appFilePath: Path,
                                       ScalaVariable(
                                           name = "select",
                                           body = ScalaBody(
-                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy, data = data, textMatchStyle = requestData.textMatchStyle.getOrElse($textMatchStyle)))"),
+                                              s"dataSet.Fetch(dsRequest = DsRequest(sqlDialect = sessionContext.getSQLDialect, startRow = requestData.startRow.getOrElse(0), endRow = requestData.endRow.getOrElse(0), sortBy = requestData.sortBy.getOrElse(Vector.empty), data = data, textMatchStyle = requestData.textMatchStyle.getOrElse($textMatchStyle)))"),
                                           serrializeToOneString = true),
                                       newLine,
                                       ScalaApplyObject(name = "Out", parametrs = ScalaClassParametrs(
@@ -631,7 +632,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = s"requestData.oldValues ++ requestData.request.getJsonObject($dataTag)".body,
+                                                        body = s"requestData.oldValues ++ requestData.data".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
@@ -695,7 +696,7 @@ class GenBOContainer(val appFilePath: Path,
                                     }
 
                                     getDataBody ++= (
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       newLine,
@@ -754,7 +755,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 caseBody = ScalaBody(
                                                     ScalaVariable(
                                                         name = "data",
-                                                        body = s"requestData.request.getJsonObject($dataTag)".body,
+                                                        body = s"requestData.data.getOrElse(Json.Null)".body,
                                                         serrializeToOneString = true
                                                     ),
                                                     newLine,
@@ -823,7 +824,7 @@ class GenBOContainer(val appFilePath: Path,
                                       newLine,
                                       ScalaVariable(name = "_transactionNum", `type` = "Option[String]".tp, variableType = VariableVar, serrializeToOneString = true, body = s"None".body),
                                       newLine,
-                                      "logger debug s\"request: ${newLine + requestData.toPrettyString}\"",
+                                      "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
                                       ScalaVariable(name = "listResponse", serrializeToOneString = true, body = s"ArrayBuffer.empty[Json]".body),
                                       getDeleteSatement,
