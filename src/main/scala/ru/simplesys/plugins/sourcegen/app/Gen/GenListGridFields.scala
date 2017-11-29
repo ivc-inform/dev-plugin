@@ -46,7 +46,7 @@ class GenListGridFields(val appFilePath: Path,
                         val lookup = _elementField.getBooleanValue("Lookup")                                                                       
                         val foreignKey = _elementField.getStringValue("ForeignField")
 
-                        val listFridField = new ScalaClassDeclare {
+                        val listGridField = new ScalaClassDeclare {
                             scalaClassGen = "ListGridFieldProps".cls
                             typeScalaClass = AnonimousScalaClass
                         }
@@ -68,38 +68,38 @@ class GenListGridFields(val appFilePath: Path,
                             collectionElemObject += listFridFieldObject
                         }
 
-                        listFridField addMember ScalaExpression(s"nameStrong = ${listFridFieldObjectName}.opt")
+                        listGridField addMember ScalaExpression(s"nameStrong = ${listFridFieldObjectName}.opt")
 
                         val fieldType = (elementField \ "Type").text
 
                         val fieldHidden = _elementField.getBooleanValue("Hidden")
                         fieldType match {
                             case "sDescription_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"`type` = ${"ListGridFieldType.sCaption_SimpleType.opt"}")
+                                listGridField addMember ScalaExpression(s"`type` = ${"ListGridFieldType.sCaption_SimpleType.opt"}")
                             case "id_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"`type` = ${"ListGridFieldType.id_SimpleType.opt"}")
+                                listGridField addMember ScalaExpression(s"`type` = ${"ListGridFieldType.id_SimpleType.opt"}")
                             case tp =>
-                                listFridField addMember ScalaExpression(s"`type` = ${s"ListGridFieldType.$tp.opt"}")
+                                listGridField addMember ScalaExpression(s"`type` = ${s"ListGridFieldType.$tp.opt"}")
 
                         }
 
                         fieldType match {
                             case "clob_SimpleType" =>
                             case "dDate_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"align = Alignment.center.opt")
-                                listFridField addMember ScalaExpression(s"format = $dateFormat.opt")
+                                listGridField addMember ScalaExpression(s"align = Alignment.center.opt")
+                                listGridField addMember ScalaExpression(s"format = $dateFormat.opt")
                             case "dDateOptTime_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"align = Alignment.center.opt")
-                                listFridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
+                                listGridField addMember ScalaExpression(s"align = Alignment.center.opt")
+                                listGridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
                             case "dDateTime_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"align = Alignment.center.opt")
-                                listFridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
+                                listGridField addMember ScalaExpression(s"align = Alignment.center.opt")
+                                listGridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
                             case "dTimestamp_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"align = Alignment.center.opt")
-                                listFridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
+                                listGridField addMember ScalaExpression(s"align = Alignment.center.opt")
+                                listGridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
                             case "dTimestampWithTZ_SimpleType" =>
-                                listFridField addMember ScalaExpression(s"align = Alignment.center.opt")
-                                listFridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
+                                listGridField addMember ScalaExpression(s"align = Alignment.center.opt")
+                                listGridField addMember ScalaExpression(s"format = $dateTimeFormat.opt")
                             case "di_SimpleType" =>
                             case "fDouble_SimpleType" =>
                             case "fPrice_SimpleType" =>
@@ -127,9 +127,9 @@ class GenListGridFields(val appFilePath: Path,
                         }
 
                         if (fieldHidden)
-                            listFridField addMember ScalaExpression(s" hidden = true")
+                            listGridField addMember ScalaExpression(s" hidden = true")
 
-                        listGridFieldsArray += listFridField
+                        listGridFieldsArray += listGridField
 
                         val formItem = new ScalaClassDeclare {
                             scalaClassGen = s"FormItemProps".cls
