@@ -108,6 +108,22 @@ object AppDefJS {
         //</editor-fold>
         //</editor-fold>
 
+        //<editor-fold desc="#765">
+        logger info (s"Begin #765.")
+        res ++= new GenBODataRecord(
+            appFilePath = tmp,
+            boFilePath = sourceBoDir,
+            schemaPath = "schemaApp.xsd".xsdURI,
+            sourceMain = sourceMain,
+            outFilePath = outScalaAppDir,
+            packageName = pkgAppName + ".scala.container",
+            pkgBOName,
+            stage = "#765",
+            logger = logger).createSeq
+
+        logger info (s"Done #765.")
+        //</editor-fold>
+
         logger info (s"Source Scala.js generation done.")
         res
     }

@@ -86,7 +86,6 @@ object AppDef {
 
         //<editor-fold desc="#765">
         logger info (s"Begin #765.")
-
         res ++= new GenBOContainer(
             appFilePath = tmp,
             boFilePath = sourceBoDir,

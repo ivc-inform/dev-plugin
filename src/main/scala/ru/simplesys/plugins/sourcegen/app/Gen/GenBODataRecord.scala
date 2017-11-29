@@ -89,6 +89,7 @@ class GenBODataRecord(val appFilePath: Path,
                 val module = ScalaModule(
                     s"ru.simplesys.defs.app.scala.container".pkg,
                     newLine,
+                    "java.time.LocalDateTime".imp,
                     "scala.scalajs.js".imp,
                 )
 
