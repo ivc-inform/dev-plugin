@@ -56,7 +56,7 @@ object AppDef {
             logger info (s"Done #932#2.")
 
         logger info (s"Begin #932#3.")
-        res += new GenSimpleTypes1(
+        res += new GenSimpleTypes(
             appFilePath = tmp / "SimpleTypes.xml",
             schemaPath = "schemaISC.xsd".xsdURI,
             outFilePath = outScalaAppDir / "scala" / "components" / "SimpleTypes.scala",
@@ -86,20 +86,6 @@ object AppDef {
         //</editor-fold>
 
         //<editor-fold desc="#758">
-        /*logger info (s"Begin #758.")
-        if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
-            params =>
-                params("ContextPath") = contextPath
-                params("tmpDir") = tmp.toURL
-                params("jsDir") = jsDir.toURL
-                params("macroDir") = (sourceAppDir / "macroBo").toURL
-                params("generatedDir") = xmlPath.toURL
-                params("FilesName") = appFiles
-                Transform(xsltPath = xslPath / "BoTransformation.xsl", initialTemplate = "ProcessingAll")
-        } > 0)
-            throw new RuntimeException("Execution terminated, due to an error(s) in #758 !!!")
-        else
-            logger info (s"Done #758.")*/
         //</editor-fold>
 
         //<editor-fold desc="#760">
