@@ -6,7 +6,7 @@ name := "dev-plugin"
 
 organization := "ru.simplesys"
 
-version := "1.3.15-SNAPSHOT"
+version := "1.3.16-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 
