@@ -10,7 +10,7 @@ import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import ru.simplesys.plugins.sourcegen.app.{ArrayScalaClassJSON, JsonListScalaClassJSON, SeqScalaClassJSON}
 import sbt.{File, Logger}
 
-import scalax.file.Path
+import com.simplesys.file.{Path, PathSet}
 
 abstract class GenScala {
     val appFilePath: Path

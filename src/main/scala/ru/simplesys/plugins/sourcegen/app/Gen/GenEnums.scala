@@ -1,6 +1,6 @@
 package ru.simplesys.plugins.sourcegen.app.Gen
 
-import scalax.file.{PathSet, Path}
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.io._
 import java.io.File
 import sbt.Logger

@@ -13,7 +13,7 @@ import ru.simplesys.plugins.sourcegen.meta.SchemaDef
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
-import scalax.file.{Path, PathSet}
+import com.simplesys.file.{Path, PathSet}
 
 object AppDef {
     def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {

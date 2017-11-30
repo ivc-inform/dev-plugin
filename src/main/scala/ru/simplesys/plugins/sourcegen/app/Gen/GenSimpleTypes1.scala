@@ -10,7 +10,7 @@ import com.simplesys.xhtml.XHTML._
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
 
-import scalax.file.Path
+import com.simplesys.file.{Path, PathSet}
 
 class GenSimpleTypes1(val appFilePath: Path,
                       val schemaPath: URI,

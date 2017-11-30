@@ -14,7 +14,7 @@ import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import com.simplesys.file.{Path, PathSet}
 
 class GenTables(val appFilePath: Path,
                 val outFilePath: Path,

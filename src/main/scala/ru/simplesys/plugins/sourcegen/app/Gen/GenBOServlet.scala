@@ -16,7 +16,7 @@ import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Sorting
-import scalax.file.{Path, PathSet}
+import com.simplesys.file.{Path, PathSet}
 
 class GenBOServlet(val appFilePath: Path,
                    val boFilePath: Path,

@@ -2,7 +2,7 @@ package ru.simplesys.plugins.sourcegen.app.Gen
 
 import sbt.{Logger, File}
 import com.simplesys.common.Strings.newLine
-import scalax.file.Path
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.io._
 import com.simplesys.genSources._
 import com.simplesys.scalaGen._
