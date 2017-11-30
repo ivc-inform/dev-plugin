@@ -23,10 +23,8 @@ class GenSimpleTypes(val appFilePath: Path,
 
         val simpleTypes = new ScalaClassDeclare {
             scalaClassGen = "SimpleTypes".cls
-            //typeScalaClass = TypeScalaObject
             extensibleClass = "StaticJSCode".ext
             typeScalaClass = TypeScalaObject
-            //annotation = ScalaAnnotation("JSExport")
         }
 
         simpleTypes addMember ScalaMethod(
