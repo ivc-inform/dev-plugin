@@ -2,7 +2,7 @@ package ru.simplesys.plugins.sourcegen.app
 
 import java.io.File
 
-import com.simplesys.io._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.saxon.XsltTransformer._
 import com.simplesys.saxon._
 import net.sf.saxon.lib.FeatureKeys
@@ -11,9 +11,9 @@ import ru.simplesys.plugins.sourcegen.XmlUtil
 import ru.simplesys.plugins.sourcegen.app.Gen._
 import ru.simplesys.plugins.sourcegen.meta.SchemaDef
 import sbt.{File, Logger}
+import com.simplesys.io._
 
 import scala.collection.mutable.ArrayBuffer
-import com.simplesys.file.{Path, PathSet}
 
 object AppDef {
     def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {

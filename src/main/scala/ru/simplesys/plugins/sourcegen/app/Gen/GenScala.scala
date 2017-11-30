@@ -4,13 +4,11 @@ import java.net.URI
 
 import com.simplesys.common.Strings._
 import com.simplesys.common.equality.SimpleEquality._
-import com.simplesys.isc.system.typesDyn.OperatorId
-import com.simplesys.scalaGen.{ScalaClassJSONProperties, ScalaClassJSONProperty, ScalaClassJSONPropertyClassJSON, ScalaClassesJSON, _}
+import com.simplesys.file.Path
+import com.simplesys.scalaGen.{ScalaClassJSONProperties, ScalaClassJSONProperty, ScalaClassJSONPropertyClassJSON, _}
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import ru.simplesys.plugins.sourcegen.app.{ArrayScalaClassJSON, JsonListScalaClassJSON, SeqScalaClassJSON}
 import sbt.{File, Logger}
-
-import com.simplesys.file.{Path, PathSet}
 
 abstract class GenScala {
     val appFilePath: Path

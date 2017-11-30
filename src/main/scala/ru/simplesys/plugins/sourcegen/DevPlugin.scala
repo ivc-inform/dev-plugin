@@ -41,14 +41,6 @@ object DevPlugin extends AutoPlugin {
     val startPackageName = settingKey[String]("Package name for generation's starting point")
     val contextPath = settingKey[String]("Context WebApp")
     val maxArity = settingKey[Int]("maxArity: How max arity TuplesSS")
-    //val isGenerateBOCode = settingKey[Boolean]("Should we generate BO files")
-    //val isGenerateJSCode = settingKey[Boolean]("Should we generate Scala->JS files")
-
-//    val liquibaseUrl = settingKey[String]("The url for liquibase")
-//    val liquibaseUsername = settingKey[String]("Username.")
-//    val liquibasePassword = settingKey[String]("Password")
-//    val liquibaseDriver = settingKey[String]("DB Driver")
-//    val liquibaseDefaultSchemaName = settingKey[Option[String]]("Default schema name")
 
     val quoted = settingKey[Boolean]("Use quotes for generating and using tables, columns, constraints")
 
@@ -121,24 +113,6 @@ object DevPlugin extends AutoPlugin {
         startPackageAppName := startPackageName.value + ".app",
         liquibaseCreateChangelog := outputCreateChangelogDir.value / "db.changelog-create.xml",
         liquibaseUpgradeChangelog := outputUpgradeChangelogDir.value / "db.changelog-upgrade.xml",
-//        liquibaseChangelog := liquibaseUpgradeChangelog.value,
-//        liquibaseContext := "",
-//        liquibaseDefaultSchemaName := None,
-        //---------------------------------------------------------------------------------
-
-        // Internal structures initialization
-        //---------------------------------------------------------------------------------
-//        liquibaseDatabase := CommandLineUtils.createDatabaseObject(ClasspathUtilities.toLoader((fullClasspath in Runtime).value.map(_.data)), liquibaseUrl.value, liquibaseUsername.value, liquibasePassword.value, liquibaseDriver.value, null, liquibaseDefaultSchemaName.value.getOrElse(null), null, null),
-//        liquibase := new Liquibase(liquibaseChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value),
-        //---------------------------------------------------------------------------------
-
-        // Tasks implementations
-        //---------------------------------------------------------------------------------
-//        liquibaseUpdate := liquibase.value.update(liquibaseContext.value),
-//        liquibaseCreate := {
-//            val liquibase = new Liquibase(liquibaseCreateChangelog.value.getPath, new FileSystemResourceAccessor, liquibaseDatabase.value)
-//            liquibase update liquibaseContext.value
-//        },
         generateScalaCode := {
 
             import meta.SchemaDef

@@ -4,16 +4,16 @@ import java.net.URI
 
 import com.simplesys.common.Strings.{newLine, _}
 import com.simplesys.common._
-import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
 import com.simplesys.io._
-import com.simplesys.scalaGen._
+import com.simplesys.scalaGen.{ScalaClassesJSON, _}
 import com.simplesys.xhtml.XHTML._
-import ru.simplesys.plugins.sourcegen.app.SeqScalaClassJSON
 import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
+import com.simplesys.file.{Path, PathSet}
+import ru.simplesys.plugins.sourcegen.app.SeqScalaClassJSON
 
 class GenDataSources(val appFilePath: Path,
                      val schemaPath: URI,

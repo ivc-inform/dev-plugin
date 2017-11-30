@@ -4,6 +4,7 @@ import java.net.URI
 
 import com.simplesys.common.Strings.{newLine, _}
 import com.simplesys.common._
+import com.simplesys.file.{Path, PathSet}
 import com.simplesys.genSources._
 import com.simplesys.io._
 import com.simplesys.scalaGen._
@@ -12,7 +13,6 @@ import ru.simplesys.plugins.sourcegen.app.xml.IscElem
 import sbt.{File, Logger}
 
 import scala.collection.mutable.ArrayBuffer
-import com.simplesys.file.{Path, PathSet}
 
 class GenListGridFields(val appFilePath: Path,
                         val schemaPath: URI,

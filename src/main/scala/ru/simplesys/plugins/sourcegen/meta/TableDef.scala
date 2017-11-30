@@ -16,6 +16,7 @@ trait TableDef {
   def autoTableDBName(implicit resolver: SchemaDef): String = if (useTablePrefix) (resolver.resolveGroup(group).prefix + "_" + tableName).toUpperCase else tableName.toUpperCase
   def tableDBName(implicit resolver: SchemaDef): String = autoTableDBName
   val selfRef: LinkRefToTable = LinkRefToTable(group, tableName)
+
   def columns: Seq[ColumnDef[_]]
 
   def columnsWithOutLob: Seq[ColumnDef[_]] = columns.filter(

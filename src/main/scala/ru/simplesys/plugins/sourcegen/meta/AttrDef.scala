@@ -328,8 +328,8 @@ object AttrDef {
 
     def apply(currentOwner: LinkRefToAbstractClass, forPKAttrs: Option[(Seq[String], String)], x: Node): AttrDef[_] = {
         val name = (x \ "@name").text
-        //val caption = (x \ "@caption").textOption.getOrElse(name)
-        val caption = (x \ "@caption").textOption.getOrElse("") //Из-за отсутствия признака visible нулевой caption принимается `типа` `invisible`
+        val caption = (x \ "@caption").textOption.getOrElse(name)
+        //val caption = (x \ "@caption").textOption.getOrElse("") //Из-за отсутствия признака visible нулевой caption принимается `типа` `invisible`
         val dataType = DataTypes.typesMap((x \ "@type").text)
         val isMandatory = (x \ "@mandatory").textOption.exists(_.toBoolean)
         val isCalculated = (x \ "@calculated").textOption.map(_.toBoolean).getOrElse(false)

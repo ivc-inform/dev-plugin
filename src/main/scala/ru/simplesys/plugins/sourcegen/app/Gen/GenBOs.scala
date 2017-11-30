@@ -132,6 +132,7 @@ class GenBOs(val appFilePath: Path,
         val tables: Seq[ITable] = if (!forLob) clazz.linkRefsToAllTables.map(_.toTable) else Seq(schema.tablesMap(LinkRefToTable(clazz.group, clazz.className)))
 
         var allColumns = strEmpty
+        var allColumns1 = strEmpty
         var allColumnsP = strEmpty
         var forTuple = strEmpty
         var columnTypes = strEmpty
@@ -169,6 +170,7 @@ class GenBOs(val appFilePath: Path,
                 val tblColumn = tableVal + "." + (if (attr.isMandatory) column.scalaName else column.scalaName + "Option")
 
                 allColumns += columnVal.space + "~".space
+                allColumns1 += columnVal.space + ",".space
 
                 if (!attr.isCalculated && !attr.isDiscriminator)
                     allColumnsP += columnVal + space + "=".space + columnVal + ",".space
@@ -203,6 +205,7 @@ class GenBOs(val appFilePath: Path,
                           parametrs = ScalaClassParametrs(
                               ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
                               ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = attr.name.dblQuoted),
+                              ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = attr.caption.dblQuoted),
                               ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                           )))
                       else
@@ -214,6 +217,7 @@ class GenBOs(val appFilePath: Path,
                                   parametrs = ScalaClassParametrs(
                                       ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
                                       ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = attr.name.dblQuoted),
+                                      ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = attr.caption.dblQuoted),
                                       ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                                   )
                                   members = if (attr.isMandatory) ArrayBuffer(
@@ -229,6 +233,7 @@ class GenBOs(val appFilePath: Path,
         tupleType = "TupleSS" + i
         columnTypes = "TupleSS" + i + "[" + columnTypes.delLastChar + "]"
         allColumns = if (i > 1) allColumns.delLastChar else allColumns.trim
+        allColumns1 = if (i > 1) allColumns1.delLastChar else allColumns1.trim
         allColumnsP = allColumnsP.delLastChar
         forTuple = if (i > 0) forTuple.delLastChar else forTuple.trim
 
@@ -237,7 +242,8 @@ class GenBOs(val appFilePath: Path,
           ScalaShortComment(s"For select tuple: (${forTuple})"),
           newLine,
           ScalaAliasType(name = "ColumnTypes", body = ScalaBody(columnTypes)),
-          ScalaVariable(name = "allColumns", serrializeToOneString = true, body = allColumns.body)
+          ScalaVariable(name = "allColumns", serrializeToOneString = true, body = allColumns.body),
+          ScalaVariable(name = "allColumns1", serrializeToOneString = true, body = ScalaBody(s"Seq($allColumns1)"))
           )
 
         boClass.getConstraints(clazz = clazz, forLob = forLob)
