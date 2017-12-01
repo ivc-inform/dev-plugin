@@ -60,7 +60,10 @@ class IscElem(protected val proxy: Elem) extends Logging {
                         val _value = if (value.indexOf("@") == -1) value else value.substring(0, value.indexOf("@"))
                         val _variable = if (value.indexOf("@") == -1) strEmpty else value.substring(value.indexOf("@") + 1)
                         if (_variable !== strEmpty)
-                            res = (label -> _value).URLwithVarProperty(_variable.dblQuoted)
+                            res = (label -> _value).URLwithVarProperty({
+                                import com.simplesys.common.JVM.Strings._
+                                _variable.dblQuoted
+                            })
                         else
                             res = (label -> _value).URLProperty
                     case "unq" =>
@@ -124,7 +127,11 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             case "dateTime" =>
                                 res = (label -> _value.toLocalDateTime()).propertyWithTm
                             case _ =>
-                                throw new RuntimeException(s"Unknown implemantation :${label.dblQuoted} type: ${`type`}")
+                                throw new RuntimeException(s"Unknown implemantation :${
+                                    {
+                                        import com.simplesys.common.JVM.Strings._
+                                        label.dblQuoted
+                                    }} type: ${`type`}")
                         }
 
                         res
@@ -246,7 +253,11 @@ class IscElem(protected val proxy: Elem) extends Logging {
                             case "dateTime" =>
                                 res = (label.unCapitalize -> _value.toLocalDateTime()).propertyWithTm
                             case _ =>
-                                throw new RuntimeException(s"Unknown implemantation :${label.dblQuoted} type: ${`type`}")
+                                throw new RuntimeException(s"Unknown implemantation :${
+                                    {
+                                        import com.simplesys.common.JVM.Strings._
+                                        label.dblQuoted
+                                    }} type: ${`type`}")
                         }
 
                         res

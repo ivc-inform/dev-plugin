@@ -24,10 +24,18 @@ abstract class GenScala {
                 case ScalaClassJSONPropertyClassJSON(value) =>
                     ScalaBody(value addProperties makeCode(root, includingGroupName))
                 case propertyElement =>
-                    throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+                    throw new RuntimeException(s"Unknown implemantation for type : ${
+                        {
+                            import com.simplesys.common.JVM.Strings._
+                            propertyElement.toString.dblQuoted
+                        }}")
             }
             case propertyElement =>
-                throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+                throw new RuntimeException(s"Unknown implemantation for type : ${
+                    {
+                        import com.simplesys.common.JVM.Strings._
+                        propertyElement.toString.dblQuoted
+                    }}")
         }
     }
 
@@ -37,10 +45,18 @@ abstract class GenScala {
                 case ScalaClassJSONPropertyClassJSON(value) =>
                     ScalaBody(value addProperties makeCodeJS(root, includingGroupName))
                 case propertyElement =>
-                    throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+                    throw new RuntimeException(s"Unknown implemantation for type : ${
+                        {
+                            import com.simplesys.common.JVM.Strings._
+                            propertyElement.toString.dblQuoted
+                        }}")
             }
             case propertyElement =>
-                throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
+                throw new RuntimeException(s"Unknown implemantation for type : ${
+                    {
+                        import com.simplesys.common.JVM.Strings._
+                        propertyElement.toString.dblQuoted
+                    }}")
         }
     }
 
@@ -89,7 +105,11 @@ abstract class GenScala {
                             case value: ScalaPropertyElement =>
                                 res += propertyElement
                             case _ =>
-                                throw new RuntimeException(s"Unknown implemantation label:${label} type : ${scalaPropertElement.toString.dblQuoted}")
+                                throw new RuntimeException(s"Unknown implemantation label:${label} type : ${
+                                    {
+                                        import com.simplesys.common.JVM.Strings._
+                                        scalaPropertElement.toString.dblQuoted
+                                    }}")
                         }
                 }
             }
@@ -136,7 +156,11 @@ abstract class GenScala {
                             case value: ScalaPropertyElement =>
                                 res += propertyElement
                             case _ =>
-                                throw new RuntimeException(s"Unknown implemantation label:${label} type : ${scalaPropertElement.toString.dblQuoted}")
+                                throw new RuntimeException(s"Unknown implemantation label:${label} type : ${
+                                    {
+                                        import com.simplesys.common.JVM.Strings._
+                                        scalaPropertElement.toString.dblQuoted
+                                    }}")
                         }
                 }
             }

@@ -49,9 +49,16 @@ class GenListGridFields1(val appFilePath: Path,
                                 typeScalaClass = TypeScalaObject
                             }
                             if (!lookup)
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${
+                                    {
+                                        import com.simplesys.common.JVM.Strings._
+                                        fieldName.dblQuoted
+                                    }}".body, serrializeToOneString = true))
                             else
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = {
+                                    import com.simplesys.common.JVM.Strings._
+                                    s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body
+                                }, serrializeToOneString = true))
                             collectionElemObject += listFridFieldObject
                         }
                     }
@@ -79,7 +86,11 @@ class GenListGridFields1(val appFilePath: Path,
                         makeCollectionISCElementsJS(root, lss, lsf, lssObjects, lssNames)
 
                     case label =>
-                        throw new RuntimeException(s"Unknown implemantation for root.label : ${label.dblQuoted}")
+                        throw new RuntimeException(s"Unknown implemantation for root.label : ${
+                            {
+                                import com.simplesys.common.JVM.Strings._
+                                label.dblQuoted
+                            }}")
                 }
         }
 

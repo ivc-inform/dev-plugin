@@ -75,7 +75,11 @@ class GenBOServlet(val appFilePath: Path,
                                 res += dataURL.substring(0, dataURL.indexOf("@"))
                             else
                                 res += dataURL
-                            res.dblQuoted
+
+                            {
+                                import com.simplesys.common.JVM.Strings._
+                                res.dblQuoted
+                            }
                         }
                         val classServletAnnotation = ScalaAnnotation("WebServlet", "asyncSupported" -> "true", "urlPatterns" -> ("Array(" + _dataURL + ")"))
 
@@ -114,7 +118,10 @@ class GenBOServlet(val appFilePath: Path,
 
 
                             //<editor-fold desc=" Body Метода providersPartial">
-                            providersPartionalMethodBody += ScalaCaseLine(s"/logic/${fullName}/${mode}".dblQuoted.expr, serrializeToOneString = true, caseBody = s"actor${mode}".body)
+                            {
+                                import com.simplesys.common.JVM.Strings._
+                                providersPartionalMethodBody += ScalaCaseLine(s"/logic/${fullName}/${mode}".dblQuoted.expr, serrializeToOneString = true, caseBody = s"actor${mode}".body)
+                            }
                             //</editor-fold>
 
                             // <editor-fold desc="Классы типа class ????ХХХХХActor extends Actor with Suite????">
@@ -164,14 +171,20 @@ class GenBOServlet(val appFilePath: Path,
                                                   val getterType = (x: IscElem).getStringValue("GetterType")
                                                   val _boName = jObjectFieldName.substring(jObjectFieldName.indexOf(".") + 1) + jObjectFieldName.substring(0, jObjectFieldName.indexOf(".")).capitalize
 
-                                                  if (itemName == strEmpty)
+                                                  if (itemName == strEmpty) {
+                                                      import com.simplesys.common.JVM.Strings._
                                                       ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = _boName, sign = ScalaSignArrowRight)
-                                                  else if (!lookup)
+                                                  }
+                                                  else if (!lookup) {
+                                                      import com.simplesys.common.JVM.Strings._
                                                       ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = {
                                                           if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
                                                       } + boName, sign = ScalaSignArrowRight)
-                                                  else
+                                                  }
+                                                  else {
+                                                      import com.simplesys.common.JVM.Strings._
                                                       ScalaClassParametr(name = name.dblQuoted, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})", sign = ScalaSignArrowRight)
+                                                  }
                                           }: _*
                                       )
                                 )
@@ -194,7 +207,11 @@ class GenBOServlet(val appFilePath: Path,
                                                     val res = attr.attrType.scalaTypeAsString(clazz.group, schema)
                                                     if (res.indexOf(".") !== -1) {
                                                         addedImports += res.imp
-                                                        logger debug (s"Bad type: ${res.dblQuoted} tarnsform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
+
+                                                        {
+                                                            import com.simplesys.common.JVM.Strings._
+                                                            logger debug (s"Bad type: ${res.dblQuoted} tarnsform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
+                                                        }
 
                                                         res.substring(res.lastIndexOf(".") + 1)
                                                     } else
@@ -250,12 +267,16 @@ class GenBOServlet(val appFilePath: Path,
                                             val genBySeq = (x: IscElem).getBooleanValue("GenBySeq")
 
                                             if (!lookup)
-                                                if (!newLine)
+                                                if (!newLine) {
+                                                    import com.simplesys.common.JVM.Strings._
                                                     parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})")
+                                                }
                                                 else
                                                     genBySeq match {
-                                                        case false =>
+                                                        case false => {
+                                                            import com.simplesys.common.JVM.Strings._
                                                             parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})")
+                                                        }
                                                         case true =>
                                                             getterType match {
                                                                 case "Long" =>
@@ -510,8 +531,10 @@ class GenBOServlet(val appFilePath: Path,
                                     case "Remove" =>
                                         def getPrimarykeyVariables: ScalaVariables = {
                                             ScalaVariables(getPkField.map {
-                                                case PkData(getterType: String, pk: String) =>
+                                                case PkData(getterType: String, pk: String) => {
+                                                    import com.simplesys.common.JVM.Strings._
                                                     ScalaVariable(name = pk, body = s"data.get${getterType}(${pk.dblQuoted})".body, serrializeToOneString = true)
+                                                }
                                             }: _*)
                                         }
 
