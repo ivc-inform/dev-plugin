@@ -79,11 +79,7 @@ class GenBOContainer(val appFilePath: Path,
                                 res += dataURL.substring(0, dataURL.indexOf("@"))
                             else
                                 res += dataURL
-
-                            {
-                                import com.simplesys.common.JVM.Strings._
-                                res.dblQuoted
-                            }
+                            res.dblQuoted
                         }
 
                         val mainObject = new ScalaClassDeclare {
@@ -93,14 +89,8 @@ class GenBOContainer(val appFilePath: Path,
 
                         for (mode <- operationTypes; _dataURL <- (dataSource \ (mode + "DataURL"))) {
                             val url = s"logic/$fullName/$mode"
-                            val urlVar = ScalaVariable(name = s"${fullName}_$mode", serrializeToOneString = true, body = {
-                                import com.simplesys.common.JVM.Strings._
-                                url.dblQuoted.body
-                            })
-                            val actorAnnotation = ScalaAnnotation("RSTransfer", "urlPattern" -> {
-                                import com.simplesys.common.JVM.Strings._
-                                s"/$url".dblQuoted
-                            })
+                            val urlVar = ScalaVariable(name = s"${fullName}_$mode", serrializeToOneString = true, body = url.dblQuoted.body)
+                            val actorAnnotation = ScalaAnnotation("RSTransfer", "urlPattern" -> s"/$url".dblQuoted)
 
                             def makeSemiHandMakeTrait(mode: String): String = {
                                 val fileTraitPath = sourceMain / "scala" / "com" / "simplesys" / "container" / "SemiHandTraits" / (s"${fullName}_SemiHandTrait_$mode.scala")
@@ -138,7 +128,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   `type` = "Blob".tp
                                               )
                                           ),
-                                          body = ScalaBody("{\n         import com.simplesys.common.JVM.Strings._\n         blob.asString\n     }"),
+                                          body = ScalaBody("blob.asString"),
                                           serrializeToOneString = true)
                                     )
 
@@ -212,15 +202,7 @@ class GenBOContainer(val appFilePath: Path,
                                                 val res = attr.attrType.scalaTypeAsString(clazz.group, schema)
                                                 if (res.indexOf(".") !== -1) {
                                                     addedImports += res.imp
-                                                    logger debug (s"Bad type: ${
-                                                        {
-                                                            import com.simplesys.common.JVM.Strings._
-                                                            res.dblQuoted
-                                                        }} transform to ${
-                                                        {
-                                                            import com.simplesys.common.JVM.Strings._
-                                                            res.substring(res.lastIndexOf(".") + 1).dblQuoted
-                                                        }} and added import ${res}")
+                                                    logger debug (s"Bad type: ${res.dblQuoted} transform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
 
                                                     res.substring(res.lastIndexOf(".") + 1)
                                                 } else
@@ -278,19 +260,11 @@ class GenBOContainer(val appFilePath: Path,
 
                                         if (!lookup)
                                             if (!newLine)
-                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${
-                                                    {
-                                                        import com.simplesys.common.JVM.Strings._
-                                                        name.dblQuoted
-                                                    }})")
+                                                parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})")
                                             else
                                                 genBySeq match {
                                                     case false =>
-                                                        parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${
-                                                            {
-                                                                import com.simplesys.common.JVM.Strings._
-                                                                name.dblQuoted
-                                                            }})")
+                                                        parametrs += ScalaClassParametr(name = name, `type` = ScalaImplicitType, defaultValue = s"data.get${getterType}(${name.dblQuoted})")
                                                     case true =>
                                                         getterType match {
                                                             case "Long" =>
@@ -342,20 +316,14 @@ class GenBOContainer(val appFilePath: Path,
                                             if (itemName == strEmpty) {
                                                 if (!lookup)
                                                     ScalaClassParametr(
-                                                        name = {
-                                                            import com.simplesys.common.JVM.Strings._
-                                                            name.dblQuoted
-                                                        },
+                                                        name = name.dblQuoted,
                                                         `type` = ScalaImplicitType,
                                                         defaultValue = blobWrapper(_boName),
                                                         sign = ScalaSignArrowRight
                                                     )
                                                 else
                                                     ScalaClassParametr(
-                                                        name = {
-                                                            import com.simplesys.common.JVM.Strings._
-                                                            s"${name}_${foreignKey.capitalize}".dblQuoted
-                                                        },
+                                                        name = s"${name}_${foreignKey.capitalize}".dblQuoted,
                                                         `type` = ScalaImplicitType,
                                                         defaultValue = blobWrapper(s"${_boName}_${foreignKey.capitalize}"),
                                                         sign = ScalaSignArrowRight
@@ -363,25 +331,16 @@ class GenBOContainer(val appFilePath: Path,
                                             }
                                             else if (!lookup)
                                                 ScalaClassParametr(
-                                                    name = {
-                                                        import com.simplesys.common.JVM.Strings._
-                                                        name.dblQuoted
-                                                    },
+                                                    name = name.dblQuoted,
                                                     `type` = ScalaImplicitType,
                                                     defaultValue = blobWrapper({
                                                         if (itemName.isEmpty) s"${name}" else s"${itemName}.${name}"
                                                     } + boName), sign = ScalaSignArrowRight)
                                             else
                                                 ScalaClassParametr(
-                                                    name = {
-                                                        import com.simplesys.common.JVM.Strings._
-                                                        s"${name}_${foreignKey.capitalize}".dblQuoted
-                                                    },
+                                                    name = s"${name}_${foreignKey.capitalize}".dblQuoted,
                                                     `type` = ScalaImplicitType,
-                                                    defaultValue = {
-                                                        import com.simplesys.common.JVM.Strings._
-                                                        blobWrapper(s"data.get${getterType}(${s"${name}_${foreignKey.capitalize}".dblQuoted})")
-                                                    },
+                                                    defaultValue = blobWrapper(s"data.get${getterType}(${s"${name}_${foreignKey.capitalize}".dblQuoted})"),
                                                     sign = ScalaSignArrowRight
                                                 )
                                     }: _*
@@ -544,10 +503,7 @@ class GenBOContainer(val appFilePath: Path,
                                 case "Fetch" =>
                                     addedImports += s"${pkgBOName}.${groupName}.${boName.capitalize}DS".imp
 
-                                    val textMatchStyle = {
-                                        import com.simplesys.common.JVM.Strings._
-                                        "exact".dblQuoted
-                                    }
+                                    val textMatchStyle = "exact".dblQuoted
                                     getDataBody ++= (
                                       "logger debug s\"request: ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
@@ -746,11 +702,7 @@ class GenBOContainer(val appFilePath: Path,
                                     def getPrimarykeyVariables: ScalaVariables = {
                                         ScalaVariables(getPkField.map {
                                             case PkData(getterType: String, pk: String) =>
-                                                ScalaVariable(name = pk, body = s"data.get${getterType}(${
-                                                    {
-                                                        import com.simplesys.common.JVM.Strings._
-                                                        pk.dblQuoted
-                                                    }})".body, serrializeToOneString = true)
+                                                ScalaVariable(name = pk, body = s"data.get${getterType}(${pk.dblQuoted})".body, serrializeToOneString = true)
                                         }: _*)
                                     }
 

@@ -421,14 +421,8 @@ class GenDSs(val appFilePath: Path,
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}")),
           newLine,
-          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              clazz.className.dblQuoted
-          })),
-          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              clazz.group.dblQuoted
-          }))
+          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
+          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
         )
 
         j += 1

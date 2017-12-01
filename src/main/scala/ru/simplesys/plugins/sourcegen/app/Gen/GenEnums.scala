@@ -73,14 +73,8 @@ class GenEnums(val appFilePath: Path,
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
-          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              clazz.className.dblQuoted
-          })),
-          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              clazz.group.dblQuoted
-          }))
+          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
+          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
           )
 
         enumClass addMembers(
@@ -167,14 +161,8 @@ class GenEnums(val appFilePath: Path,
                       body = if (!column.dataType.isComplexDataType) ScalaBody(ScalaApplyObject(
                           name = typeColumn,
                           parametrs = ScalaClassParametrs(
-                              ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                  import com.simplesys.common.JVM.Strings._
-                                  column.dbName.dblQuoted
-                              }),
-                              ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = {
-                                  import com.simplesys.common.JVM.Strings._
-                                  (clazz.group + "_" + clazz.className + "_" + attr.name).dblQuoted
-                              }),
+                              ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
+                              ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = (clazz.group + "_" + clazz.className + "_" + attr.name).dblQuoted),
                               ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                           )))
                       else
@@ -184,14 +172,8 @@ class GenEnums(val appFilePath: Path,
                                   typeScalaClass = AnonimousScalaClass
                                   generics = ScalaGenerics(clazz.className)
                                   parametrs = ScalaClassParametrs(
-                                      ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                          import com.simplesys.common.JVM.Strings._
-                                          column.dbName.dblQuoted
-                                      }),
-                                      ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = {
-                                          import com.simplesys.common.JVM.Strings._
-                                          (clazz.group + "_" + clazz.className + "_" + attr.name).dblQuoted
-                                      }),
+                                      ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
+                                      ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = (clazz.group + "_" + clazz.className + "_" + attr.name).dblQuoted),
                                       ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                                   )
                                   members = ArrayBuffer(
@@ -355,10 +337,7 @@ class GenEnums(val appFilePath: Path,
 
         var discriminators = ""
         discriminatorSeq.zipWithIndex foreach {
-            case (discriminator, index) => discriminators += s"${if (index === 0) "Where" else "And"}(${discriminator.colRef.name} === ${if (discriminator.colRef.toCol.dataType.simpleDataType.toString === "String") {
-                import com.simplesys.common.JVM.Strings._
-                discriminator.value.dblQuoted
-            } else discriminator.value})".space
+            case (discriminator, index) => discriminators += s"${if (index === 0) "Where" else "And"}(${discriminator.colRef.name} === ${if (discriminator.colRef.toCol.dataType.simpleDataType.toString === "String") discriminator.value.dblQuoted else discriminator.value})".space
         }
 
         var joins = ""

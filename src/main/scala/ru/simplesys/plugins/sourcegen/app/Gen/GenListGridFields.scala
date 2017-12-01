@@ -26,14 +26,8 @@ class GenListGridFields(val appFilePath: Path,
     type CollectionElemObject = ArrayBuffer[ScalaObjectElement]
     type CollectionElemName = ArrayBuffer[String]
 
-    val dateTimeFormat = {
-        import com.simplesys.common.JVM.Strings._
-        "dd.MM.yyyy HH:mm:ss".dblQuoted
-    }
-    val dateFormat = {
-        import com.simplesys.common.JVM.Strings._
-        "dd.MM.yyyy".dblQuoted
-    }
+    val dateTimeFormat = "dd.MM.yyyy HH:mm:ss".dblQuoted
+    val dateFormat = "dd.MM.yyyy".dblQuoted
 
     private def makeCollectionISCElementsJS(parentElem: IscElem, listGridFieldsCollection: CollectionElem, formItemsCollection: CollectionElem, collectionElemObject: CollectionElemObject, collectionElemName: CollectionElemName) = {
         for (element <- parentElem.child.filter(_.label != "#PCDATA")) {
@@ -67,16 +61,9 @@ class GenListGridFields(val appFilePath: Path,
                                 extensibleClass = "NameStrong".ext
                             }
                             if (!lookup)
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${
-                                    {
-                                        import com.simplesys.common.JVM.Strings._
-                                        fieldName.dblQuoted
-                                    }}".body, serrializeToOneString = true))
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
                             else
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = {
-                                    import com.simplesys.common.JVM.Strings._
-                                    s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body
-                                }, serrializeToOneString = true))
+                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
                             collectionElemObject += listFridFieldObject
                         }
 
@@ -246,11 +233,7 @@ class GenListGridFields(val appFilePath: Path,
                         makeCollectionISCElementsJS(root, lss, lsf, lssObjects, lssNames)
 
                     case label =>
-                        throw new RuntimeException(s"Unknown implemantation for root.label : ${
-                            {
-                                import com.simplesys.common.JVM.Strings._
-                                label.dblQuoted
-                            }}")
+                        throw new RuntimeException(s"Unknown implemantation for root.label : ${label.dblQuoted}")
                 }
         }
 

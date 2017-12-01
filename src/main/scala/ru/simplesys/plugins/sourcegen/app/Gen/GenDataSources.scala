@@ -88,15 +88,11 @@ class GenDataSources(val appFilePath: Path,
                                 case _ =>
                             }
 
-                        case _ => {
-                            import com.simplesys.common.JVM.Strings._
+                        case _ =>
                             throw new RuntimeException(s"Unknown implemantation for type : ${scalaPropertyElement.toString.dblQuoted}")
-                        }
                     }
-                case _ => {
-                    import com.simplesys.common.JVM.Strings._
+                case _ =>
                     throw new RuntimeException(s"Unknown implemantation for type : ${propertyElement.toString.dblQuoted}")
-                }
             }
         }
     }
@@ -123,10 +119,8 @@ class GenDataSources(val appFilePath: Path,
                     case "DataSources" =>
                         makeCollectionISCElementsJS(root, dssJS)
 
-                    case label => {
-                        import com.simplesys.common.JVM.Strings._
+                    case label =>
                         throw new RuntimeException(s"Unknown implemantation for root.label : ${label.dblQuoted}")
-                    }
                 }
         }
 

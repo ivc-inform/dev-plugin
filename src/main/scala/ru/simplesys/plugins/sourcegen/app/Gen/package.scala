@@ -29,10 +29,7 @@ package object Gen extends Logging {
                             ScalaApplyObject(
                                 name = if (uc.ucType === PK) "PrimaryKey" else "UniqueKey",
                                 parametrs = ScalaClassParametrs(
-                                    ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                        import com.simplesys.common.JVM.Strings._
-                                        uc.constrAttrName.dblQuoted
-                                    }),
+                                    ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = uc.constrAttrName.dblQuoted),
                                     ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${uc.attrNames.map(f => s"KeyConstraintData(${f + (if (addClassName) clazz.className else strEmpty)})").mkString(",")}")
                                 )
                             )
@@ -43,10 +40,7 @@ package object Gen extends Logging {
                             ScalaApplyObject(
                                 name = if (uc.ucType === PK) "PrimaryKey" else "UniqueKey",
                                 parametrs = ScalaClassParametrs(
-                                    ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                        import com.simplesys.common.JVM.Strings._
-                                        uc.constrAttrName.dblQuoted
-                                    }),
+                                    ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = uc.constrAttrName.dblQuoted),
                                     ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${uc.attrNames.map(f => s"KeyConstraintData(${f + (if (addClassName) clazz.className else strEmpty)})").mkString(",")}")
                                 )
                             )
@@ -58,19 +52,8 @@ package object Gen extends Logging {
                         constraints += ScalaApplyObject(
                             name = "ForignKey",
                             parametrs = ScalaClassParametrs(
-                                ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                    import com.simplesys.common.JVM.Strings._
-                                    fk.constrAttrName.dblQuoted
-                                }),
-                                ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${fk.attrNames.map(f => s"ForignKeyConstraintData(${f + (if (addClassName) clazz.className else strEmpty)}, ReferencedData(${
-                                    {
-                                        import com.simplesys.common.JVM.Strings._
-                                        fk.referencedClassRef.groupName.dblQuoted
-                                    }},${
-                                    {
-                                        import com.simplesys.common.JVM.Strings._
-                                        fk.referencedClassRef.objectName.dblQuoted
-                                    }}), ${fk.isMandatory.toString})").mkString(",")}")
+                                ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = fk.constrAttrName.dblQuoted),
+                                ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${fk.attrNames.map(f => s"ForignKeyConstraintData(${f + (if (addClassName) clazz.className else strEmpty)}, ReferencedData(${fk.referencedClassRef.groupName.dblQuoted},${fk.referencedClassRef.objectName.dblQuoted}), ${fk.isMandatory.toString})").mkString(",")}")
                             )
                         )
                 }
@@ -90,10 +73,7 @@ package object Gen extends Logging {
                                 constraints += ScalaApplyObject(
                                     name = if (uc.ucType === PK) (if (index === 0) "PrimaryKey" else "MigratedPrimaryKey") else "UniqueKey",
                                     parametrs = ScalaClassParametrs(
-                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                            import com.simplesys.common.JVM.Strings._
-                                            (uc.constrAttrName + suffix).dblQuoted
-                                        }),
+                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = (uc.constrAttrName + suffix).dblQuoted),
                                         ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${uc.attrNames.map(f => s"KeyConstraintData(${f + clazz.className.capitalize}${suffix})").mkString(",")}")
                                     )
                                 )
@@ -104,10 +84,7 @@ package object Gen extends Logging {
                                 constraints += ScalaApplyObject(
                                     name = if (uc.ucType === PK) (if (index === 0) "PrimaryKey" else "MigratedPrimaryKey") else "UniqueKey",
                                     parametrs = ScalaClassParametrs(
-                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                            import com.simplesys.common.JVM.Strings._
-                                            (uc.constrAttrName + suffix).dblQuoted
-                                        }),
+                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = (uc.constrAttrName + suffix).dblQuoted),
                                         ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${uc.attrNames.map(f => s"KeyConstraintData(${f + clazz.className.capitalize}${suffix})").mkString(",")}")
                                     )
                                 )
@@ -119,19 +96,8 @@ package object Gen extends Logging {
                                 constraints += ScalaApplyObject(
                                     name = "ForignKey",
                                     parametrs = ScalaClassParametrs(
-                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                            import com.simplesys.common.JVM.Strings._
-                                            (fk.constrAttrName + suffix).dblQuoted
-                                        }),
-                                        ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${fk.attrNames.map(f => s"ForignKeyConstraintData(${f + clazz.className.capitalize}${suffix}, ReferencedData(${
-                                            {
-                                                import com.simplesys.common.JVM.Strings._
-                                                fk.referencedClassRef.groupName.dblQuoted
-                                            }},${
-                                            {
-                                                import com.simplesys.common.JVM.Strings._
-                                                fk.referencedClassRef.objectName.dblQuoted
-                                            }}), ${fk.isMandatory.toString})").mkString(",")}")
+                                        ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = (fk.constrAttrName + suffix).dblQuoted),
+                                        ScalaClassParametr(name = "constraintDate", `type` = ScalaImplicitType, defaultValue = s"${fk.attrNames.map(f => s"ForignKeyConstraintData(${f + clazz.className.capitalize}${suffix}, ReferencedData(${fk.referencedClassRef.groupName.dblQuoted},${fk.referencedClassRef.objectName.dblQuoted}), ${fk.isMandatory.toString})").mkString(",")}")
                                     )
                                 )
                         }

@@ -36,13 +36,12 @@ publishMavenStyle := true
 libraryDependencies ++= {
 	//val ssysCoreVersion = "1.4.0.2"
 	val ssysCoreVersion = "1.5-SNAPSHOT"
-	val ssysCoreCrossVersion = "1.0.0.5-SNAPSHOT"
 	val scalazVersion = "7.2.15"
 	val scalaFmtVersion = "1.3.0"
     Seq(
         "com.simplesys.core" %% "core-domains" % ssysCoreVersion,
         "com.simplesys.core" %% "core-utils" % ssysCoreVersion,
-        "com.simplesys.cross" %% "common-cross" % ssysCoreCrossVersion,
+        "com.simplesys.core" %% "common" % ssysCoreVersion,
         "com.simplesys.core" %% "xml-extender" % ssysCoreVersion,
         "com.simplesys.core" %% "saxon-wrapper" % ssysCoreVersion,
         "com.simplesys.core" %% "scala-gen" % ssysCoreVersion,

@@ -98,17 +98,8 @@ class GenBOs(val appFilePath: Path,
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
-          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              clazz.className.dblQuoted
-          })),
-          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              {
-                  import com.simplesys.common.JVM.Strings._
-                  clazz.group.dblQuoted
-              }
-          }))
+          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
+          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
           )
 
         boClass addMembers(
@@ -191,11 +182,7 @@ class GenBOs(val appFilePath: Path,
                     if (res.indexOf(".") !== -1) {
                         if (!addImports.exists(_.toString() === res.imp.toString())) {
                             addImports += res.imp
-
-                            {
-                                import com.simplesys.common.JVM.Strings._
-                                logger debug (s"Bad type: ${res.dblQuoted} tarnsform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
-                            }
+                            logger debug (s"Bad type: ${res.dblQuoted} tarnsform to ${res.substring(res.lastIndexOf(".") + 1).dblQuoted} and added import ${res}")
                         }
                         res.substring(res.lastIndexOf(".") + 1)
                     } else
@@ -216,18 +203,9 @@ class GenBOs(val appFilePath: Path,
                       body = if (!column.dataType.isComplexDataType) ScalaBody(ScalaApplyObject(
                           name = typeColumn,
                           parametrs = ScalaClassParametrs(
-                              ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                  import com.simplesys.common.JVM.Strings._
-                                  column.dbName.dblQuoted
-                              }),
-                              ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = {
-                                  import com.simplesys.common.JVM.Strings._
-                                  attr.name.dblQuoted
-                              }),
-                              ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = {
-                                  import com.simplesys.common.JVM.Strings._
-                                  attr.caption.dblQuoted
-                              }),
+                              ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
+                              ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = attr.name.dblQuoted),
+                              ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = attr.caption.dblQuoted),
                               ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                           )))
                       else
@@ -237,18 +215,9 @@ class GenBOs(val appFilePath: Path,
                                   typeScalaClass = AnonimousScalaClass
                                   generics = ScalaGenerics(s"${_columnType}")
                                   parametrs = ScalaClassParametrs(
-                                      ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                          import com.simplesys.common.JVM.Strings._
-                                          column.dbName.dblQuoted
-                                      }),
-                                      ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = {
-                                          import com.simplesys.common.JVM.Strings._
-                                          attr.name.dblQuoted
-                                      }),
-                                      ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = {
-                                          import com.simplesys.common.JVM.Strings._
-                                          attr.caption.dblQuoted
-                                      }),
+                                      ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted),
+                                      ScalaClassParametr(name = "nameInBo", `type` = ScalaImplicitType, defaultValue = attr.name.dblQuoted),
+                                      ScalaClassParametr(name = "caption", `type` = ScalaImplicitType, defaultValue = attr.caption.dblQuoted),
                                       ScalaClassParametr(name = "tableColumn", `type` = ScalaImplicitType, defaultValue = tblColumn)
                                   )
                                   members = if (attr.isMandatory) ArrayBuffer(
@@ -472,10 +441,7 @@ class GenBOs(val appFilePath: Path,
         boClass addMembers(ScalaEndComment("Columns for Insert/Update/Delete"), newLine)
 
         val discriminators: String = (discriminatorSeq.zipWithIndex map {
-            case (discriminator, index) => s"${if (index === 0) "Where" else "And"}(${discriminator.colRef.name} === ${if (discriminator.colRef.toCol.dataType.simpleDataType.scalaTypeAsString(discriminator.colRef.table.group, schema) === "String") {
-                import com.simplesys.common.JVM.Strings._
-                discriminator.value.dblQuoted
-            } else discriminator.value})"
+            case (discriminator, index) => s"${if (index === 0) "Where" else "And"}(${discriminator.colRef.name} === ${if (discriminator.colRef.toCol.dataType.simpleDataType.scalaTypeAsString(discriminator.colRef.table.group, schema) === "String") discriminator.value.dblQuoted else discriminator.value})"
         }).mkString(space)
 
         val joins: String = (clazz.columnRelationsLinkAllTables map {

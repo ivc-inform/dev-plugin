@@ -104,11 +104,7 @@ class GenSimpleTypes(val appFilePath: Path,
                     bodyCreateJS += ScalaExpression(expression = makeScalaCodeJS(simpleType).serrialize())
                     bodyCreateJS += newLine
                 case label =>
-                    throw new RuntimeException(s"Unknown implemantation for simpleType.label : ${
-                        {
-                            import com.simplesys.common.JVM.Strings._
-                            label.dblQuoted
-                        }}")
+                    throw new RuntimeException(s"Unknown implemantation for simpleType.label : ${label.dblQuoted}")
             }
         }
 

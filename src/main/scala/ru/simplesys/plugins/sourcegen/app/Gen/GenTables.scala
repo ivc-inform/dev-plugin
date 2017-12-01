@@ -96,24 +96,15 @@ class GenTables(val appFilePath: Path,
               ),
               serrializeToOneString = true, body = ScalaBody(s"new ${className}(alias = alias)")),
           newLine,
-          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              table.tableName.dblQuoted
-          })),
-          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              table.group.dblQuoted
-          }))
+          ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(table.tableName.dblQuoted)),
+          ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(table.group.dblQuoted))
         )
 
         tableClass addMembers(
           newLine,
           ScalaVariable(name = "quoted", serrializeToOneString = true, body = ScalaBody(quoted.toString)),
           newLine,
-          ScalaMethod(name = "databaseTablename", body = ScalaBody({
-              import com.simplesys.common.JVM.Strings._
-              table.tableDBName.dblQuoted
-          }), serrializeToOneString = true),
+          ScalaMethod(name = "databaseTablename", body = ScalaBody(table.tableDBName.dblQuoted), serrializeToOneString = true),
           newLine,
           ScalaVariable(name = "sqlDialect", serrializeToOneString = true, body = "dataSource.sqlDialect".body),
           newLine
@@ -151,10 +142,7 @@ class GenTables(val appFilePath: Path,
                     body = ScalaBody(ScalaApplyObject(
                         name = s"${columnType}${if (isMandatory) "" else "Option"}ColumnTable",
                         parametrs = ScalaClassParametrs(
-                            ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                import com.simplesys.common.JVM.Strings._
-                                column.dbName.dblQuoted
-                            })
+                            ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted)
                         ))),
                     serrializeToOneString = true)
 
@@ -165,10 +153,7 @@ class GenTables(val appFilePath: Path,
                         body = ScalaBody(ScalaApplyObject(
                             name = s"${columnType}${if (!isMandatory) "" else "Option"}ColumnTable",
                             parametrs = ScalaClassParametrs(
-                                ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = {
-                                    import com.simplesys.common.JVM.Strings._
-                                    column.dbName.dblQuoted
-                                })
+                                ScalaClassParametr(name = "name", `type` = ScalaImplicitType, defaultValue = column.dbName.dblQuoted)
                             ))),
                         serrializeToOneString = true)
                 }
