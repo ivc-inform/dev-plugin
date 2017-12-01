@@ -138,7 +138,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   `type` = "Blob".tp
                                               )
                                           ),
-                                          body = ScalaBody("blob.asString"),
+                                          body = ScalaBody("{\n         import com.simplesys.common.JVM.Strings._\n         blob.asString\n     }"),
                                           serrializeToOneString = true)
                                     )
 
