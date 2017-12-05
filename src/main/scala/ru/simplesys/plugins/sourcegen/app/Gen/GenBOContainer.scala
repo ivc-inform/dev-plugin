@@ -490,7 +490,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(insert.printException.get.message, insert.printException.get.stackTrace).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(ErrorData(insert.printException.get.message, insert.printException.get.stackTrace).asJson).asJson")
                                                   )
                                               )
                                           ))),
@@ -576,7 +576,7 @@ class GenBOContainer(val appFilePath: Path,
                                                           })
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(select.printException.get.message, select.printException.get.stackTrace)")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(ErrorData(select.printException.get.message, select.printException.get.stackTrace).asJson)")
                                                   )
                                               )
                                           ))),
@@ -690,7 +690,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   )
                                               ),
                                               ScalaCaseLine(expression = "Failure(_)".expr,
-                                                  caseBody = ScalaBody("DSResponseFailureEx(update.printException.get.message, update.printException.get.stackTrace).asJson")
+                                                  caseBody = ScalaBody("DSResponseFailureEx(ErrorData(update.printException.get.message, update.printException.get.stackTrace).asJson).asJson")
                                               )
                                           )
                                       ))),
@@ -820,7 +820,7 @@ class GenBOContainer(val appFilePath: Path,
                                                       )
                                                   ),
                                                   ScalaCaseLine(expression = "Failure(_)".expr,
-                                                      caseBody = ScalaBody("DSResponseFailureEx(delete.printException.get.message, delete.printException.get.stackTrace).asJson")
+                                                      caseBody = ScalaBody("DSResponseFailureEx(ErrorData(delete.printException.get.message, delete.printException.get.stackTrace).asJson).asJson")
                                                   )
                                               )
                                           ))),
@@ -862,6 +862,7 @@ class GenBOContainer(val appFilePath: Path,
                             "java.time.LocalDateTime".imp,
                             "com.simplesys.isc.dataBinging.{DSResponse, RPCResponse, Transaction, DSResponseFailureEx}".imp,
                             "com.simplesys.circe.Circe._".imp,
+                            "com.simplesys.isc.dataBinging._".imp,
                             "scala.collection.mutable.ArrayBuffer".imp,
                             "com.simplesys.app.seq.Sequences".imp,
                             "com.simplesys.common.Strings._".imp,
