@@ -128,7 +128,7 @@ class GenBOContainer(val appFilePath: Path,
                                                   `type` = "Blob".tp
                                               )
                                           ),
-                                          body = ScalaBody("blob.asString"),
+                                          body = ScalaBody("inputStream2Sting(blob)"),
                                           serrializeToOneString = true)
                                     )
 
@@ -295,7 +295,7 @@ class GenBOContainer(val appFilePath: Path,
                             }
 
                             def recordDyn(itemName: String, boName: String = strEmpty) = ScalaApplyObject(
-                                name = "fromJsonObject(JsonObject.fromIterable(Seq",
+                                name = "obj",
                                 parametrs = ScalaClassParametrs(
                                     (_dataSource \ "Fields" \ "DataSourceFieldDyn") map {
                                         x =>
@@ -344,8 +344,7 @@ class GenBOContainer(val appFilePath: Path,
                                                     sign = ScalaSignArrowRight
                                                 )
                                     }: _*
-                                ),
-                                suffix = "))"
+                                )
                             )
 
                             case class PkData(getterType: String, pk: String)
