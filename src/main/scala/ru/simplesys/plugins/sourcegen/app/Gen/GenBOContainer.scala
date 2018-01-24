@@ -31,7 +31,7 @@ class GenBOContainer(val appFilePath: Path,
     val operationTypes = Seq("Add", "Fetch", "Remove", "Update")
     val sourceBOFiles: PathSet[Path] = boFilePath * "*.xml"
     val generetedFiles: PathSet[Path] = appFilePath * "dataSources.xml"
-    
+
     def create: File = ????
 
     def createSeq: Seq[File] = {
@@ -110,7 +110,7 @@ class GenBOContainer(val appFilePath: Path,
                                     traitDeclate addMembers(
                                       newLine,
                                       ScalaComment("!!!!!!!!!!!!!!!!!!!!!!!!!!!! DON'T MOVE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"),
-                                      ScalaVariable(name = "requestData", body = ScalaBody("new DSRequest(request.JSONData)"), serrializeToOneString = true),
+                                      ScalaVariable(name = "requestData", `type` = "DSRequest".tp, body = ScalaBody("request.JSONData.as[DSRequest].getOrElse(throw new RuntimeException (\"Dont parsed Request JSON\"))"), serrializeToOneString = true),
                                       newLine,
                                       "logger debug s\"Request for " + mode + ": ${newLine + requestData.asJson.toPrettyString}\"",
                                       newLine,
