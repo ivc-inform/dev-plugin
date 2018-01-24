@@ -57,7 +57,7 @@ object DevPlugin extends AutoPlugin {
     val generateScalaCode = taskKey[Seq[File]]("Generate scala sources from schema files")
     val generateScalaJSCode = taskKey[Seq[File]]("Generate scala.js sources from schema files")
     val generateBoScalaCode = taskKey[Seq[File]]("Generate scala sources tables & classes from schema files")
-    val N877 = taskKey[Unit]("Issue #877")
+    val n877 = taskKey[Unit]("Issue #877")
     val generateMockupUI = taskKey[Unit]("generate UI from Balsamiq mockups")
     val logMetamodel = taskKey[Unit]("Incpection BO MetaModel")
 
@@ -222,7 +222,7 @@ object DevPlugin extends AutoPlugin {
             poso ++ res764 ++ res819 ++ res844 ++ res938
         },
 
-        N877 := {
+        n877 := {
 
             import com.simplesys.file.ImplicitConversions._
             import com.simplesys.io._
