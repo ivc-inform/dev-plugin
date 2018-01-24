@@ -56,10 +56,10 @@ class GenBODataRecord(val appFilePath: Path,
 
                     if (!servletes.exists(_ === dataSourceIdentifier)) {
                         servletes += dataSourceIdentifier
-                        val boName = dataSourceIdentifier.substring(dataSourceIdentifier.indexOf("_") + 1)
+                        val boName = dataSourceIdentifier.substring(0, dataSourceIdentifier.indexOf("_")).capitalize + dataSourceIdentifier.substring(dataSourceIdentifier.indexOf("_") + 1).capitalize
 
                         val recordTrait = new ScalaClassDeclare {
-                            scalaClassGen = (s"${boName.capitalize}DataRecord").cls
+                            scalaClassGen = (s"${boName}DataRecord").cls
                             typeScalaClass = TypeScalaTrait
                             extensibleClass = "js.Object".ext
                         }
