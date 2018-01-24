@@ -115,8 +115,7 @@ object DevPlugin extends AutoPlugin {
 
             try {
                 Thread.currentThread setContextClassLoader cl2Set
-                //                schema.generateScalaCode(outScalaBODir, pkgBOName) ++
-                AppDef.generateScalaCode(
+                AppDef.makeScalaCode(
                     baseDirectory = baseDirectory.value,
                     tmp = tmpResourcesDir.value,
                     sourceBoDir = sourceBoDir.value,
@@ -149,7 +148,7 @@ object DevPlugin extends AutoPlugin {
 
             try {
                 Thread.currentThread setContextClassLoader cl2Set
-                AppDefJS.generateScalaCode(
+                AppDefJS.makeScalaCode(
                     baseDirectory = baseDirectory.value,
                     tmp = tmpResourcesDir.value,
                     sourceBoDir = sourceBoDir.value,

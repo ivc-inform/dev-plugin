@@ -16,9 +16,10 @@ import com.simplesys.io._
 import scala.collection.mutable.ArrayBuffer
 
 object AppDef {
-    def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
+    def makeScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
         if (contextPath.isEmpty)
             throw new RuntimeException(s"ContextPath must be not Empty.")
+
         //Path("journal").deleteRecursively(force = true)
         val res = ArrayBuffer.empty[File]
         val xmlPath: Path = outScalaAppDir / "xml"

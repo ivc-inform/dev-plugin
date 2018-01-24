@@ -37,7 +37,7 @@ class GenBODataRecord(val appFilePath: Path,
 
         val resSeq = ArrayBuffer.empty[File]
         val servletes = ArrayBuffer.empty[String]
-        val res = (outFilePath / "scala" / "container" / s"RecordsBOs.scala").createFile(failIfExists = false).toFile
+        val res = (outFilePath / "scala" / "container" / "RecordsBOs.scala").createFile(failIfExists = false).toFile
 
         generetedFiles foreach {
             file =>
@@ -56,7 +56,7 @@ class GenBODataRecord(val appFilePath: Path,
 
                     if (!servletes.exists(_ === dataSourceIdentifier)) {
                         servletes += dataSourceIdentifier
-                        val boName = dataSourceIdentifier.substring(dataSourceIdentifier.indexOf("_") + 1)
+                        val boName = dataSourceIdentifier//.substring(dataSourceIdentifier.indexOf("_") + 1)
 
                         val recordTrait = new ScalaClassDeclare {
                             scalaClassGen = (s"${boName.capitalize}DataRecord").cls
@@ -91,6 +91,7 @@ class GenBODataRecord(val appFilePath: Path,
                     newLine,
                     "java.time.LocalDateTime".imp,
                     "scala.scalajs.js".imp,
+                    "com.simplesys.jdbc.control.clob.Blob".imp
                 )
 
 

@@ -14,9 +14,10 @@ import sbt.{File, Logger}
 import scala.collection.mutable.ArrayBuffer
 
 object AppDefJS {
-    def generateScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
+    def makeScalaCode(baseDirectory: Path, tmp: Path, sourceBoDir: Path, sourceAppDir: Path, outScalaAppDir: Path, sourceMain: Path, pkgAppName: String, pkgBOName: String, contextPath: String, maxArity: Int)(implicit logger: Logger): Seq[File] = {
         if (contextPath.isEmpty)
             throw new RuntimeException(s"ContextPath must be not Empty.")
+
         //Path("journal").deleteRecursively(force = true)
         val res = ArrayBuffer.empty[File]
         val xmlPath: Path = outScalaAppDir / "xml"
@@ -77,7 +78,7 @@ object AppDefJS {
                 params("tmpDir") = tmp.toURL
                 Transform(xsltPath = xslPath / "MakeDSFromAllBo.xsl", initialTemplate = "ProcessingAll")
         } > 0)
-            throw new RuntimeException("Execution terminated, due to an error(s) in #756 !!!")
+            throw new RuntimeException("Execution terminated, due to an error(s) in #757 !!!")
         else
             logger info (s"Done #757.")
         //</editor-fold>
