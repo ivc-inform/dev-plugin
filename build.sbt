@@ -46,7 +46,6 @@ libraryDependencies ++= {
         "com.simplesys.core" %% "saxon-wrapper" % ssysCoreVersion,
         "com.simplesys.core" %% "scala-gen" % ssysCoreVersion,
         "org.scalaz" %% "scalaz-core" % scalazVersion,
-        //"org.liquibase" % "liquibase-maven-plugin" % "3.5.1",
         "com.h2database" % "h2" % "1.4.192",
         "com.geirsson" %% "scalafmt-core" % scalaFmtVersion,
         "com.geirsson" %% "scalafmt-cli" % scalaFmtVersion,
