@@ -36,6 +36,22 @@ object AppDefJS {
 
         //<editor-fold desc="#756">
         logger info (s"Begin #756.")
+        XmlUtil.save(schema.toXML("http://toucan.simplesys.lan/xml/xsd/v1.0.0-1"), (tmp / "allBo.xml").toFile)
+
+        logger info (s"Begin #932#1.")
+        XmlUtil.save(DataTypes.toXML("http://toucan.simplesys.lan/xml/xsd/v1.0.0-1"), (tmp / "domains.xml").toFile)
+        logger info (s"Done #932#1.")
+
+        logger info (s"Begin #932#2.")
+        if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
+            params =>
+                params("resFile") = (tmp / "SimpleTypes.xml").toURL
+                params("inputBoFile") = (tmp / "domains.xml").toURL
+                Transform(xsltPath = xslPath / "MakeSimpleClasses.xsl", initialTemplate = "ProcessingAll")
+        } > 0)
+            throw new RuntimeException("Execution terminated, due to an error(s) !!!")
+        else
+            logger info (s"Done #932#2.")
 
         logger info (s"Begin #932#3.")
         res += new GenSimpleTypes(
@@ -48,6 +64,23 @@ object AppDefJS {
         logger info (s"Done #932#3.")
 
         logger info (s"Done #756.")
+        //</editor-fold>
+
+        //<editor-fold desc="#757">
+        logger info (s"Begin #757.")
+        if (withTransformation((FeatureKeys.MULTIPLE_SCHEMA_IMPORTS -> true)) {
+            params =>
+                params("ContextPath") = contextPath
+                params("resFile") = (tmp / "dataSources.xml").toURL
+                params("inputBoFile") = (tmp / "allBo.xml").toURL
+                params("domainsFile") = (tmp / "domains.xml").toURL
+                params("maxArity") = maxArity
+                params("tmpDir") = tmp.toURL
+                Transform(xsltPath = xslPath / "MakeDSFromAllBo.xsl", initialTemplate = "ProcessingAll")
+        } > 0)
+            throw new RuntimeException("Execution terminated, due to an error(s) in #757 !!!")
+        else
+            logger info (s"Done #757.")
         //</editor-fold>
 
         //<editor-fold desc="#760">

@@ -127,19 +127,6 @@ object DevPlugin extends AutoPlugin {
                     contextPath = contextPath.value,
                     maxArity = maxArity.value
                 )
-
-                AppDefJS.makeScalaCode(
-                    baseDirectory = baseDirectory.value,
-                    tmp = tmpResourcesDir.value,
-                    sourceBoDir = sourceBoDir.value,
-                    sourceAppDir = sourceAppDir.value,
-                    outScalaAppDir = outputScalaCodeAppDir.value,
-                    sourceMain = sourceMainDir.value,
-                    pkgAppName = startPackageAppName.value,
-                    pkgBOName = startPackageBOName.value,
-                    contextPath = contextPath.value,
-                    maxArity = maxArity.value
-                )
             }
             finally {
                 Thread.currentThread setContextClassLoader cl2Save
