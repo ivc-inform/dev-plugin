@@ -55,6 +55,7 @@ object DevPlugin extends AutoPlugin {
     //---------------------------------------------------------------------------------
 
     val generateScalaCode = taskKey[Seq[File]]("Generate scala sources from schema files")
+    val generateScalaJSCode = taskKey[Seq[File]]("Generate scala.js sources from schema files")
     val generateBoScalaCode = taskKey[Seq[File]]("Generate scala sources tables & classes from schema files")
     val n877 = taskKey[Unit]("Issue #877")
     val generateMockupUI = taskKey[Unit]("generate UI from Balsamiq mockups")
@@ -146,6 +147,38 @@ object DevPlugin extends AutoPlugin {
 
         },
 
+        generateScalaJSCode := {
+            import com.simplesys.file.ImplicitConversions._
+            import meta.SchemaDef
+
+            implicit val logger = streams.value.log
+            implicit val schema = SchemaDef(startPackageBOName.value, sourceSchemaBOFiles.value)
+
+            tmpResourcesDir.value.mkdirs()
+
+            val cl2Save = Thread.currentThread.getContextClassLoader
+            val cl2Set = this.getClass.getClassLoader
+
+            try {
+                Thread.currentThread setContextClassLoader cl2Set
+                AppDefJS.makeScalaCode(
+                    baseDirectory = baseDirectory.value,
+                    tmp = tmpResourcesDir.value,
+                    sourceBoDir = sourceBoDir.value,
+                    sourceAppDir = sourceAppDir.value,
+                    outScalaAppDir = outputScalaCodeAppDir.value,
+                    sourceMain = sourceMainDir.value,
+                    pkgAppName = startPackageAppName.value,
+                    pkgBOName = startPackageBOName.value,
+                    contextPath = contextPath.value,
+                    maxArity = maxArity.value
+                )
+            }
+            finally {
+                Thread.currentThread setContextClassLoader cl2Save
+            }
+
+        },
         generateBoScalaCode := {
 
             import com.simplesys.file.ImplicitConversions._
