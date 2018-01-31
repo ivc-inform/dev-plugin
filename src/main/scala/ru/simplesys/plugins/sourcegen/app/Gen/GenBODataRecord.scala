@@ -91,7 +91,7 @@ class GenBODataRecord(val appFilePath: Path,
                     newLine,
                     "java.time.LocalDateTime".imp,
                     "scala.scalajs.js".imp,
-                    "com.simplesys.jdbc.control.clob.Blob".imp //Не открывать, нет реализации в Scala.js
+                    "com.simplesys.jdbc.control.clob.Blob".imp 
                 )
 
 
