@@ -2,8 +2,6 @@ sbtPlugin := true
 
 name := "dev-plugin"
 
-//enablePlugins(GitVersioning)
-
 organization := "ru.simplesys"
 
 version := "1.3.16-SNAPSHOT"
@@ -56,8 +54,6 @@ libraryDependencies ++= {
 }
 
 logLevel := Level.Info
-
-//git.baseVersion := "1.3.11"
 
 
 
