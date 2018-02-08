@@ -28,7 +28,6 @@ trait SchemaDefMetaGen {
             |import ru.simplesys.meta._
             |import ru.simplesys.coreutil.{SealedEnumRuntime, SealedCaseClassEnum}
             |import com.simplesys.jdbc._
-            |import io.circe.Json
             |import com.simplesys.corelibrary.domain._
             |import com.simplesys.common.array._
             |import com.simplesys.jdbc.control.clob._
@@ -96,7 +95,6 @@ trait SchemaDefMetaGen {
               |import scalaz.syntax.std.option._
               |import scalaz.std.option._
               |import scalaz.std.string._
-              |import io.circe.Json
               |
               |import ru.simplesys.meta.types.{MetaType, Domain}
               |import ru.simplesys.meta._
