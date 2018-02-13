@@ -6,9 +6,9 @@ enablePlugins(GitVersioning)
 
 organization := "ru.simplesys"
 
-//version := "1.0.10-SNAPSHOT"
+//version := "1.0.11-SNAPSHOT"
 
-scalaVersion := "2.10.6"
+scalaVersion := "2.10.7"
 
 scalacOptions := Seq(
     "-feature",
