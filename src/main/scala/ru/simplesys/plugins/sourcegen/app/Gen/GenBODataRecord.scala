@@ -68,16 +68,16 @@ class GenBODataRecord(val appFilePath: Path,
                             x =>
                                 val name = (x: IscElem).getStringValue("Name")
                                 val tp: String = (x: IscElem).getStringValue("GetterType").replace("Opt", strEmpty)
-                                val required: Boolean = (x: IscElem).getBooleanValue("Required")
+                                //val required: Boolean = (x: IscElem).getBooleanValue("Required")
                                 val lookup: Boolean = (x: IscElem).getBooleanValue("Lookup")
 
-                                if (!lookup) {
+                                //if (!lookup) {
                                     val _tp = tp match {
                                         case "Long" ⇒ "Double"
                                         case any ⇒ any
                                     }
                                     recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
-                                }
+                                //}
                         }
 
                         traitsRecords append recordTrait
@@ -91,7 +91,7 @@ class GenBODataRecord(val appFilePath: Path,
                     newLine,
                     "java.time.LocalDateTime".imp,
                     "scala.scalajs.js".imp,
-                    "com.simplesys.jdbc.control.clob.Blob".imp 
+                    "com.simplesys.jdbc.control.clob.{Blob, Clob}".imp
                 )
 
 

@@ -122,6 +122,17 @@ object AppDefJS {
             stage = "#765",
             logger = logger).createSeq
 
+        res ++= new GenBOContainerShared(
+            appFilePath = tmp,
+            boFilePath = sourceBoDir,
+            schemaPath = "schemaApp.xsd".xsdURI,
+            sourceMain = sourceMain,
+            outFilePath = outScalaAppDir,
+            packageName = pkgAppName + ".scala.container",
+            pkgBOName,
+            stage = "#765",
+            logger = logger).createSeq
+
         logger info (s"Done #765.")
         //</editor-fold>
 

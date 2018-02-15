@@ -68,26 +68,17 @@ class GenBOContainer(val appFilePath: Path,
                         addedImports += firstAddImport
 
                         val fullName = s"${groupName}_${boName}"
+
                         val res = (outFilePath / "scala" / "container" / s"${fullName}_Container.scala").createFile(failIfExists = false).toFile
 
                         val dataURL = dataSource getStringValue "DataURL"
-                        val _dataURL: String = {
-                            var res = ""
-                            if (dataURL.head != '/')
-                                res += "/"
-                            if (dataURL.indexOf("@") != -1)
-                                res += dataURL.substring(0, dataURL.indexOf("@"))
-                            else
-                                res += dataURL
-                            res.dblQuoted
-                        }
 
                         val mainObject = new ScalaClassDeclare {
                             scalaClassGen = (s"${boName.capitalize}Container").cls
                             typeScalaClass = TypeScalaObject
                         }
 
-                        for (mode <- operationTypes; _dataURL <- (dataSource \ (mode + "DataURL"))) {
+                        for (mode <- operationTypes; _ <- (dataSource \ (mode + "DataURL"))) {
                             val url = s"logic/$fullName/$mode"
                             val urlVar = ScalaVariable(name = s"${fullName}_$mode", serrializeToOneString = true, body = url.dblQuoted.body)
                             val actorAnnotation = ScalaAnnotation("RSTransfer", "urlPattern" -> s"/$url".dblQuoted)
@@ -431,7 +422,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                         expression = "operation".expr,
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "operation.getJsonObject(\"data\")".body,
+                                                                            body = "operation.asJson.getJsonObject(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         newLine,
@@ -641,7 +632,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                     ScalaBody(
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "operation.getJsonObjectOpt(\"oldValues\") ++ operation.getJsonObjectOpt(\"data\")".body,
+                                                                            body = "operation.asJson.getJsonObjectOpt(\"oldValues\") ++ operation.asJson.getJsonObjectOpt(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
@@ -763,7 +754,7 @@ class GenBOContainer(val appFilePath: Path,
                                                                     ScalaBody(
                                                                         ScalaVariable(
                                                                             name = "data",
-                                                                            body = "operation.getJsonObjectOpt(\"data\")".body,
+                                                                            body = "operation.asJson.getJsonObjectOpt(\"data\")".body,
                                                                             serrializeToOneString = true
                                                                         ),
                                                                         "logger debug (s\"data: ${newLine + data.toPrettyString}\")",
@@ -845,7 +836,7 @@ class GenBOContainer(val appFilePath: Path,
                                   body = ScalaIf("receiveBase.isEmpty".expr, ScalaBody(recieveBody), ScalaBody("receiveBase.get"))
                               ))
 
-                            mainObject addMembers(newLine, urlVar, newLine, actorClass)
+                            mainObject addMembers(newLine, actorClass)
                         }
 
                         val module = ScalaModule(
@@ -863,10 +854,12 @@ class GenBOContainer(val appFilePath: Path,
                             "com.simplesys.isc.dataBinging.DSRequest._".imp,
                             "com.simplesys.isc.dataBinging.DSResponse._".imp,
                             "com.simplesys.circe.Circe._".imp,
+                            "io.circe.Json._".imp,
                             "scala.collection.mutable.ArrayBuffer".imp,
                             "com.simplesys.app.seq.Sequences".imp,
                             "com.simplesys.common.Strings._".imp,
                             "com.simplesys.jdbc._".imp,
+                            "ru.simplesys.defs.app.scala.container._".imp,
                             "com.simplesys.common._".imp,
                             "com.simplesys.circe.Circe._".imp,
                             "io.circe.syntax._".imp,
@@ -882,7 +875,7 @@ class GenBOContainer(val appFilePath: Path,
                             "scalaz.{Failure, Success}".imp,
                             "com.simplesys.common.array._".imp,
                             "com.simplesys.messages.Message".imp,
-                            "scala.scalajs.js".imp,
+                            "scala.scalajs.js".imp
                         )
 
                         module ++= addedImports

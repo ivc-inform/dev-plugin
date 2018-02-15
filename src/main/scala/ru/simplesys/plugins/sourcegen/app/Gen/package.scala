@@ -7,6 +7,7 @@ import com.simplesys.scalaGen.{ScalaApplyObject, ScalaBody, ScalaClassParametr, 
 import ru.simplesys.plugins.sourcegen.meta.{LinkToColumnWValue, _}
 
 package object Gen extends Logging {
+
     implicit class Imp(string: String) {
         def tbl = s"${string.capitalize}Tbl"
         def bo = s"${string.capitalize}Bo"

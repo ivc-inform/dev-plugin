@@ -100,7 +100,7 @@ class GenBOs(val appFilePath: Path,
           newLine,
           ScalaVariable(name = "objectName", serrializeToOneString = true, body = ScalaBody(clazz.className.dblQuoted)),
           ScalaVariable(name = "groupName", serrializeToOneString = true, body = ScalaBody(clazz.group.dblQuoted))
-          )
+        )
 
         boClass addMembers(
           ScalaComment(s"Class: ${clazz.className}, group: ${clazz.group}"),
@@ -126,7 +126,7 @@ class GenBOs(val appFilePath: Path,
               )),
           newLine,
           ScalaVariable(name = "quoted", serrializeToOneString = true, body = ScalaBody(quoted.toString))
-          )
+        )
 
         //val tables: Seq[ITable] = clazz.linkRefsToAllTables.map(_.toTable)
         val tables: Seq[ITable] = if (!forLob) clazz.linkRefsToAllTables.map(_.toTable) else Seq(schema.tablesMap(LinkRefToTable(clazz.group, clazz.className)))
@@ -244,7 +244,7 @@ class GenBOs(val appFilePath: Path,
           ScalaAliasType(name = "ColumnTypes", body = ScalaBody(columnTypes)),
           ScalaVariable(name = "allColumns", serrializeToOneString = true, body = allColumns.body),
           ScalaVariable(name = "allColumns1", serrializeToOneString = true, body = ScalaBody(s"Seq($allColumns1)"))
-          )
+        )
 
         boClass.getConstraints(clazz = clazz, forLob = forLob)
         boClass addMembers(ScalaEndComment("Columns for select"), newLine)
@@ -745,7 +745,7 @@ class GenBOs(val appFilePath: Path,
           newLine,
           selectOneMethod(ScalaClassGenericType(ScalaBaseClassDeclare("ValidationEx".cls, ScalaGeneric("FT#ReturnType")))),
           ScalaEndComment("Fetch")
-          )
+        )
 
 
         if (!clazz.isAbstract) {
@@ -853,7 +853,7 @@ class GenBOs(val appFilePath: Path,
                   ),
                   `type` = ScalaClassGenericType(ScalaBaseClassDeclare("Array".cls, ScalaGeneric("Int")))),
               ScalaEndComment("Delete")
-              )
+            )
         }
 
         val module = ScalaModule(
@@ -885,7 +885,7 @@ class GenBOs(val appFilePath: Path,
 
         module ++= addImports.toArray
 
-        module ++=(
+        module ++= (
           newLine,
           boObject,
           newLine,

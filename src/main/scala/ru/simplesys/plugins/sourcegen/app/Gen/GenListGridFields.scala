@@ -55,16 +55,16 @@ class GenListGridFields(val appFilePath: Path,
 
                         if (collectionElemName.find(_ == listFridFieldObjectName).isEmpty) {
                             collectionElemName += listFridFieldObjectName
-                            val listFridFieldObject = new ScalaClassDeclare {
+                            val listGridFieldObject = new ScalaClassDeclare {
                                 scalaClassGen = listFridFieldObjectName.cls
                                 typeScalaClass = TypeScalaObject
                                 extensibleClass = "NameStrong".ext
                             }
                             if (!lookup)
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
+                                listGridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName.dblQuoted}".body, serrializeToOneString = true))
                             else
-                                listFridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
-                            collectionElemObject += listFridFieldObject
+                                listGridFieldObject addMember (ScalaVariable(name = "name", body = s"${fieldName}_${foreignKey.capitalize}".dblQuoted.body, serrializeToOneString = true))
+                            collectionElemObject += listGridFieldObject
                         }
 
                         listGridField addMember ScalaExpression(s"nameStrong = ${listFridFieldObjectName}.opt")

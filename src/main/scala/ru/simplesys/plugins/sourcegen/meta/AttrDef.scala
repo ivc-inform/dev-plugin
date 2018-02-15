@@ -34,6 +34,7 @@ trait AttrDef[T] {
     def autoColumnName: String = name
 
     def scalaTypeAsString(implicit currentGroupName: Locator, resolver: SchemaDef): String = attrType.scalaTypeAsStringConditional(isMandatory)(currentGroupName, resolver)
+
     def stringToSourceValue(s: String)(implicit currentGroupName: Locator, resolver: SchemaDef): String
     def scSimpleType: SCSimpleType = attrType.simpleDataType
 
@@ -330,7 +331,8 @@ object AttrDef {
         val name = (x \ "@name").text
         val caption = (x \ "@caption").textOption.getOrElse(name)
         //val caption = (x \ "@caption").textOption.getOrElse("") //Из-за отсутствия признака visible нулевой caption принимается `типа` `invisible`
-        val dataType = DataTypes.typesMap((x \ "@type").text)
+        val _type = (x \ "@type").text
+        val dataType = DataTypes.typesMap(if (_type == "JSON") "json" else _type)
         val isMandatory = (x \ "@mandatory").textOption.exists(_.toBoolean)
         val isCalculated = (x \ "@calculated").textOption.map(_.toBoolean).getOrElse(false)
         val isHidden = (x \ "@hidden").textOption.map(_.toBoolean).getOrElse(false)
