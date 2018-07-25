@@ -71,13 +71,13 @@ class GenBODataRecord(val appFilePath: Path,
                                 //val required: Boolean = (x: IscElem).getBooleanValue("Required")
                                 val lookup: Boolean = (x: IscElem).getBooleanValue("Lookup")
 
-                                //if (!lookup) {
+                                if (!lookup) {
                                     val _tp = tp match {
                                         case "Long" ⇒ "Double"
                                         case any ⇒ any
                                     }
                                     recordTrait addMember ScalaVariable(name = name, serrializeToOneString = true, sign = strEmpty, `type` = s"js.UndefOr[${_tp}]".tp, body = "= js.undefined".body)
-                                //}
+                                }
                         }
 
                         traitsRecords append recordTrait
